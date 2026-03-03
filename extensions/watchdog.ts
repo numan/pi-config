@@ -164,6 +164,7 @@ export default function (pi: ExtensionAPI) {
 
   let checkInterval: ReturnType<typeof setInterval> | null = null;
   let sessionCtx: any = null;
+  let judgeInProgress: boolean = false;
 
   function updateActivity() {
     lastActivityTimestamp = Date.now();
@@ -196,16 +197,54 @@ export default function (pi: ExtensionAPI) {
       // Recent activity — no problem
       if (timeSinceActivity < stuckThresholdMs) return;
 
-      // Phase 1: Inactivity detected — placeholder for Phase 2 judge call
-      consecutiveInterventions++;
-      console.log(
-        `[Watchdog] No activity for ${Math.round(timeSinceActivity / 1000)}s (intervention #${consecutiveInterventions}/${maxInterventions}). Phase 2 judge call goes here.`
-      );
+      // Guard against re-entrant judge calls
+      if (judgeInProgress) return;
 
+      // Consecutive limit check — give up before even calling judge
       if (consecutiveInterventions >= maxInterventions) {
-        console.log("[Watchdog] Max interventions reached. Disabling watchdog.");
+        await ctx.abort();
+        pi.sendUserMessage(
+          "[Watchdog] Giving up after " + maxInterventions + " intervention attempts. The current operation was cancelled. Please review and decide how to proceed.",
+          { deliverAs: "followUp" }
+        );
         enabled = false;
         updateStatusBar();
+        return;
+      }
+
+      judgeInProgress = true;
+      try {
+        const summary = formatSessionSummary(ctx);
+        const judgment = await callJudge(pi, summary, timeSinceActivity, consecutiveInterventions);
+
+        if (judgment.action === "continue") {
+          // No intervention needed — reset timestamp so we don't immediately re-trigger
+          lastActivityTimestamp = Date.now();
+        } else if (judgment.action === "nudge") {
+          await ctx.abort();
+          pi.sendUserMessage(
+            "[Watchdog] " + judgment.message + " The blocked operation was cancelled. Try a different approach.",
+            { deliverAs: "followUp" }
+          );
+          consecutiveInterventions++;
+          lastActivityTimestamp = Date.now();
+          if (judgment.compact) {
+            ctx.compact();
+          }
+        } else if (judgment.action === "abort") {
+          await ctx.abort();
+          pi.sendUserMessage(
+            "[Watchdog] " + judgment.message + " Session stopped to avoid wasting resources.",
+            { deliverAs: "followUp" }
+          );
+          enabled = false;
+          updateStatusBar();
+          if (judgment.compact) {
+            ctx.compact();
+          }
+        }
+      } finally {
+        judgeInProgress = false;
       }
     }, checkIntervalMs);
   }

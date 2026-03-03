@@ -1,5 +1,158 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
+interface JudgeResult {
+  action: "continue" | "nudge" | "abort";
+  message: string;
+  compact: boolean;
+}
+
+function formatSessionSummary(ctx: any): string {
+  const entries: any[] = ctx.sessionManager.getBranch();
+  const recent = entries.slice(-20);
+
+  const lines: string[] = [];
+  let totalChars = 0;
+  const CAP = 4000;
+
+  // Context usage header
+  const usage = ctx.getContextUsage?.();
+  if (usage?.tokens != null) {
+    lines.push(`[CONTEXT] ${usage.tokens} tokens used`);
+  }
+
+  for (const entry of recent) {
+    if (totalChars >= CAP) break;
+    if (entry.type !== "message" || !entry.message) continue;
+
+    const msg = entry.message;
+    const ts = entry.timestamp
+      ? new Date(entry.timestamp).toISOString().substring(11, 19)
+      : "";
+    const prefix = ts ? `[${ts}] ` : "";
+
+    let line = "";
+
+    if (msg.role === "user") {
+      const text =
+        typeof msg.content === "string"
+          ? msg.content
+          : Array.isArray(msg.content)
+            ? msg.content.map((b: any) => b.text ?? "").join(" ")
+            : "";
+      line = `${prefix}[USER] ${text.substring(0, 200)}`;
+    } else if (msg.role === "assistant") {
+      if (Array.isArray(msg.content)) {
+        for (const block of msg.content) {
+          if (totalChars >= CAP) break;
+          if (block.type === "text") {
+            line = `${prefix}[ASSISTANT] ${block.text.substring(0, 200)}`;
+          } else if (block.type === "toolCall") {
+            const args = JSON.stringify(block.arguments ?? {});
+            line = `${prefix}[TOOL_CALL] ${block.name}(${args.substring(0, 100)})`;
+          }
+          if (line) {
+            lines.push(line);
+            totalChars += line.length;
+            line = "";
+          }
+        }
+        continue;
+      }
+    } else if (msg.role === "toolResult") {
+      const content = Array.isArray(msg.content)
+        ? msg.content.map((b: any) => b.text ?? "").join(" ")
+        : String(msg.content ?? "");
+      const status = msg.isError ? "error" : "success";
+      line = `${prefix}[TOOL_RESULT] ${msg.toolName ?? ""}: ${status} - ${content.substring(0, 200)}`;
+    } else {
+      continue;
+    }
+
+    if (line) {
+      lines.push(line);
+      totalChars += line.length;
+    }
+  }
+
+  return lines.join("\n");
+}
+
+async function callJudge(
+  pi: ExtensionAPI,
+  summary: string,
+  timeSinceActivityMs: number,
+  consecutiveInterventions: number
+): Promise<JudgeResult> {
+  const defaultResult: JudgeResult = {
+    action: "continue",
+    message: "Judge unavailable",
+    compact: false,
+  };
+
+  const idleSecs = Math.round(timeSinceActivityMs / 1000);
+
+  const judgePrompt = `You are monitoring an AI coding agent session. Analyze the recent activity and determine if the agent needs intervention.
+
+## Recent Session Activity
+${summary}
+
+## Situation
+- The agent has not produced any new activity for ${idleSecs} seconds
+- There have been ${consecutiveInterventions} previous watchdog interventions in this session
+
+## Analysis Instructions
+Determine one of:
+- **continue**: Agent is making progress (just slow) — no intervention needed
+- **nudge**: Agent appears stuck — suggest what it should try differently in your message
+- **abort**: Agent is looping (same errors/approaches repeated) — situation is unrecoverable without user input
+
+Also consider:
+- If context token count is high (>150k), set compact: true to recommend compaction
+- If the agent is looping on the same errors or approaches, recommend abort
+- Your message should be actionable: what specifically should the agent try?
+
+Respond ONLY with valid JSON, no other text, no markdown fences:
+{ "action": "continue" | "nudge" | "abort", "message": "explanation", "compact": true | false }`;
+
+  try {
+    const result = await pi.exec(
+      "pi",
+      [
+        "-p",
+        "--no-session",
+        "--no-tools",
+        "--model",
+        "anthropic/claude-haiku-3-5",
+        judgePrompt,
+      ],
+      { timeout: 30000 }
+    );
+
+    if (result.code !== 0 || !result.stdout) return defaultResult;
+
+    // Extract JSON — handle optional markdown code fences
+    const text = result.stdout.trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return defaultResult;
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (
+      parsed.action === "continue" ||
+      parsed.action === "nudge" ||
+      parsed.action === "abort"
+    ) {
+      return {
+        action: parsed.action,
+        message: String(parsed.message ?? ""),
+        compact: Boolean(parsed.compact),
+      };
+    }
+    return defaultResult;
+  } catch {
+    return defaultResult;
+  }
+}
+
 export default function (pi: ExtensionAPI) {
   // State
   let lastActivityTimestamp: number = Date.now();

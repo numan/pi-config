@@ -40,16 +40,6 @@ Avoid over-engineering. Only make changes that are directly requested or clearly
 
 **The right amount of complexity is the minimum needed for the current task.**
 
-### Frontend: Cursor Pointer on Interactive Elements
-
-When working on frontend code, **always** add `cursor: pointer` to buttons, clickable elements, and anything with interactive behavior. This includes:
-- `<button>` elements
-- Clickable cards, links, icons
-- Toggle switches, checkboxes, dropdowns
-- Any element with an `onClick` handler
-
-This is non-negotiable — every interactive element must feel clickable. Don't wait to be reminded.
-
 ### Respect Project Convention Files
 
 Many projects contain agent instruction files from other tools. Be mindful of these when working in any project:
@@ -156,7 +146,6 @@ This section applies to the main Pi agent, not subagents.
 
 You can execute slash commands yourself using the `execute_command` tool:
 - **Run `/answer`** after asking multiple questions — don't make the user invoke it
-- **Run `/reload`** after creating skills
 - **Send follow-up prompts** to yourself
 
 ### History & Archives
@@ -242,7 +231,7 @@ ls ~/.pi/history/$(basename "$PWD")/research/
 
 ### Skill Triggers
 
-Skills provide specialized instructions for specific tasks. Load them when the context matches.
+Skills provide specialized instructions for specific tasks. Load them when the context matches. Also provide them to subagents depending on the task.
 
 | When... | Load skill... |
 |---------|---------------|

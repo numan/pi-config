@@ -130,7 +130,6 @@ Installed via `pi install` and managed in `settings.json`.
 | `parallel_research` | pi-parallel | Deep async research synthesizing across many sources |
 | `parallel_enrich` | pi-parallel | Batch-enrich structured data with web-sourced information |
 | `glimpse` | glimpse | Show native macOS UI — dialogs, forms, visualizations, widgets |
-| `cmux_browser` | pi-cmux | Open URLs, take snapshots, click, fill forms inside cmux |
 | `cmux_workspace` | pi-cmux | List/create workspaces, split panes, send text to terminals |
 | `cmux_notify` | pi-cmux | Send targeted notifications inside cmux |
 

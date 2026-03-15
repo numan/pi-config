@@ -1,6 +1,8 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { Text } from "@mariozechner/pi-tui";
+import { dirname, join } from "node:path";
+import { readdirSync, statSync } from "node:fs";
 import {
   isCmuxAvailable,
   createSurface,
@@ -95,25 +97,24 @@ export default function panelAgentsExtension(pi: ExtensionAPI) {
         // In a long session, --append-system-prompt gets buried and ignored.
         // Putting the preamble in the user message ensures it's the last thing
         // the agent sees and actually responds to.
-        const preamble =
-          "=== YOU ARE A SUB-AGENT SESSION ===\n" +
-          "You were spawned into a dedicated panel by the main session.\n" +
-          "The conversation history above is CONTEXT — do NOT continue it.\n" +
-          "Start fresh with the task below.\n" +
-          "You only have built-in tools (read, bash, edit, write).\n" +
-          `${interactive ? "The user will interact with you here. When done, they exit with Ctrl+D." : "Complete your task autonomously."}\n` +
-          "===";
+        const modeHint = interactive
+          ? "The user will interact with you here. When done, they will exit with Ctrl+D."
+          : "Complete your task autonomously.";
         const summaryInstruction =
           "Your FINAL message should summarize what you accomplished.";
         const roleBlock = params.systemPrompt
-          ? `\n\nYour role:\n${params.systemPrompt}`
+          ? `\n\n${params.systemPrompt}`
           : "";
         const fullTask =
-          `${preamble}${roleBlock}\n\nTask:\n${params.task}\n\n${summaryInstruction}`;
+          `${roleBlock}\n\n${modeHint}\n\n${params.task}\n\n${summaryInstruction}`;
 
         // Build pi command
+        // Default: fresh session. The caller passes context in the task message.
+        // Sharing the full session overwhelms the agent in long conversations —
+        // it continues the parent conversation instead of focusing on its task.
+        // The branch_summary still gets written to the MAIN session for /tree visibility.
         const parts: string[] = ["pi"];
-        parts.push("--session", shellEscape(sessionFile));
+        parts.push("--session-dir", shellEscape(dirname(sessionFile)));
         parts.push("--no-extensions");
 
         if (params.skills) {
@@ -164,20 +165,36 @@ export default function panelAgentsExtension(pi: ExtensionAPI) {
 
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
 
-        // Read new entries and extract summary
-        const newEntries = getNewEntries(sessionFile, entryCount);
-        const lastEntry = newEntries.length > 0 ? newEntries[newEntries.length - 1] : null;
-        const lastEntryId = lastEntry?.id ?? null;
+        // Find the sub-agent's session file (newest .jsonl in the session dir)
+        const sessionDir = dirname(sessionFile);
+        const sessionFiles = readdirSync(sessionDir)
+          .filter((f) => f.endsWith(".jsonl"))
+          .map((f) => ({ name: f, path: join(sessionDir, f), mtime: statSync(join(sessionDir, f)).mtimeMs }))
+          .sort((a, b) => b.mtime - a.mtime);
+        // The sub-agent's file is the newest one that isn't the main session
+        const subSessionFile = sessionFiles.find((f) => f.path !== sessionFile);
 
-        const summary =
-          findLastAssistantMessage(newEntries) ??
-          (exitCode !== 0
+        let summary: string;
+        let lastEntryId: string | null = null;
+
+        if (subSessionFile) {
+          const allEntries = getNewEntries(subSessionFile.path, 0);
+          const lastEntry = allEntries.length > 0 ? allEntries[allEntries.length - 1] : null;
+          lastEntryId = lastEntry?.id ?? null;
+          summary =
+            findLastAssistantMessage(allEntries) ??
+            (exitCode !== 0
+              ? `Sub-agent exited with code ${exitCode}`
+              : "Sub-agent exited without output");
+        } else {
+          summary = exitCode !== 0
             ? `Sub-agent exited with code ${exitCode}`
-            : "Sub-agent exited without output");
+            : "Sub-agent exited without output";
+        }
 
-        // Append branch summary
+        // Append branch summary to the MAIN session file for /tree visibility
         if (branchPointId) {
-          appendBranchSummary(sessionFile, branchPointId, lastEntryId, summary);
+          appendBranchSummary(sessionFile, branchPointId, lastEntryId ?? branchPointId, summary);
         }
 
         // Close surface

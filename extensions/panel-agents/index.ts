@@ -199,7 +199,13 @@ export default function panelAgentsExtension(pi: ExtensionAPI) {
         }
 
         if (effectiveTools) {
-          parts.push("--tools", shellEscape(effectiveTools));
+          // --tools only accepts builtins. Extension-provided tools (todo,
+          // write_artifact, etc.) are available via auto-discovered extensions.
+          const BUILTIN_TOOLS = new Set(["read", "bash", "edit", "write", "grep", "find", "ls"]);
+          const builtins = effectiveTools.split(",").map((t) => t.trim()).filter((t) => BUILTIN_TOOLS.has(t));
+          if (builtins.length > 0) {
+            parts.push("--tools", shellEscape(builtins.join(",")));
+          }
         }
 
         // Write task to a temp file and use @file syntax.

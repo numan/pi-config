@@ -106,15 +106,19 @@ Work through requirements **one topic at a time**:
 
 ### How to Ask
 
-- Group related questions, use `/answer` for multiple questions
+- Group related questions — then **always run `/answer`** so the user gets a clean Q&A interface:
+  ```
+  [list your questions]
+  execute_command(command="/answer", reason="Opening Q&A for requirements")
+  ```
 - Prefer multiple choice when possible (easier to answer)
 - Share what you already know from context — don't re-ask obvious things
 
 After each round of answers, either:
-- Ask follow-up questions if something is still unclear
+- Ask follow-up questions (and run `/answer` again)
 - Summarize your understanding and confirm: "So we're building X that does Y for Z. Right?"
 
-**Don't move to Phase 3 until requirements are clear. Ask, then STOP and wait.**
+**Don't move to Phase 3 until requirements are clear. Ask, run `/answer`, then STOP and wait.**
 
 ---
 

@@ -149,6 +149,13 @@ export default function panelAgentsExtension(pi: ExtensionAPI) {
 
       try {
 
+        // Record existing session files BEFORE spawning so we can identify
+        // which file the sub-agent created (not just "newest")
+        const sessionDir = dirname(sessionFile);
+        const existingSessionFiles = new Set(
+          readdirSync(sessionDir).filter((f) => f.endsWith(".jsonl"))
+        );
+
         // Create cmux surface
         surface = createSurface(params.name);
 
@@ -256,13 +263,13 @@ export default function panelAgentsExtension(pi: ExtensionAPI) {
           // Fork mode: the forked file IS the sub-agent's session
           subSessionFile = { path: forkedSessionFile };
         } else {
-          // Fresh session mode: find the newest .jsonl that isn't the main session
-          const sessionDir = dirname(sessionFile);
-          const sessionFiles = readdirSync(sessionDir)
-            .filter((f) => f.endsWith(".jsonl"))
+          // Find the NEW session file created by this sub-agent.
+          // Compare current files against the snapshot taken before spawning.
+          const newFiles = readdirSync(sessionDir)
+            .filter((f) => f.endsWith(".jsonl") && !existingSessionFiles.has(f))
             .map((f) => ({ name: f, path: join(sessionDir, f), mtime: statSync(join(sessionDir, f)).mtimeMs }))
             .sort((a, b) => b.mtime - a.mtime);
-          subSessionFile = sessionFiles.find((f) => f.path !== sessionFile);
+          subSessionFile = newFiles[0];
         }
 
         let summary: string;

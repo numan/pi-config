@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.58.1",
+  "lastChangelogVersion": "0.58.3",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-4-6",
   "defaultThinkingLevel": "medium",
@@ -18,24 +18,11 @@
       ]
     },
     "git:github.com/pasky/chrome-cdp-skill",
-    "git:github.com/HazAT/glimpse",
-    {
-      "source": "git:github.com/nicobailon/pi-subagents",
-      "extensions": [
-        "-index.ts",
-        "-notify.ts"
-      ]
-    }
+    "git:github.com/HazAT/glimpse"
   ],
   "hideThinkingBlock": false,
   "extensions": [
     "+extensions/cmux/index.ts",
-    "+extensions/claude-tool/index.ts",
-    "-extensions/ghostty.ts",
-    "-extensions/branch.ts"
-  ],
-  "skills": [
-    "-skills/tmux/SKILL.md",
-    "-skills/brainstorm/SKILL.md"
+    "+extensions/claude-tool/index.ts"
   ]
 }

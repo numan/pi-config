@@ -2,8 +2,8 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { Text } from "@mariozechner/pi-tui";
 import { dirname, join } from "node:path";
-import { readdirSync, statSync, readFileSync, existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { readdirSync, statSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import {
   isCmuxAvailable,
   createSurface,
@@ -217,14 +217,16 @@ export default function panelAgentsExtension(pi: ExtensionAPI) {
           parts.push("--tools", shellEscape(effectiveTools));
         }
 
-        // Never use -p. All agents run in interactive mode so the user can
-        // watch progress in real-time. Autonomous agents call panel_done to
-        // self-terminate. Interactive agents wait for user Ctrl+D.
-        parts.push(shellEscape(fullTask));
+        // Write task to a temp file and use @file syntax.
+        // Terminal input buffers truncate around 4096 bytes, and agent bodies +
+        // skills + task can easily exceed that when passed as a CLI argument.
+        const taskFile = join(tmpdir(), `panel-task-${Date.now()}.md`);
+        writeFileSync(taskFile, fullTask, "utf8");
+        parts.push(`@${shellEscape(taskFile)}`);
 
         const piCommand = parts.join(" ");
         // Set PANEL_AGENT_NAME env var so panel-done.ts can set the terminal title
-        const command = `PANEL_AGENT_NAME=${shellEscape(params.name)} ${piCommand}; echo '__PANEL_DONE_'$?'__'`;
+        const command = `PANEL_AGENT_NAME=${shellEscape(params.name)} ${piCommand}; rm -f ${shellEscape(taskFile)}; echo '__PANEL_DONE_'$?'__'`;
 
         // Send to surface
         sendCommand(surface, command);

@@ -49,7 +49,7 @@
  */
 
 import type { ExtensionAPI, Theme } from "@mariozechner/pi-coding-agent";
-import { truncateHead, DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, formatSize } from "@mariozechner/pi-coding-agent";
+import { truncateHead, DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, formatSize, keyHint } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { Text, truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@mariozechner/pi-tui";
 import type { TUI, Component } from "@mariozechner/pi-tui";
@@ -1012,10 +1012,24 @@ export default function (pi: ExtensionAPI) {
 				text += theme.fg("warning", "resume ");
 				text += theme.fg("dim", args.resumeSessionId.slice(0, 8) + "… ");
 			}
-			const prompt = args.prompt?.length > 100 ? args.prompt.slice(0, 100) + "…" : args.prompt;
-			text += theme.fg("accent", `"${prompt}"`);
 			if (args.model) text += theme.fg("dim", ` model=${args.model}`);
 			if (args.maxTurns) text += theme.fg("dim", ` maxTurns=${args.maxTurns}`);
+			if (args.outputFile) text += theme.fg("dim", ` → ${args.outputFile}`);
+
+			// Show prompt streaming in — renderCall is called repeatedly as the
+			// LLM generates tool arguments, so args.prompt grows token by token.
+			const prompt = args.prompt ?? "";
+			if (prompt) {
+				const firstLine = prompt.split("\n").find((l: string) => l.trim()) ?? "";
+				const preview = firstLine.length > 100 ? firstLine.slice(0, 100) + "…" : firstLine;
+				if (preview) {
+					text += "\n" + theme.fg("toolOutput", preview);
+				}
+				const totalLines = prompt.split("\n").length;
+				if (totalLines > 1) {
+					text += theme.fg("muted", ` (${totalLines} lines)`);
+				}
+			}
 			return new Text(text, 0, 0);
 		},
 
@@ -1127,7 +1141,10 @@ export default function (pi: ExtensionAPI) {
 			if (!expanded) {
 				const firstLine = result.content[0]?.type === "text" ? result.content[0].text.split("\n")[0] : "";
 				const preview = firstLine.length > 120 ? firstLine.slice(0, 120) + "…" : firstLine;
-				header += "\n" + theme.fg("dim", preview);
+				if (preview) {
+					header += "\n" + theme.fg("dim", preview);
+				}
+				header += " " + theme.fg("muted", `(${keyHint("expandTools", "to expand")})`);
 				return new Text(header, 0, 0);
 			}
 

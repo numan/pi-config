@@ -3,7 +3,7 @@ name: scout
 description: Fast codebase reconnaissance - maps existing code, conventions, and patterns for a task
 tools: read, bash
 deny-tools: claude
-model: openai-codex/gpt-5.1-codex-mini
+model: openai-codex/gpt-5.4-mini
 thinking: minimal
 output: context.md
 spawning: false

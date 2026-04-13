@@ -49,7 +49,7 @@ if [ ! -f "$EXPECTED_DIR/settings.json" ]; then
 }
 EOF
 else
-  echo "settings.json already exists — skipping creation"
+  echo "settings.json already exists -- skipping creation"
   echo ""
 fi
 

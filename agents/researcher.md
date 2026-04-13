@@ -2,7 +2,8 @@
 name: researcher
 description: Deep research agent — uses Claude Code as the primary reasoning engine, parallel tools for web discovery
 tools: read, bash, write
-model: anthropic/claude-sonnet-4-6
+model: openai-codex/gpt-5.4
+thinking: medium
 spawning: false
 auto-exit: true
 system-prompt: append

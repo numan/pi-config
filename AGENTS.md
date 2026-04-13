@@ -240,6 +240,8 @@ subagent({
 - **Need context first** → Start with `scout`
 - **Web research or external info needed** → Delegate to `researcher` (uses parallel tools for web search/synthesis, Claude Code for hands-on code exploration)
 
+When a delegated workflow requires approval of a plan, checklist, or todo list, approval means the user explicitly approves that concrete artifact after you present it. General eagerness to proceed does not count. Do not start execution until the specific checklist/plan/todos have been shown and explicitly approved.
+
 #### When NOT to Delegate
 
 - Quick fixes (< 2 minutes of work)

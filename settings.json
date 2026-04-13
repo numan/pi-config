@@ -16,7 +16,8 @@
     "git:github.com/HazAT/pi-interactive-subagents",
     "-git:github.com/HazAT/pi-autoresearch",
     "git:github.com/badlogic/pi-diff-review",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:pi-powerline-footer"
   ],
   "hideThinkingBlock": false,
   "extensions": [

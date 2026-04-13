@@ -39,7 +39,8 @@ if [ ! -f "$EXPECTED_DIR/settings.json" ]; then
     "git:github.com/HazAT/pi-interactive-subagents",
     "-git:github.com/HazAT/pi-autoresearch",
     "git:github.com/badlogic/pi-diff-review",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:pi-powerline-footer"
   ],
   "hideThinkingBlock": false,
   "extensions": [
@@ -60,6 +61,8 @@ pi install git:github.com/pasky/chrome-cdp-skill 2>/dev/null || echo "  chrome-c
 pi install git:github.com/HazAT/pi-interactive-subagents 2>/dev/null || echo "  pi-interactive-subagents already installed"
 pi install git:github.com/badlogic/pi-diff-review 2>/dev/null || echo "  pi-diff-review already installed"
 pi install npm:pi-web-access 2>/dev/null || echo "  pi-web-access already installed"
+pi install npm:pi-powerline-footer 2>/dev/null || echo "  pi-powerline-footer already installed"
+
 echo ""
 
 # # Install claude-tool extension dependencies

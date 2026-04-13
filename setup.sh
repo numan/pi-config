@@ -27,7 +27,13 @@ if [ ! -f "$EXPECTED_DIR/settings.json" ]; then
   "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "git:github.com/HazAT/pi-smart-sessions",
+    "git:github.com/nicobailon/pi-mcp-adapter",
+    {
+      "source": "git:github.com/HazAT/pi-smart-sessions",
+      "extensions": [
+        "+extensions/smart-sessions.ts"
+      ]
+    },
     "git:github.com/pasky/chrome-cdp-skill",
     "-git:github.com/HazAT/glimpse",
     "git:github.com/HazAT/pi-interactive-subagents",
@@ -48,6 +54,7 @@ fi
 
 # Install packages
 echo "Installing packages..."
+pi install git:github.com/nicobailon/pi-mcp-adapter 2>/dev/null || echo "  pi-mcp-adapter already installed"
 pi install git:github.com/HazAT/pi-smart-sessions 2>/dev/null || echo "  pi-smart-sessions already installed"
 pi install git:github.com/pasky/chrome-cdp-skill 2>/dev/null || echo "  chrome-cdp-skill already installed"
 pi install git:github.com/HazAT/pi-interactive-subagents 2>/dev/null || echo "  pi-interactive-subagents already installed"

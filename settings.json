@@ -4,7 +4,13 @@
   "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "git:github.com/HazAT/pi-smart-sessions",
+    "git:github.com/nicobailon/pi-mcp-adapter",
+    {
+      "source": "git:github.com/HazAT/pi-smart-sessions",
+      "extensions": [
+        "+extensions/smart-sessions.ts"
+      ]
+    },
     "git:github.com/pasky/chrome-cdp-skill",
     "-git:github.com/HazAT/glimpse",
     "git:github.com/HazAT/pi-interactive-subagents",

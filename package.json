@@ -2,7 +2,9 @@
   "name": "pi-config",
   "version": "1.0.0",
   "description": "Personal pi coding agent configuration — clone to ~/.pi/agent/",
-  "keywords": ["pi-package"],
-  "author": "HazAT",
+  "keywords": [
+    "pi-package"
+  ],
+  "author": "numan",
   "license": "MIT"
 }

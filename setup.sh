@@ -20,10 +20,10 @@ echo ""
 # Create settings.json if it doesn't exist
 if [ ! -f "$EXPECTED_DIR/settings.json" ]; then
   echo "Creating settings.json..."
-  cat > "$EXPECTED_DIR/settings.json" << 'EOF'
+  cat >"$EXPECTED_DIR/settings.json" <<'EOF'
 {
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-6",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/nicobailon/pi-mcp-adapter",

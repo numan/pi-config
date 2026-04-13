@@ -22,32 +22,22 @@ if [ ! -f "$EXPECTED_DIR/settings.json" ]; then
   echo "Creating settings.json..."
   cat >"$EXPECTED_DIR/settings.json" <<'EOF'
 {
+  "lastChangelogVersion": "0.67.6",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "git:github.com/nicobailon/pi-mcp-adapter",
-    {
-      "source": "git:github.com/HazAT/pi-smart-sessions",
-      "extensions": [
-        "+extensions/smart-sessions.ts"
-      ]
-    },
-    {
-      "source": "git:github.com/HazAT/pi-parallel",
-      "extensions": [
-        "+extension/index.ts"
-      ]
-    },
+    "git:github.com/HazAT/pi-smart-sessions",
     "git:github.com/pasky/chrome-cdp-skill",
-    "git:github.com/HazAT/glimpse",
+    "-git:github.com/HazAT/glimpse",
     "git:github.com/HazAT/pi-interactive-subagents",
-    "git:github.com/HazAT/pi-autoresearch"
+    "-git:github.com/HazAT/pi-autoresearch",
+    "git:github.com/badlogic/pi-diff-review",
+    "npm:pi-web-access"
   ],
   "hideThinkingBlock": false,
   "extensions": [
-    "+extensions/cmux/index.ts",
-    "+extensions/claude-tool/index.ts"
+    "+extensions/cmux/index.ts"
   ]
 }
 EOF
@@ -58,22 +48,20 @@ fi
 
 # Install packages
 echo "Installing packages..."
-pi install git:github.com/nicobailon/pi-mcp-adapter 2>/dev/null || echo "  pi-mcp-adapter already installed"
 pi install git:github.com/HazAT/pi-smart-sessions 2>/dev/null || echo "  pi-smart-sessions already installed"
-pi install git:github.com/HazAT/pi-parallel 2>/dev/null || echo "  pi-parallel already installed"
 pi install git:github.com/pasky/chrome-cdp-skill 2>/dev/null || echo "  chrome-cdp-skill already installed"
-pi install git:github.com/HazAT/glimpse 2>/dev/null || echo "  glimpse already installed"
 pi install git:github.com/HazAT/pi-interactive-subagents 2>/dev/null || echo "  pi-interactive-subagents already installed"
-pi install git:github.com/HazAT/pi-autoresearch 2>/dev/null || echo "  pi-autoresearch already installed"
+pi install git:github.com/badlogic/pi-diff-review 2>/dev/null || echo "  pi-diff-review already installed"
+pi install npm:pi-web-access 2>/dev/null || echo "  pi-web-access already installed"
 echo ""
 
-# Install claude-tool extension dependencies
-if [ -f "$EXPECTED_DIR/extensions/claude-tool/package.json" ]; then
-  echo "Installing claude-tool dependencies..."
-  cd "$EXPECTED_DIR/extensions/claude-tool" && npm install --silent
-  cd "$EXPECTED_DIR"
-  echo ""
-fi
+# # Install claude-tool extension dependencies
+# if [ -f "$EXPECTED_DIR/extensions/claude-tool/package.json" ]; then
+#   echo "Installing claude-tool dependencies..."
+#   cd "$EXPECTED_DIR/extensions/claude-tool" && npm install --silent
+#   cd "$EXPECTED_DIR"
+#   echo ""
+# fi
 
 echo "✅ Setup complete!"
 echo ""

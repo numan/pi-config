@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.67.6",
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-7",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/HazAT/pi-smart-sessions",
@@ -9,8 +9,8 @@
     "-git:github.com/HazAT/glimpse",
     "git:github.com/HazAT/pi-interactive-subagents",
     "-git:github.com/HazAT/pi-autoresearch",
-    "git:github.com/HazAT/pi-parallel",
-    "git:github.com/badlogic/pi-diff-review"
+    "git:github.com/badlogic/pi-diff-review",
+    "npm:pi-web-access"
   ],
   "hideThinkingBlock": false,
   "extensions": [

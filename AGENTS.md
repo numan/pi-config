@@ -105,6 +105,8 @@ Don't just write code and hope it works — verify as you go.
 
 Keep tests lightweight — quick sanity checks, not full test suites. Use safe inputs and non-destructive operations.
 
+For UI behavior changes, prefer tests that exercise the real interaction path over implementation-detail assertions. If the question is "what happens when the user clicks/tabs/types?", write or update an integration-style test around that behavior instead of only asserting prop wiring or internal callbacks.
+
 **Think like an engineer pairing with the user.** You wouldn't write code and walk away — you'd run it, see it work, then move on.
 
 ### Clean Up After Yourself

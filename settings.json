@@ -1,26 +1,19 @@
 {
-  "lastChangelogVersion": "0.65.0",
+  "lastChangelogVersion": "0.67.6",
   "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-6",
+  "defaultModel": "claude-opus-4-7",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/HazAT/pi-smart-sessions",
     "git:github.com/pasky/chrome-cdp-skill",
-    "git:github.com/HazAT/glimpse",
+    "-git:github.com/HazAT/glimpse",
     "git:github.com/HazAT/pi-interactive-subagents",
-    {
-      "source": "git:github.com/HazAT/pi-autoresearch",
-      "extensions": [
-        "-extensions/pi-autoresearch/index.ts"
-      ],
-      "skills": []
-    },
-    "git:github.com:HazAT/pi-parallel",
-    "git:https://github.com/badlogic/pi-diff-review"
+    "-git:github.com/HazAT/pi-autoresearch",
+    "git:github.com/HazAT/pi-parallel",
+    "git:github.com/badlogic/pi-diff-review"
   ],
   "hideThinkingBlock": false,
   "extensions": [
-    "+extensions/cmux/index.ts",
-    "+extensions/claude-tool/index.ts"
+    "+extensions/cmux/index.ts"
   ]
 }

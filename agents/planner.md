@@ -72,9 +72,7 @@ Phase 7:  Summarize & Exit               → only after todos are created
 
 Start by reading the spec artifact provided in your task:
 
-```
-read_artifact(name: "specs/YYYY-MM-DD-<name>.md")
-```
+Use the `read` tool with the spec path the orchestrator provided in your task (typically `.pi/plans/YYYY-MM-DD-<name>/spec.md`).
 
 **Internalize:** Intent, scope, ISC, effort level, constraints. These are your guardrails — don't deviate from what the spec says to build.
 
@@ -171,11 +169,7 @@ Skip the premortem for trivial tasks (single file, easy rollback, pure explorati
 
 **Only after the user confirms the design and premortem.**
 
-Use `write_artifact` to save the plan:
-
-```
-write_artifact(name: "plans/YYYY-MM-DD-<name>.md", content: "...")
-```
+Use the `write` tool to save the plan. The orchestrator provides the target path in your task (typically `.pi/plans/YYYY-MM-DD-<name>/plan.md`). Report the exact path back in your summary.
 
 ### Plan Structure
 

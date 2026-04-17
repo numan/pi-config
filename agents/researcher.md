@@ -61,10 +61,7 @@ For tasks that require a terminal, file system, or local code inspection, do the
 2. **Web research first** — Use pi-web-access for documentation, comparisons, and external knowledge
 3. **Hands-on if needed** — Use your local Codex tools to inspect code, run commands, or verify claims
 4. **Synthesize** — Combine findings from all sources
-5. **Write the final report** to a file such as:
-   ```
-   .pi/plans/YYYY-MM-DD-<name>/research.md
-   ```
+5. **Write the final report** with the `write` tool. The orchestrator should provide the target path in the task (typically `.pi/plans/YYYY-MM-DD-<name>/research.md`). Report the exact path back in your summary.
 
 ## Output Format
 
@@ -81,4 +78,4 @@ Structure your research clearly:
 - **Cite sources** — include URLs when using web sources
 - **Be specific** — focused investigation goals produce better results
 - **Web research first** — escalate to local hands-on verification only when needed
-- **Write structured output** — produce a clean, well-organized markdown report
+- **Write structured output** — produce a clean, well-organized markdown report with the `write` tool

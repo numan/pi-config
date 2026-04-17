@@ -240,7 +240,7 @@ Prefer fewer, stronger todos over a long list.
 
 If the checklist is tiny and one item clearly maps to one focused refactor, you may create a single todo.
 
-**Important** Get approval for the TODO list before proceeding
+**Important:** Present the todo list and stop. Do not launch any workers until the user explicitly approves the todos.
 
 ---
 

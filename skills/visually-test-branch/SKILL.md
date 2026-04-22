@@ -1,0 +1,242 @@
+---
+name: visually-test-branch
+description: Branch-focused visual QA workflow for the current local branch. Use when asked to "visually test this branch", "test the current branch in the browser", "run branch visual QA", "generate a visual test report for this branch", or "inspect what this branch changed and test it". Starts with researcher-led branch analysis, delegates browser automation to testing subagents via agent-browser, and keeps all artifacts in one seeded run directory under pi/visual-tests.
+---
+
+# Visually Test Branch
+
+Turn the current local branch into an evidence-backed visual QA run with durable handoffs and a self-contained artifact directory.
+
+## Step 1: Work from the seeded run directory
+
+Use this skill through the `/visually-test-branch` launcher when possible.
+
+Read these files first:
+
+- `RUN_DIR/run.json`
+- `RUN_DIR/context/launch.md`
+- `RUN_DIR/context/artifact-contract.md`
+
+Treat the seeded run directory as the only valid place for run artifacts. Keep every generated file inside `RUN_DIR`.
+
+Standard artifact paths:
+
+```text
+RUN_DIR/
+  run.json
+  context/
+    launch.md
+    artifact-contract.md
+    target-environment.md
+  analysis/
+    branch-analysis.md
+    test-plan.md
+  handoffs/
+    research-to-testing.md
+    testing/
+      <feature-slug>.md
+    testing-to-report.md
+    evidence-to-report.md
+  evidence/
+    screenshots/
+    videos/
+    issues/
+      <issue-slug>/
+  results/
+    <feature-slug>/
+      outcome.md
+      assets/
+  report/
+    index.html
+    assets/
+  summary.json
+```
+
+## Step 2: Resolve the local test target
+
+Confirm what local environment should be exercised for this branch.
+
+Write `RUN_DIR/context/target-environment.md` with:
+
+- current branch
+- local URL
+- startup expectations
+- auth or fixture assumptions
+- known limits to coverage
+
+If the correct local target is not clear from the repo or user request, ask the user before launching browser tests.
+
+## Step 3: Start with branch analysis via researcher
+
+Spawn a `researcher` subagent first. Do not start browser work until the researcher artifacts exist.
+
+The researcher must write:
+
+- `RUN_DIR/analysis/branch-analysis.md`
+- `RUN_DIR/analysis/test-plan.md`
+- `RUN_DIR/handoffs/research-to-testing.md`
+
+The branch analysis must cover:
+
+- branch intent
+- changed files and hotspots
+- impacted user-facing features
+- relevant non-UI changes
+- risks and open questions
+
+The test plan must cover:
+
+- feature slugs to test
+- priority flows
+- screenshots required on success
+- videos required for multi-step or risky flows
+- likely issue areas and severity expectations
+
+The research-to-testing handoff must map each feature slug to:
+
+- what to test
+- why it matters for this branch
+- setup notes
+- required evidence
+- exact output paths under `RUN_DIR`
+
+## Step 4: Create durable handoffs for each testing subagent
+
+Write one file per feature or flow under:
+
+- `RUN_DIR/handoffs/testing/<feature-slug>.md`
+
+Each handoff file must include:
+
+- feature name and slug
+- target URL or route
+- setup steps
+- flows to exercise
+- required screenshots
+- required videos
+- indirect non-UI signals to watch for
+- output paths for results and evidence
+
+This is the durable handoff from research to testing. Do not rely on memory or implicit conversation continuity alone.
+
+## Step 5: Run browser testing only in subagents
+
+Never drive the browser from the main session.
+
+Spawn `visual-tester` subagents for each feature handoff and make browser automation explicit through the `agent-browser` skill in those subagents.
+
+Each testing task must require outputs under `RUN_DIR` only:
+
+- `RUN_DIR/results/<feature-slug>/outcome.md`
+- `RUN_DIR/results/<feature-slug>/assets/...`
+- `RUN_DIR/evidence/screenshots/...`
+- `RUN_DIR/evidence/videos/...`
+- `RUN_DIR/evidence/issues/<issue-slug>/...`
+
+Tester outcomes must:
+
+- record passed coverage inside `outcome.md`
+- record failed or blocked flows clearly
+- create one evidence directory per real issue
+- tag each issue as Critical, High, Medium, or Low
+- include reproduction notes and evidence paths
+
+Do not create fake issue entries for passing coverage.
+
+## Step 6: Preserve testing-to-report handoffs
+
+After all testing subagents finish, read their outputs and write:
+
+- `RUN_DIR/handoffs/testing-to-report.md`
+- `RUN_DIR/handoffs/evidence-to-report.md`
+
+`testing-to-report.md` must summarize:
+
+- features tested
+- pass/fail/partial outcome
+- tested flows
+- blocked coverage
+- non-UI observations worth mentioning
+
+`evidence-to-report.md` must index:
+
+- success screenshots
+- flow videos
+- issue evidence directories
+- severity mapping
+- any evidence supporting non-UI claims indirectly
+
+These are the durable handoffs from testing to final report assembly.
+
+## Step 7: Build the final artifacts
+
+Create:
+
+- `RUN_DIR/report/index.html`
+- `RUN_DIR/summary.json`
+
+The final report must include:
+
+- branch and local target summary
+- impacted features section
+- one subsection per impacted feature
+- tested-flow subsections nested inside each feature
+- screenshots or videos for coverage
+- passed coverage within feature or flow sections
+- issues found section
+- one subsection per issue with severity and evidence
+- non-UI change summary when relevant
+- indirect validation evidence when available
+- explicit coverage gaps or blockers
+
+`summary.json` must include at least:
+
+```json
+{
+  "branch": "feature/example",
+  "runDir": "pi/visual-tests/2026-04-22-feature-example",
+  "targetEnvironment": {
+    "url": "http://localhost:3000"
+  },
+  "features": [
+    {
+      "slug": "checkout",
+      "outcome": "partial",
+      "outcomePath": "results/checkout/outcome.md"
+    }
+  ],
+  "issues": [
+    {
+      "slug": "checkout-button-overlap",
+      "severity": "High",
+      "evidenceDir": "evidence/issues/checkout-button-overlap"
+    }
+  ],
+  "nonUiChanges": [],
+  "overallStatus": "issues-found"
+}
+```
+
+## Step 8: Final checks
+
+Before reporting completion:
+
+- verify every required artifact exists inside `RUN_DIR`
+- verify browser execution happened only in testing subagents
+- verify research → testing handoff exists
+- verify testing → report handoff exists
+- verify issue/evidence → final report handoff exists
+- verify the workflow stays branch-focused and local-environment-focused
+- verify the report does not frame itself as CI replacement or preview-environment testing
+
+## Exit criteria
+
+Do not stop until you can point to:
+
+- `RUN_DIR/analysis/branch-analysis.md`
+- `RUN_DIR/analysis/test-plan.md`
+- `RUN_DIR/handoffs/research-to-testing.md`
+- `RUN_DIR/handoffs/testing-to-report.md`
+- `RUN_DIR/handoffs/evidence-to-report.md`
+- `RUN_DIR/report/index.html`
+- `RUN_DIR/summary.json`

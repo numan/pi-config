@@ -79,6 +79,7 @@ Loaded on-demand when the context matches.
 | **cmux** | Managing terminal sessions via cmux |
 | **presentation-creator** | Creating data-driven presentation slides |
 | **add-mcp-server** | Adding MCP server configurations |
+| **visually-test-branch** | Running branch-focused visual QA with researcher + browser subagents |
 
 ## Extensions
 
@@ -89,6 +90,7 @@ Loaded on-demand when the context matches.
 | **cost/** | `/cost` command — API cost summary |
 | **execute-command/** | `execute_command` tool — lets the agent self-invoke slash commands |
 | **todos/** | `/todos` command + `todo` tool — file-based todo management |
+| **visually-test-branch/** | `/visually-test-branch` launcher — seeds a visual QA run directory and injects the workflow |
 
 ## Commands
 
@@ -100,6 +102,7 @@ Loaded on-demand when the context matches.
 | `/answer` | Extract questions into interactive Q&A |
 | `/todos` | Visual todo manager |
 | `/cost` | API cost summary |
+| `/visually-test-branch` | Analyze the current branch, run browser QA via subagents, and save artifacts under `pi/visual-tests/...` |
 
 ## Packages
 

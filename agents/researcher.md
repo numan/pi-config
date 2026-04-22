@@ -3,7 +3,7 @@ name: researcher
 description: Deep research using pi-web-access tools for web/docs research and Codex for hands-on code investigation
 tools: read, bash, web_search, fetch_content, get_search_content, code_search
 model: openai-codex/gpt-5.4
-thinking: medium
+thinking: high
 spawning: false
 auto-exit: true
 system-prompt: append
@@ -66,6 +66,7 @@ For tasks that require a terminal, file system, or local code inspection, do the
 ## Output Format
 
 Structure your research clearly:
+
 - Summary of what was researched
 - Organized findings with headers
 - Source URLs and references

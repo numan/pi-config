@@ -55,9 +55,10 @@ Specialized roles with baked-in identity, workflow, and review rubrics. Most age
 | **scout** | package | Fast codebase reconnaissance — gathers context without making changes |
 | **worker** | package | Implements tasks from todos, commits with polished messages |
 | **reviewer** | package | Reviews code for quality, security, correctness |
-| **visual-tester** | package | Visual QA — navigates web UIs via Chrome CDP, spots issues, produces reports |
+| **visual-tester** | package | General visual QA agent — available for ad hoc browser/UI checks |
 | **claude-code** | package | Delegates autonomous tasks to Claude Code |
 | **researcher** | local | Deep research using parallel.ai tools + Claude Code for code analysis |
+| **visually-test-branch-tester** | local | Dedicated visually-test-branch browser tester — executes feature handoffs, captures run-dir evidence, writes deterministic outcomes |
 | **autoresearch** | local | Autonomous experiment loop — runs, measures, and optimizes iteratively |
 
 ## Skills
@@ -102,7 +103,7 @@ Loaded on-demand when the context matches.
 | `/answer` | Extract questions into interactive Q&A |
 | `/todos` | Visual todo manager |
 | `/cost` | API cost summary |
-| `/visually-test-branch` | Analyze the current local branch, use `researcher` for branch understanding, run browser-testing subagents backed by `agent-browser`, and save `report/index.html` + `summary.json` inside one `pi/visual-tests/...` run directory |
+| `/visually-test-branch` | Analyze the current local branch, use `researcher` for branch understanding, run dedicated `visually-test-branch-tester` subagents backed by `agent-browser`, and save `report/index.html` + `summary.json` inside one `pi/visual-tests/...` run directory |
 
 `/visually-test-branch` is for local branch QA only. It keeps all run artifacts in one seeded directory, summarizes non-UI changes separately, and only claims indirect validation evidence for those changes when the run actually observed it.
 

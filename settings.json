@@ -1,23 +1,19 @@
 {
-  "lastChangelogVersion": "0.67.6",
+  "lastChangelogVersion": "0.68.0",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/nicobailon/pi-mcp-adapter",
-    {
-      "source": "git:github.com/HazAT/pi-smart-sessions",
-      "extensions": [
-        "+extensions/smart-sessions.ts"
-      ]
-    },
+    "extensions/smart-sessions.ts",
     "git:github.com/pasky/chrome-cdp-skill",
     "-git:github.com/HazAT/glimpse",
     "git:github.com/HazAT/pi-interactive-subagents",
     "-git:github.com/HazAT/pi-autoresearch",
     "git:github.com/badlogic/pi-diff-review",
     "npm:pi-web-access",
-    "npm:pi-powerline-footer"
+    "npm:pi-powerline-footer",
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "hideThinkingBlock": false,
   "extensions": [

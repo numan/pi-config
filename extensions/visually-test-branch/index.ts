@@ -91,10 +91,25 @@ function seedRunArtifacts(metadata: LaunchMetadata): void {
   );
 }
 
+function buildInjectedPrompt(workflowPath: string, workflowContent: string, metadata: LaunchMetadata): string {
+  const taskBlock = [
+    "Run context:",
+    `- Canonical run directory: ${metadata.runDir}`,
+    `- Launch metadata: ${join(metadata.runDir, "run.json")}`,
+    `- Current branch: ${metadata.branch}`,
+    `- Working directory: ${metadata.cwd}`,
+    `- User intent: ${metadata.userIntent || "(none provided)"}`,
+  ].join("\n");
+
+  return `<skill name="visually-test-branch" location="${workflowPath}">\n${workflowContent}\n</skill>\n\n${taskBlock}`;
+}
+
 export const __test__ = {
   stripFrontmatter,
   slugify,
   buildRunDir,
+  seedRunArtifacts,
+  buildInjectedPrompt,
 };
 
 export default function visuallyTestBranchExtension(pi: ExtensionAPI) {
@@ -136,18 +151,7 @@ export default function visuallyTestBranchExtension(pi: ExtensionAPI) {
       let workflowContent = readFileSync(workflowPath, "utf8");
       workflowContent = stripFrontmatter(workflowContent).trim();
 
-      const taskBlock = [
-        "Run context:",
-        `- Canonical run directory: ${runDir}`,
-        `- Launch metadata: ${join(runDir, "run.json")}`,
-        `- Current branch: ${branch}`,
-        `- Working directory: ${cwd}`,
-        `- User intent: ${userIntent || "(none provided)"}`,
-      ].join("\n");
-
-      pi.sendUserMessage(
-        `<skill name="visually-test-branch" location="${workflowPath}">\n${workflowContent}\n</skill>\n\n${taskBlock}`,
-      );
+      pi.sendUserMessage(buildInjectedPrompt(workflowPath, workflowContent, metadata));
     },
   });
 }

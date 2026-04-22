@@ -17,6 +17,7 @@
   ],
   "hideThinkingBlock": false,
   "extensions": [
-    "+extensions/cmux/index.ts"
+    "+extensions/cmux/index.ts",
+    "+extensions/visually-test-branch/index.ts"
   ]
 }

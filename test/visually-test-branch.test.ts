@@ -1,10 +1,11 @@
 import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { __test__ } from "../extensions/visually-test-branch/index.ts";
+import visuallyTestBranchExtension, { __test__ } from "../extensions/visually-test-branch/index.ts";
 
 const { buildRunDir, seedRunArtifacts, buildInjectedPrompt } = __test__;
 
@@ -16,6 +17,19 @@ function createDeterministicRoot(name: string): string {
   mkdirSync(root, { recursive: true });
   testRoots.add(root);
   return root;
+}
+
+function initGitRepo(root: string, branch = "feature/fake-branch"): void {
+  execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.name", "Pi Test"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.email", "pi-test@example.com"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["checkout", "-b", branch], { cwd: root, stdio: "ignore" });
+  writeFileSync(join(root, "README.md"), "# test\n", "utf8");
+  execFileSync("git", ["add", "README.md"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["-c", "commit.gpgsign=false", "commit", "-m", "init"], {
+    cwd: root,
+    stdio: "ignore",
+  });
 }
 
 afterEach(() => {
@@ -58,6 +72,12 @@ describe("visually-test-branch extension helpers", () => {
         launch: "context/launch.md",
         artifactContract: "context/artifact-contract.md",
       },
+      templates: {
+        testingHandoff: "/fake/extensions/visually-test-branch/templates/testing-handoff.md",
+        featureOutcome: "/fake/extensions/visually-test-branch/templates/feature-outcome.md",
+        summarySchema: "/fake/extensions/visually-test-branch/templates/summary.schema.json",
+        reportOutline: "/fake/extensions/visually-test-branch/templates/report-outline.md",
+      },
     };
 
     seedRunArtifacts(metadata);
@@ -96,6 +116,10 @@ describe("visually-test-branch extension helpers", () => {
         `- Canonical run directory: ${runDir}`,
         `- Launch metadata: ${join(runDir, "run.json")}`,
         `- Launch context: ${join(runDir, "context", "launch.md")}`,
+        `- Testing handoff template: ${metadata.templates.testingHandoff}`,
+        `- Feature outcome template: ${metadata.templates.featureOutcome}`,
+        `- Summary schema: ${metadata.templates.summarySchema}`,
+        `- Report outline: ${metadata.templates.reportOutline}`,
         "- Do not write run artifacts to /tmp.",
         "- Do not use the session artifact folder as the source of truth.",
         "- Create any additional files under this directory tree only.",
@@ -117,6 +141,12 @@ describe("visually-test-branch extension helpers", () => {
         workflow: "/repo/extensions/visually-test-branch/workflow.md",
         launch: "context/launch.md",
         artifactContract: "context/artifact-contract.md",
+      },
+      templates: {
+        testingHandoff: "/repo/extensions/visually-test-branch/templates/testing-handoff.md",
+        featureOutcome: "/repo/extensions/visually-test-branch/templates/feature-outcome.md",
+        summarySchema: "/repo/extensions/visually-test-branch/templates/summary.schema.json",
+        reportOutline: "/repo/extensions/visually-test-branch/templates/report-outline.md",
       },
     };
 
@@ -143,5 +173,62 @@ describe("visually-test-branch extension helpers", () => {
         "- User intent: (none provided)",
       ].join("\n"),
     );
+  });
+
+  it("registers the command and executes the real handler path", async () => {
+    const cwd = createDeterministicRoot("visual-handler");
+    initGitRepo(cwd, "feature/handler-path");
+
+    let registeredHandler: ((args: string | undefined, ctx: any) => Promise<void>) | undefined;
+    let injectedMessage = "";
+    const notifications: Array<{ message: string; level: string }> = [];
+
+    visuallyTestBranchExtension({
+      registerCommand(name: string, command: { handler: (args: string | undefined, ctx: any) => Promise<void> }) {
+        assert.equal(name, "visually-test-branch");
+        registeredHandler = command.handler;
+      },
+      sendUserMessage(message: string) {
+        injectedMessage = message;
+      },
+    } as any);
+
+    assert.ok(registeredHandler, "expected /visually-test-branch to register a handler");
+
+    await registeredHandler!("focus checkout", {
+      cwd,
+      ui: {
+        notify(message: string, level: string) {
+          notifications.push({ message, level });
+        },
+      },
+    });
+
+    assert.deepEqual(notifications, []);
+
+    const runRoot = join(cwd, "pi", "visual-tests");
+    const [runDirName] = readdirSync(runRoot);
+    assert.match(runDirName, /^\d{4}-\d{2}-\d{2}-feature-handler-path$/);
+
+    const runDir = join(runRoot, runDirName);
+    assert.equal(existsSync(join(runDir, "run.json")), true);
+    assert.equal(existsSync(join(runDir, "context", "launch.md")), true);
+    assert.equal(existsSync(join(runDir, "context", "artifact-contract.md")), true);
+
+    const runJson = JSON.parse(readFileSync(join(runDir, "run.json"), "utf8"));
+    assert.equal(runJson.branch, "feature/handler-path");
+    assert.equal(runJson.userIntent, "focus checkout");
+    assert.equal(typeof runJson.templates.testingHandoff, "string");
+    assert.equal(typeof runJson.templates.featureOutcome, "string");
+    assert.equal(typeof runJson.templates.summarySchema, "string");
+    assert.equal(typeof runJson.templates.reportOutline, "string");
+
+    assert.match(injectedMessage, /^<skill name="visually-test-branch" location=".*workflow\.md">/);
+    assert.doesNotMatch(injectedMessage, /^---$/m);
+    assert.match(injectedMessage, /# Visually Test Branch/);
+    assert.match(injectedMessage, /Run context:/);
+    assert.match(injectedMessage, new RegExp(`- Canonical run directory: ${runDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+    assert.match(injectedMessage, /- Current branch: feature\/handler-path/);
+    assert.match(injectedMessage, /- User intent: focus checkout/);
   });
 });

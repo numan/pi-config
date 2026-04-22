@@ -36,6 +36,13 @@ Read these files first:
 - `RUN_DIR/context/launch.md`
 - `RUN_DIR/context/artifact-contract.md`
 
+`RUN_DIR/run.json` also records the template paths the workflow should use for deterministic outputs:
+
+- `templates.testingHandoff`
+- `templates.featureOutcome`
+- `templates.summarySchema`
+- `templates.reportOutline`
+
 Treat the seeded run directory as the only valid place for run artifacts. Keep every generated file inside `RUN_DIR`.
 
 Standard artifact paths:
@@ -136,6 +143,8 @@ Each handoff file must include:
 - indirect non-UI signals to watch for
 - output paths for results and evidence
 
+Use `templates.testingHandoff` from `RUN_DIR/run.json` as the canonical shape for these files.
+
 This is the durable handoff from research to testing. Do not rely on memory or implicit conversation continuity alone.
 
 ## Step 5: Run browser testing only in subagents
@@ -151,6 +160,8 @@ Each testing task must require outputs under `RUN_DIR` only:
 - `RUN_DIR/evidence/screenshots/...`
 - `RUN_DIR/evidence/videos/...`
 - `RUN_DIR/evidence/issues/<issue-slug>/...`
+
+Use `templates.featureOutcome` from `RUN_DIR/run.json` as the canonical shape for `outcome.md`.
 
 Tester outcomes must:
 
@@ -194,6 +205,8 @@ Create:
 - `RUN_DIR/report/index.html`
 - `RUN_DIR/summary.json`
 
+Use `templates.reportOutline` for the report structure and `templates.summarySchema` for the machine-readable summary contract.
+
 The final report must include:
 
 - branch and local target summary
@@ -220,14 +233,25 @@ The final report must include:
   "features": [
     {
       "slug": "checkout",
+      "name": "Checkout",
       "outcome": "partial",
-      "outcomePath": "results/checkout/outcome.md"
+      "outcomePath": "results/checkout/outcome.md",
+      "flows": [
+        {
+          "name": "Submit order",
+          "status": "partial",
+          "screenshots": ["evidence/screenshots/checkout/submit-order.png"],
+          "videos": ["evidence/videos/checkout/submit-order.mp4"]
+        }
+      ]
     }
   ],
   "issues": [
     {
       "slug": "checkout-button-overlap",
+      "title": "Submit button overlaps order summary",
       "severity": "High",
+      "featureSlug": "checkout",
       "evidenceDir": "evidence/issues/checkout-button-overlap"
     }
   ],

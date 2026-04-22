@@ -16,6 +16,12 @@ type LaunchMetadata = {
     launch: string;
     artifactContract: string;
   };
+  templates: {
+    testingHandoff: string;
+    featureOutcome: string;
+    summarySchema: string;
+    reportOutline: string;
+  };
 };
 
 function stripFrontmatter(content: string): string {
@@ -83,6 +89,10 @@ function seedRunArtifacts(metadata: LaunchMetadata): void {
       `- Canonical run directory: ${metadata.runDir}`,
       `- Launch metadata: ${join(metadata.runDir, "run.json")}`,
       `- Launch context: ${join(metadata.runDir, metadata.seededFiles.launch)}`,
+      `- Testing handoff template: ${metadata.templates.testingHandoff}`,
+      `- Feature outcome template: ${metadata.templates.featureOutcome}`,
+      `- Summary schema: ${metadata.templates.summarySchema}`,
+      `- Report outline: ${metadata.templates.reportOutline}`,
       "- Do not write run artifacts to /tmp.",
       "- Do not use the session artifact folder as the source of truth.",
       "- Create any additional files under this directory tree only.",
@@ -143,6 +153,12 @@ export default function visuallyTestBranchExtension(pi: ExtensionAPI) {
           workflow: workflowPath,
           launch: "context/launch.md",
           artifactContract: "context/artifact-contract.md",
+        },
+        templates: {
+          testingHandoff: join(dirname(new URL(import.meta.url).pathname), "templates", "testing-handoff.md"),
+          featureOutcome: join(dirname(new URL(import.meta.url).pathname), "templates", "feature-outcome.md"),
+          summarySchema: join(dirname(new URL(import.meta.url).pathname), "templates", "summary.schema.json"),
+          reportOutline: join(dirname(new URL(import.meta.url).pathname), "templates", "report-outline.md"),
         },
       };
 

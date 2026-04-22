@@ -20,6 +20,13 @@ Read these files first with the plain `read` tool:
 - `RUN_DIR/context/launch.md`
 - `RUN_DIR/context/artifact-contract.md`
 
+`RUN_DIR/run.json` also records the canonical template paths for:
+
+- `templates.testingHandoff`
+- `templates.featureOutcome`
+- `templates.summarySchema`
+- `templates.reportOutline`
+
 Treat `RUN_DIR` as the canonical run directory from the launch context. It will be a seeded directory under `pi/visual-tests/YYYY-MM-DD-<name>/`. Do not write any run artifact outside this tree.
 
 ## Step 2: Establish the run contract
@@ -143,6 +150,8 @@ Each file must include:
 - where the tester must write outcome and assets
 - known risks and non-UI observations to watch indirectly
 
+Use the template path from `RUN_DIR/run.json -> templates.testingHandoff` as the canonical shape for these files.
+
 These files are the durable handoff from research to browser testing.
 
 ## Step 6: Launch browser-driven testing in subagents
@@ -168,6 +177,7 @@ Required outputs:
 - RUN_DIR/evidence/videos/... for captured videos
 - RUN_DIR/evidence/issues/<issue-slug>/... for issue-specific evidence
 
+Use the template path from RUN_DIR/run.json -> templates.featureOutcome for outcome.md.
 Record passed coverage inside outcome.md, not as fake issues. For each real issue, include severity (Critical/High/Medium/Low), reproduction notes, and evidence paths.`
 })
 ```
@@ -207,6 +217,11 @@ Create:
 - `RUN_DIR/report/index.html`
 - `RUN_DIR/summary.json`
 
+Use these template references from `RUN_DIR/run.json`:
+
+- `templates.reportOutline` for the report structure
+- `templates.summarySchema` for the machine-readable contract
+
 The report must include:
 
 - branch name and test target summary
@@ -221,15 +236,15 @@ The report must include:
 - indirect validation evidence for non-UI changes when available
 - explicit coverage limits when parts were untestable
 
-`summary.json` must be machine-readable and include at least:
+`summary.json` must be machine-readable and match the schema at `templates.summarySchema`. At minimum, include:
 
-- branch
-- runDir
-- targetEnvironment
-- features[] with outcome and artifact paths
-- issues[] with severity and evidence paths
-- nonUiChanges[]
-- overallStatus
+- `branch`
+- `runDir`
+- `targetEnvironment`
+- `features[]` with `slug`, `name`, `outcome`, `outcomePath`, and `flows[]`
+- `issues[]` with `slug`, `title`, `severity`, `featureSlug`, and `evidenceDir`
+- `nonUiChanges[]`
+- `overallStatus`
 
 ## Step 9: Final verification before reporting back
 

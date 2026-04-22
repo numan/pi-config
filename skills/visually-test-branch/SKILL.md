@@ -7,6 +7,25 @@ description: Branch-focused visual QA workflow for the current local branch. Use
 
 Turn the current local branch into an evidence-backed visual QA run with durable handoffs and a self-contained artifact directory.
 
+## What this workflow does
+
+- analyzes the current local branch first
+- uses a `researcher` subagent for branch understanding and test planning
+- runs browser-testing subagents backed by the `agent-browser` skill
+- writes every artifact for the run into one seeded `RUN_DIR`
+- produces `RUN_DIR/report/index.html` and `RUN_DIR/summary.json`
+- summarizes relevant non-UI changes separately and only cites indirect validation evidence when it was actually observed
+
+Trigger phrases include:
+
+- visually test this branch
+- test the current branch in the browser
+- run branch visual QA
+- generate a visual test report for this branch
+- inspect what this branch changed and test it
+
+This is branch-focused local-environment QA. Do not describe it as CI, a CI replacement, or preview-environment testing.
+
 ## Step 1: Work from the seeded run directory
 
 Use this skill through the `/visually-test-branch` launcher when possible.

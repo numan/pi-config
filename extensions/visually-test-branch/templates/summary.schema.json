@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "visually-test-branch summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "branch",
+    "runDir",
+    "targetEnvironment",
+    "features",
+    "issues",
+    "nonUiChanges",
+    "overallStatus"
+  ],
+  "properties": {
+    "branch": { "type": "string", "minLength": 1 },
+    "runDir": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?:[^\\0]+)$"
+    },
+    "targetEnvironment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "name", "outcome", "outcomePath", "flows"],
+        "properties": {
+          "slug": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "outcome": {
+            "type": "string",
+            "enum": ["passed", "partial", "failed", "blocked"]
+          },
+          "outcomePath": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*\\.\\.)(?:[^\\0]+)$"
+          },
+          "flows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "status"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "status": {
+                  "type": "string",
+                  "enum": ["passed", "partial", "failed", "blocked"]
+                },
+                "screenshots": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^(?!/)(?!.*\\.\\.)(?:[^\\0]+)$"
+                  }
+                },
+                "videos": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^(?!/)(?!.*\\.\\.)(?:[^\\0]+)$"
+                  }
+                },
+                "notes": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "title", "severity", "featureSlug", "evidenceDir"],
+        "properties": {
+          "slug": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "severity": {
+            "type": "string",
+            "enum": ["Critical", "High", "Medium", "Low"]
+          },
+          "featureSlug": { "type": "string", "minLength": 1 },
+          "evidenceDir": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*\\.\\.)(?:[^\\0]+)$"
+          },
+          "reproduction": { "type": "string" }
+        }
+      }
+    },
+    "nonUiChanges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["summary"],
+        "properties": {
+          "summary": { "type": "string", "minLength": 1 },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(?!/)(?!.*\\.\\.)(?:[^\\0]+)$"
+            }
+          }
+        }
+      }
+    },
+    "overallStatus": {
+      "type": "string",
+      "enum": ["passed", "issues-found", "blocked"]
+    }
+  }
+}

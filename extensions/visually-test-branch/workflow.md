@@ -26,6 +26,7 @@ Read these files first with the plain `read` tool:
 - `templates.featureOutcome`
 - `templates.summarySchema`
 - `templates.reportOutline`
+- `templates.finalReportPage`
 
 Treat `RUN_DIR` as the canonical run directory from the launch context. It will be a seeded directory under `pi/visual-tests/YYYY-MM-DD-<name>/`. Do not write any run artifact outside this tree.
 
@@ -208,43 +209,37 @@ After testing finishes, read every `RUN_DIR/results/<feature-slug>/outcome.md` f
 
 These files are the durable handoff from testing to report compilation.
 
-## Step 8: Assemble the final report
+## Step 8: Delegate final report generation
 
-Build the report only after the testing and evidence handoffs exist.
+Do not assemble the final page in the main session.
 
-Create:
+After `RUN_DIR/handoffs/testing-to-report.md` and `RUN_DIR/handoffs/evidence-to-report.md` both exist, launch a dedicated report-building subagent:
+
+```typescript
+subagent({
+  name: "🧾 Report Page Builder",
+  agent: "report-page-builder",
+  task: `Build the final static visual QA report for RUN_DIR. Read RUN_DIR/run.json, RUN_DIR/context/target-environment.md, RUN_DIR/handoffs/testing-to-report.md, RUN_DIR/handoffs/evidence-to-report.md, and every RUN_DIR/results/<feature-slug>/outcome.md file. Use RUN_DIR/run.json -> templates.finalReportPage as the canonical page contract and RUN_DIR/run.json -> templates.summarySchema as the canonical machine-readable contract. Write RUN_DIR/report/index.html and RUN_DIR/summary.json. Optional supporting files may be written under RUN_DIR/report/assets/, but evidence under RUN_DIR/evidence/... remains canonical.`
+})
+```
+
+Required inputs for that subagent:
+
+- `RUN_DIR/run.json`
+- `RUN_DIR/context/target-environment.md`
+- `RUN_DIR/handoffs/testing-to-report.md`
+- `RUN_DIR/handoffs/evidence-to-report.md`
+- every `RUN_DIR/results/<feature-slug>/outcome.md`
+- `RUN_DIR/run.json -> templates.finalReportPage`
+- `RUN_DIR/run.json -> templates.summarySchema`
+
+Owned outputs for that subagent:
 
 - `RUN_DIR/report/index.html`
 - `RUN_DIR/summary.json`
+- optional `RUN_DIR/report/assets/...`
 
-Use these template references from `RUN_DIR/run.json`:
-
-- `templates.reportOutline` for the report structure
-- `templates.summarySchema` for the machine-readable contract
-
-The report must include:
-
-- branch name and test target summary
-- impacted features section
-- one subsection per impacted feature
-- nested tested-flow subsections under each feature
-- passed coverage inside the relevant feature or flow section
-- screenshots and videos embedded or linked from the run directory
-- issues found section
-- one subsection per issue with severity and evidence
-- relevant non-UI changes summarized separately
-- indirect validation evidence for non-UI changes when available
-- explicit coverage limits when parts were untestable
-
-`summary.json` must be machine-readable and match the schema at `templates.summarySchema`. At minimum, include:
-
-- `branch`
-- `runDir`
-- `targetEnvironment`
-- `features[]` with `slug`, `name`, `outcome`, `outcomePath`, and `flows[]`
-- `issues[]` with `slug`, `title`, `severity`, `featureSlug`, and `evidenceDir`
-- `nonUiChanges[]`
-- `overallStatus`
+The report page builder owns final artifact generation only. Keep all inputs and outputs under `RUN_DIR`.
 
 ## Step 9: Final verification before reporting back
 
@@ -254,7 +249,8 @@ Before you say the workflow is complete:
 2. Confirm every required artifact lives under `RUN_DIR`.
 3. Confirm browser execution happened only in subagents.
 4. Confirm research → testing, testing → report, and issue/evidence → final report handoffs are all present as files.
-5. Confirm the report does not describe this workflow as CI replacement or preview-environment testing.
+5. Confirm the report-page-builder subagent produced `RUN_DIR/report/index.html` and `RUN_DIR/summary.json`.
+6. Confirm the report does not describe this workflow as CI replacement or preview-environment testing.
 
 In the final user-facing summary, include the exact run directory and the paths to:
 

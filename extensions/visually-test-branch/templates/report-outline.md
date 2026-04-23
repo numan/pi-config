@@ -1,4 +1,12 @@
-# Visual Test Branch Report Outline
+# Visual Test Branch Supplemental Report Outline
+
+This file is a supplemental content-outline reference for the final report.
+
+It is not the canonical page contract. The canonical page contract for `RUN_DIR/report/index.html` lives at:
+
+- `RUN_DIR/run.json -> templates.finalReportPage`
+
+Use this outline only as supporting guidance for organizing content.
 
 ## Run summary
 
@@ -7,7 +15,26 @@
 - Local target:
 - Overall status:
 
-## Impacted features
+## Executive summary
+
+- What changed or was tested:
+- Readiness summary:
+- Highest-severity issues, if any:
+- Broad coverage level:
+
+## Issues found
+
+### <issue-title>
+
+- Feature:
+- Severity: `Critical | High | Medium | Low`
+- Reproduction:
+- Evidence directory: `RUN_DIR/evidence/issues/<issue-slug>/`
+- Supporting screenshots/videos:
+
+Include only real issues here. Passing coverage belongs in the feature and flow sections.
+
+## Feature-by-feature results
 
 ### <feature-name>
 
@@ -24,18 +51,6 @@
   - `RUN_DIR/evidence/videos/<feature-slug>/<flow-name>.mp4`
 - Coverage gaps or blockers:
 
-## Issues found
-
-### <issue-title>
-
-- Feature:
-- Severity: `Critical | High | Medium | Low`
-- Reproduction:
-- Evidence directory: `RUN_DIR/evidence/issues/<issue-slug>/`
-- Supporting screenshots/videos:
-
-Include only real issues here. Passing coverage belongs in the feature and flow sections.
-
 ## Relevant non-UI changes
 
 - Change summary:
@@ -43,5 +58,14 @@ Include only real issues here. Passing coverage belongs in the feature and flow 
 
 ## Coverage limits
 
-- 
-- 
+-
+-
+
+## Artifact index
+
+- `RUN_DIR/analysis/branch-analysis.md`
+- `RUN_DIR/analysis/test-plan.md`
+- `RUN_DIR/handoffs/testing-to-report.md`
+- `RUN_DIR/handoffs/evidence-to-report.md`
+- `RUN_DIR/results/<feature-slug>/outcome.md`
+- `RUN_DIR/summary.json`

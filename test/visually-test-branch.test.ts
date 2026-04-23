@@ -77,6 +77,7 @@ describe("visually-test-branch extension helpers", () => {
         featureOutcome: "/fake/extensions/visually-test-branch/templates/feature-outcome.md",
         summarySchema: "/fake/extensions/visually-test-branch/templates/summary.schema.json",
         reportOutline: "/fake/extensions/visually-test-branch/templates/report-outline.md",
+        finalReportPage: "/fake/extensions/visually-test-branch/templates/final-report-page.md",
       },
     };
 
@@ -120,6 +121,7 @@ describe("visually-test-branch extension helpers", () => {
         `- Feature outcome template: ${metadata.templates.featureOutcome}`,
         `- Summary schema: ${metadata.templates.summarySchema}`,
         `- Report outline: ${metadata.templates.reportOutline}`,
+        `- Final report page contract: ${metadata.templates.finalReportPage}`,
         "- Do not write run artifacts to /tmp.",
         "- Do not use the session artifact folder as the source of truth.",
         "- Create any additional files under this directory tree only.",
@@ -147,6 +149,7 @@ describe("visually-test-branch extension helpers", () => {
         featureOutcome: "/repo/extensions/visually-test-branch/templates/feature-outcome.md",
         summarySchema: "/repo/extensions/visually-test-branch/templates/summary.schema.json",
         reportOutline: "/repo/extensions/visually-test-branch/templates/report-outline.md",
+        finalReportPage: "/repo/extensions/visually-test-branch/templates/final-report-page.md",
       },
     };
 
@@ -222,10 +225,20 @@ describe("visually-test-branch extension helpers", () => {
     assert.equal(typeof runJson.templates.featureOutcome, "string");
     assert.equal(typeof runJson.templates.summarySchema, "string");
     assert.equal(typeof runJson.templates.reportOutline, "string");
+    assert.equal(typeof runJson.templates.finalReportPage, "string");
+    assert.equal(existsSync(runJson.templates.testingHandoff), true);
+    assert.equal(existsSync(runJson.templates.featureOutcome), true);
+    assert.equal(existsSync(runJson.templates.summarySchema), true);
+    assert.equal(existsSync(runJson.templates.reportOutline), true);
+    assert.equal(existsSync(runJson.templates.finalReportPage), true);
 
     assert.match(injectedMessage, /^<skill name="visually-test-branch" location=".*workflow\.md">/);
     assert.doesNotMatch(injectedMessage, /^---$/m);
     assert.match(injectedMessage, /# Visually Test Branch/);
+    assert.match(injectedMessage, /agent: "report-page-builder"/);
+    assert.match(injectedMessage, /name: "🧾 Report Page Builder"/);
+    assert.match(injectedMessage, /templates\.finalReportPage as the canonical page contract/);
+    assert.match(injectedMessage, /templates\.summarySchema as the canonical machine-readable contract/);
     assert.match(injectedMessage, /Run context:/);
     assert.match(injectedMessage, new RegExp(`- Canonical run directory: ${runDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
     assert.match(injectedMessage, /- Current branch: feature\/handler-path/);

@@ -42,6 +42,7 @@ Read these files first:
 - `templates.featureOutcome`
 - `templates.summarySchema`
 - `templates.reportOutline`
+- `templates.finalReportPage`
 
 Treat the seeded run directory as the only valid place for run artifacts. Keep every generated file inside `RUN_DIR`.
 
@@ -198,67 +199,37 @@ After all testing subagents finish, read their outputs and write:
 
 These are the durable handoffs from testing to final report assembly.
 
-## Step 7: Build the final artifacts
+## Step 7: Delegate final artifact generation
 
-Create:
+Do not assemble the final page in the main session.
+
+After `RUN_DIR/handoffs/testing-to-report.md` and `RUN_DIR/handoffs/evidence-to-report.md` exist, launch a dedicated report-building subagent:
+
+```typescript
+subagent({
+  name: "🧾 Report Page Builder",
+  agent: "report-page-builder",
+  task: `Build the final static visual QA report for RUN_DIR. Read RUN_DIR/run.json, RUN_DIR/context/target-environment.md, RUN_DIR/handoffs/testing-to-report.md, RUN_DIR/handoffs/evidence-to-report.md, and every RUN_DIR/results/<feature-slug>/outcome.md file. Use RUN_DIR/run.json -> templates.finalReportPage as the canonical page contract and RUN_DIR/run.json -> templates.summarySchema as the canonical machine-readable contract. Write RUN_DIR/report/index.html and RUN_DIR/summary.json. Optional supporting files may be written under RUN_DIR/report/assets/, but evidence under RUN_DIR/evidence/... remains canonical.`
+})
+```
+
+Required inputs for that subagent:
+
+- `RUN_DIR/run.json`
+- `RUN_DIR/context/target-environment.md`
+- `RUN_DIR/handoffs/testing-to-report.md`
+- `RUN_DIR/handoffs/evidence-to-report.md`
+- every `RUN_DIR/results/<feature-slug>/outcome.md`
+- `RUN_DIR/run.json -> templates.finalReportPage`
+- `RUN_DIR/run.json -> templates.summarySchema`
+
+Owned outputs for that subagent:
 
 - `RUN_DIR/report/index.html`
 - `RUN_DIR/summary.json`
+- optional `RUN_DIR/report/assets/...`
 
-Use `templates.reportOutline` for the report structure and `templates.summarySchema` for the machine-readable summary contract.
-
-The final report must include:
-
-- branch and local target summary
-- impacted features section
-- one subsection per impacted feature
-- tested-flow subsections nested inside each feature
-- screenshots or videos for coverage
-- passed coverage within feature or flow sections
-- issues found section
-- one subsection per issue with severity and evidence
-- non-UI change summary when relevant
-- indirect validation evidence when available
-- explicit coverage gaps or blockers
-
-`summary.json` must include at least:
-
-```json
-{
-  "branch": "feature/example",
-  "runDir": "pi/visual-tests/2026-04-22-feature-example",
-  "targetEnvironment": {
-    "url": "http://localhost:3000"
-  },
-  "features": [
-    {
-      "slug": "checkout",
-      "name": "Checkout",
-      "outcome": "partial",
-      "outcomePath": "results/checkout/outcome.md",
-      "flows": [
-        {
-          "name": "Submit order",
-          "status": "partial",
-          "screenshots": ["evidence/screenshots/checkout/submit-order.png"],
-          "videos": ["evidence/videos/checkout/submit-order.mp4"]
-        }
-      ]
-    }
-  ],
-  "issues": [
-    {
-      "slug": "checkout-button-overlap",
-      "title": "Submit button overlaps order summary",
-      "severity": "High",
-      "featureSlug": "checkout",
-      "evidenceDir": "evidence/issues/checkout-button-overlap"
-    }
-  ],
-  "nonUiChanges": [],
-  "overallStatus": "issues-found"
-}
-```
+The report page builder owns final artifact generation only. Keep all inputs and outputs under `RUN_DIR`.
 
 ## Step 8: Final checks
 
@@ -270,6 +241,7 @@ Before reporting completion:
 - verify testing → report handoff exists
 - verify issue/evidence → final report handoff exists
 - verify the workflow stays branch-focused and local-environment-focused
+- verify the report-page-builder subagent produced `RUN_DIR/report/index.html` and `RUN_DIR/summary.json`
 - verify the report does not frame itself as CI replacement or preview-environment testing
 
 ## Exit criteria

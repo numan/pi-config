@@ -21,6 +21,7 @@ type LaunchMetadata = {
     featureOutcome: string;
     summarySchema: string;
     reportOutline: string;
+    finalReportPage: string;
   };
 };
 
@@ -93,6 +94,7 @@ function seedRunArtifacts(metadata: LaunchMetadata): void {
       `- Feature outcome template: ${metadata.templates.featureOutcome}`,
       `- Summary schema: ${metadata.templates.summarySchema}`,
       `- Report outline: ${metadata.templates.reportOutline}`,
+      `- Final report page contract: ${metadata.templates.finalReportPage}`,
       "- Do not write run artifacts to /tmp.",
       "- Do not use the session artifact folder as the source of truth.",
       "- Create any additional files under this directory tree only.",
@@ -159,6 +161,7 @@ export default function visuallyTestBranchExtension(pi: ExtensionAPI) {
           featureOutcome: join(dirname(new URL(import.meta.url).pathname), "templates", "feature-outcome.md"),
           summarySchema: join(dirname(new URL(import.meta.url).pathname), "templates", "summary.schema.json"),
           reportOutline: join(dirname(new URL(import.meta.url).pathname), "templates", "report-outline.md"),
+          finalReportPage: join(dirname(new URL(import.meta.url).pathname), "templates", "final-report-page.md"),
         },
       };
 

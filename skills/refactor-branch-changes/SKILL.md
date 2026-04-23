@@ -113,15 +113,15 @@ After approval, implement the todos by launching `worker` subagents one at a tim
 Rules:
 - claim the todo before launching the worker when appropriate
 - give each worker exactly one todo
-- explicitly instruct the worker to leave all changes uncommitted
-- explicitly instruct the worker not to use the `commit` skill and not to create any git commit
+- explicitly instruct the worker to validate its changes, then create a git commit for that todo before exiting
+- explicitly instruct the worker to read and follow the `commit` skill when writing that commit
 - wait for the worker result before starting the next todo
 - if a worker reports missing context, update the todo before retrying
 - do not batch multiple todos into one worker task
-- after each worker finishes, review the result, note validation, and then move to the next todo
+- after each worker finishes, review the result, note validation, and confirm the todo-specific commit was created before moving to the next todo
 - close completed todos as they are finished
 
-After all approved todos are implemented, stop with a summary of the completed refactors, affected file paths, and validation results. Tell the user the changes are intentionally left uncommitted and that they should review and commit manually.
+After all approved todos are implemented, stop with a summary of the completed refactors, affected file paths, validation results, and the per-todo commits that were created.
 
 ## Refactor principles
 
@@ -157,5 +157,5 @@ Do not stop until all relevant items are true:
 - worker subagents were launched sequentially, one todo at a time
 - each completed refactor stayed grounded in branch code and preserved behavior
 - validation results were captured for implemented todos
-- no git commit was created as part of this skill
-- the final response clearly told the user to review and commit the changes manually
+- each completed todo was committed before the next worker started
+- the final response clearly summarized the per-todo commits that were created

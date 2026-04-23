@@ -158,14 +158,14 @@ These files are the durable handoff from research to browser testing.
 
 Never drive the browser from the main session. Launch one or more testing subagents and rely on `agent-browser` there.
 
-Use `visually-test-branch-tester` subagents for browser work. Each task must point to one per-feature handoff file and require all outputs under `RUN_DIR`.
+Use `browser-tester` subagents for browser work. Each task must point to one per-feature handoff file and require all outputs under `RUN_DIR`.
 
 Use tasks shaped like this:
 
 ```typescript
 subagent({
-  name: "🧪 Visually Test Branch Tester: <feature>",
-  agent: "visually-test-branch-tester",
+  name: "🧪 Browser Tester: <feature>",
+  agent: "browser-tester",
   task: `Execute the visual QA handoff at RUN_DIR/handoffs/testing/<feature-slug>.md.
 
 Use browser automation through the agent-browser skill in this subagent, not in the main session. Save every artifact inside RUN_DIR only.

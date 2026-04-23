@@ -11,7 +11,7 @@ Turn the current local branch into an evidence-backed visual QA run with durable
 
 - analyzes the current local branch first
 - uses a `researcher` subagent for branch understanding and test planning
-- runs dedicated `visually-test-branch-tester` subagents backed by the `agent-browser` skill
+- runs dedicated `browser-tester` subagents backed by the `agent-browser` skill
 - writes every artifact for the run into one seeded `RUN_DIR`
 - produces `RUN_DIR/report/index.html` and `RUN_DIR/summary.json`
 - summarizes relevant non-UI changes separately and only cites indirect validation evidence when it was actually observed
@@ -151,7 +151,7 @@ This is the durable handoff from research to testing. Do not rely on memory or i
 
 Never drive the browser from the main session.
 
-Spawn `visually-test-branch-tester` subagents for each feature handoff and make browser automation explicit through the `agent-browser` skill in those subagents.
+Spawn `browser-tester` subagents for each feature handoff and make browser automation explicit through the `agent-browser` skill in those subagents.
 
 Each testing task must require outputs under `RUN_DIR` only:
 

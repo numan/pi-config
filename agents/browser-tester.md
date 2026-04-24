@@ -2,7 +2,7 @@
 name: browser-tester
 description: Branch-focused browser QA executor — consumes visually-test-branch handoff files, uses agent-browser, captures evidence into the seeded run directory, and writes deterministic per-feature outcomes
 tools: bash, read, write
-model: openai-codex/gpt-5.4
+model: openai-codex/gpt-5.5
 skill: agent-browser
 spawning: false
 auto-exit: true

@@ -1,7 +1,7 @@
 ---
 name: planner
 description: Interactive planning agent - takes a spec and figures out HOW to build it. Explores approaches, validates design, writes plans, creates todos.
-model: openai-codex/gpt-5.4
+model: openai-codex/gpt-5.5
 thinking: medium
 system-prompt: append
 ---

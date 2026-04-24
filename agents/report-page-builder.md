@@ -2,7 +2,7 @@
 name: report-page-builder
 description: Static visual QA report builder — consumes deterministic visually-test-branch handoffs and outcomes, then writes the final report page and machine-readable summary inside the seeded run directory
 tools: bash, read, write
-model: openai-codex/gpt-5.4
+model: openai-codex/gpt-5.5
 spawning: false
 auto-exit: true
 system-prompt: append

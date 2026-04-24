@@ -50,8 +50,7 @@ Specialized roles with baked-in identity, workflow, and review rubrics. Most age
 
 | Agent | Source | Purpose |
 |-------|--------|---------|
-| **spec** | package | Interactive spec agent — clarifies WHAT to build (intent, requirements, ISC) |
-| **planner** | package | Interactive planning — takes a spec and figures out HOW to build it |
+| **planner** | local | Interactive planning — clarifies WHAT to build lightly, figures out HOW, writes the plan, and creates todos |
 | **scout** | package | Fast codebase reconnaissance — gathers context without making changes |
 | **worker** | package | Implements tasks from todos, commits with polished messages |
 | **reviewer** | package | Reviews code for quality, security, correctness |
@@ -76,7 +75,7 @@ Loaded on-demand when the context matches.
 | **session-reader** | Reading and analyzing pi session JSONL files |
 | **skill-creator** | Scaffolding new agent skills |
 | **write-todos** | Writing clear, actionable todos from a plan |
-| **spec-visual-brainstorming** | Visual mockups, diagrams, and comparisons inside the interactive spec subagent |
+| **spec-visual-brainstorming** | Visual mockups, diagrams, and comparisons inside the planner's requirements-clarification phase |
 | **self-improve** | End-of-session retrospective — surfaces improvements and creates todos |
 | **cmux** | Managing terminal sessions via cmux |
 | **presentation-creator** | Creating data-driven presentation slides |

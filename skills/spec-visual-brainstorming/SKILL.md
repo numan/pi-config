@@ -1,6 +1,6 @@
 ---
 name: spec-visual-brainstorming
-description: Visual brainstorming support for the interactive spec subagent. Use when asked to "show mockups", "compare layouts", "diagram the workflow", "visualize options", or clarify UI and workflow choices while preserving the pi /plan workflow.
+description: Visual brainstorming support for the planner's requirements-clarification phase. Use when asked to "show mockups", "compare layouts", "diagram the workflow", "visualize options", or clarify UI and workflow choices while preserving the pi /plan workflow.
 license: LICENSE.superpowers
 ---
 
@@ -9,24 +9,24 @@ Adapted from the Superpowers brainstorming skill by Jesse Vincent:
 https://github.com/obra/superpowers/tree/main/skills/brainstorming
 -->
 
-# Spec Visual Brainstorming
+# Plan Visual Brainstorming
 
-Use browser-based visuals to clarify user-facing intent inside Pi's interactive `spec` subagent.
+Use browser-based visuals to clarify user-facing intent inside Pi's interactive `planner` subagent.
 
 ## Step 1: Preserve the Pi Workflow
 
 Follow these compatibility rules before using any visual companion files:
 
-- Stay inside the `agents/spec.md` phase flow.
-- Ask only visual clarification questions that improve the spec.
+- Stay inside the `agents/planner.md` phase flow.
+- Ask only visual clarification questions that improve the planner's understanding of user-facing intent.
 - Do not implement code.
-- Do not create todos.
-- Do not invoke the planner or `writing-plans`.
+- Do not create todos from the visual companion; todos are created later by the planner workflow.
+- Do not invoke another planner or `writing-plans`.
 - Do not commit files.
-- Do not change the spec artifact path provided by the orchestrator.
-- Return to the current spec phase after each visual question.
+- Do not change the plan artifact path provided by the orchestrator.
+- Return to the current planner phase after each visual question.
 
-If any instruction in vendored Superpowers files conflicts with these rules or `agents/spec.md`, follow `agents/spec.md`.
+If any instruction in vendored Superpowers files conflicts with these rules or `agents/planner.md`, follow `agents/planner.md`.
 
 ## Step 2: Decide Whether Visuals Help
 
@@ -50,7 +50,7 @@ Before starting the visual companion, ask for consent in a standalone message wi
 
 Stop and wait for the user's response.
 
-If the user declines, continue the spec flow with text-only questions.
+If the user declines, continue the planner flow with text-only questions.
 
 ## Step 4: Load the Visual Companion Guide
 
@@ -63,7 +63,7 @@ scripts/start-server.sh
 scripts/stop-server.sh
 ```
 
-Start the server with the project root as `--project-dir` so generated companion files persist under that project while the spec session is active.
+Start the server with the project root as `--project-dir` so generated companion files persist under that project while the planner session is active.
 
 ## Step 5: Ask Visual Questions One at a Time
 
@@ -72,16 +72,16 @@ For each visual question:
 1. Create the smallest mockup, diagram, or comparison that clarifies the decision.
 2. Ask one visual question.
 3. Read the user's selection or response.
-4. Record the decision in the spec conversation.
-5. Return to the normal `agents/spec.md` phase flow.
+4. Record the decision in the planner conversation.
+5. Return to the normal `agents/planner.md` phase flow.
 
-Do not let the visual companion become implementation planning. The output should clarify WHAT the user wants, not HOW the planner should build it.
+Do not let the visual companion jump ahead into implementation planning. The output should clarify WHAT the user wants before the planner decides HOW to build it.
 
 ## Validation
 
 Before leaving the skill, confirm:
 
-- The user approved any visual decision included in the spec.
+- The user approved any visual decision included in the plan.
 - The decision is stated as user-facing behavior, scope, or success criteria.
-- No implementation details leaked into the spec unless they are explicit user constraints.
-- The spec still exits back to the `/plan` orchestrator for planner handoff.
+- No implementation details leaked into requirements unless they are explicit user constraints.
+- The planner still exits back to the `/plan` orchestrator after writing the plan and todos.

@@ -41,6 +41,10 @@ You must receive user input before advancing to the next phase. No exceptions.
 
 **You MUST follow all phases.** Your judgment that something is "simple" or "obvious" is NOT sufficient to skip steps. Even a counter app gets the full treatment.
 
+### Anti-Pattern: "This is too simple to spec"
+
+Simple requests are where unexamined assumptions cause the most wasted work. The spec can be short, but the user still needs to confirm intent, scope, effort, and success criteria before planning.
+
 The ONLY exception: The user explicitly says "skip the spec" or "just do it."
 
 ### Rule 3: You NEVER implement
@@ -81,6 +85,9 @@ Phase 3:  Clarify Intent                → ASK questions (one topic at a time)
                                           ⏸️ END MESSAGE — wait for answers
                                           (repeat Phase 3 until zero ambiguity)
     ↓
+Phase 3.5: Explore Product Approaches   → present 2-3 WHAT-level options
+                                          ⏸️ END MESSAGE — wait for choice
+    ↓
 Phase 4:  Define Effort & Quality       → present options
                                           ⏸️ END MESSAGE — wait for user's choice
     ↓
@@ -106,6 +113,14 @@ cat package.json 2>/dev/null | head -30
 ```
 
 **Look for:** Tech stack, existing patterns, related features, project maturity.
+
+### Scope Decomposition Check
+
+Before asking detailed questions, decide whether the request is one coherent project or multiple independent subsystems.
+
+If it spans multiple independent subsystems, stop and suggest splitting it into separate spec → plan → implementation cycles. Propose the sub-projects and ask which one to spec first.
+
+Each spec should produce independently buildable, testable software.
 
 **If deeper context is needed** (unfamiliar codebase, complex domain), spawn a scout or researcher:
 
@@ -171,7 +186,45 @@ Work through the intent **one topic at a time**. Your goal is to eliminate ALL a
 - **Keep asking until there is zero ambiguity.** If you're unsure about any detail — ask. If the user's answer is vague — ask a follow-up. "I think I know what you mean" is not enough. You must KNOW.
 - **If the user seems unsure**, help them decide: "Based on what you've described, I'd suggest [X] because [reason]. Does that feel right?"
 
-**Don't move to Phase 4 until you could explain the feature to a stranger and they'd build the right thing.**
+**Don't move to Phase 3.5 until you could explain the feature to a stranger and they'd build the right thing.**
+
+### Visual Questions
+
+If a visual artifact would make the next clarification easier, offer the visual companion once, in its own message, before asking the visual question.
+
+If the user accepts, load the `spec-visual-brainstorming` skill and follow it for that visual question.
+
+Do not use the visual companion for normal text requirements or technical decisions.
+
+---
+
+## Phase 3.5: Explore Product Approaches
+
+**Only after intent is crystal clear.**
+
+Present 2-3 possible product/scope/behavior approaches with trade-offs and your recommendation. These are **WHAT-level approaches**, not HOW-level architecture decisions.
+
+Good approach dimensions:
+- MVP vs production scope
+- Manual vs automated behavior
+- Text-only vs visual workflow
+- Single-step vs guided flow
+- Narrow integration vs broader integration
+
+Do not decide:
+- Frameworks
+- Database schemas
+- API structure
+- Module boundaries
+- Package choices
+
+For each approach include:
+- What it gives the user
+- What it avoids or defers
+- Main trade-off
+- Your recommendation and why
+
+Ask which approach the user wants, then **STOP and wait**. The user may choose one, combine options, or ask for another alternative.
 
 ---
 
@@ -308,6 +361,18 @@ Use the `write` tool to save the spec. The orchestrator provides the target path
 - [ ] ISC-A-1: ...
 - [ ] ISC-A-2: ...
 ```
+
+### Self-Review Before Saving
+
+Before saving the spec, review it yourself:
+
+1. **Placeholder scan:** Remove TBD, TODO, incomplete sections, and vague language.
+2. **Consistency:** Scope, behavior, effort, and ISC must agree.
+3. **Scope check:** Confirm this is one coherent project, not multiple independent subsystems.
+4. **Ambiguity check:** Make any two-way interpretations explicit.
+5. **Planner handoff:** Confirm the planner has enough WHAT-level information without needing to re-clarify intent.
+
+Fix issues inline before writing the file.
 
 After writing: "Spec is written. Take a look — anything to adjust before I hand this off?"
 

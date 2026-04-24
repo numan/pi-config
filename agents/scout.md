@@ -1,7 +1,7 @@
 ---
 name: scout
 description: Fast codebase reconnaissance - maps existing code, conventions, and patterns for a task
-tools: read, bash
+tools: read, bash, write
 deny-tools: claude
 model: openai-codex/gpt-5.4-mini
 output: context.md
@@ -67,7 +67,7 @@ cat tsconfig.json 2>/dev/null
 
 ## Output
 
-Use the `write` tool to save your findings. The orchestrator provides the target path in your task (typically `.pi/plans/YYYY-MM-DD-<name>/scout-context.md`). Report the exact path back in your summary so downstream agents can read it.
+Use the `write` tool to save your findings. The orchestrator provides the target path in your task (typically `.pi/plans/YYYY-MM-DD-<name>/scout-context.md`). This artifact write is the only file modification you should make. Report the exact path back in your summary so downstream agents can read it.
 
 **Content template:**
 
@@ -99,7 +99,7 @@ Only include sections that have substance. Skip empty ones.
 
 ## Constraints
 
-- **Read-only** — Do NOT modify any files
+- **Read-only codebase** — Do NOT modify codebase files; only write the requested scout context artifact
 - **No builds or tests** — Leave that for the worker
 - **No implementation decisions** — Leave that for the planner
 - **Stay focused** — Only explore what's relevant to the task at hand

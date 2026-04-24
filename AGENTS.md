@@ -71,6 +71,17 @@ Many projects contain agent instruction files from other tools. Be mindful of th
 - **Skills:** `.claude/skills/` — can be registered in `.pi/settings.json` for pi to use directly
 - **Settings:** `.claude/settings.json` — permissions and tool configuration
 
+### Follow Loaded Skill Workflows Exactly
+
+When the user invokes or provides a skill with a phased workflow, follow the phases in order. Do not skip ahead because the implementation seems obvious.
+
+For planning workflows that require scout, spec, planner, plan, todos, approval, or review steps:
+- Do not edit implementation files while scouting or planning is still in progress.
+- Wait for required subagents to finish before continuing to the next phase.
+- Read the expected artifacts from disk before passing them downstream or summarizing them.
+- If a required artifact is missing or a subagent exits without output, stop and recover the workflow instead of proceeding.
+- Do not start execution until the concrete plan/checklist/todos have been presented and explicitly approved by the user.
+
 ### Read Before You Edit
 
 Never propose changes to code you haven't read. If you need to modify a file:

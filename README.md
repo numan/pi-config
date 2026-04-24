@@ -76,6 +76,7 @@ Loaded on-demand when the context matches.
 | **session-reader** | Reading and analyzing pi session JSONL files |
 | **skill-creator** | Scaffolding new agent skills |
 | **write-todos** | Writing clear, actionable todos from a plan |
+| **spec-visual-brainstorming** | Visual mockups, diagrams, and comparisons inside the interactive spec subagent |
 | **self-improve** | End-of-session retrospective — surfaces improvements and creates todos |
 | **cmux** | Managing terminal sessions via cmux |
 | **presentation-creator** | Creating data-driven presentation slides |

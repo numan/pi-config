@@ -66,28 +66,29 @@ Never commit, stash, or discard uncommitted changes without explicit user approv
 
 Use this workflow only when no PR exists for the current branch.
 
-### 4.1 Run Relevant Backend Tests
+### 4.1 Run Relevant Local Checks
 
-Discover the relevant backend test command from project evidence before creating the PR:
+Discover the most relevant validation command from project evidence before creating the PR:
 
 1. Read project instructions such as `AGENTS.md`, `CLAUDE.md`, `README.md`, or package-specific docs.
 2. Inspect common task definitions such as `package.json`, `Makefile`, `justfile`, `pyproject.toml`, `Gemfile`, `go.mod`, `Cargo.toml`, or CI workflow files.
-3. Prefer the narrow backend test command that covers the branch changes. If the backend test command is unclear, ask the user which command to run.
+3. Prefer the narrow command that covers the branch changes: targeted tests, type checks, lint checks, build checks, or a minimal smoke test for integration-heavy work.
+4. If the right validation command is unclear, ask the user which command to run.
 
-Run the selected backend tests and capture the exact command and result.
+Run the selected check and capture the exact command and result.
 
-If tests fail:
+If validation fails:
 
 1. Show the failing command and the relevant failure output.
 2. Ask the user whether to continue anyway or stop.
-3. Continue to PR creation only if the user gives express, explicit approval to continue despite the failing tests.
+3. Continue to PR creation only if the user gives express, explicit approval to continue despite the failed validation.
 4. Otherwise abandon this workflow and follow the user's instruction.
 
-If tests pass, continue.
+If validation passes, continue.
 
 ### 4.2 Push the Branch
 
-Ensure the branch exists on GitHub after tests pass:
+Ensure the branch exists on GitHub after validation passes:
 
 ```bash
 git push -u origin HEAD
@@ -109,7 +110,7 @@ Create the PR with `gh`:
 gh pr create --title "$TITLE" --body-file "$BODY_FILE"
 ```
 
-After creation, show the PR URL and include the test command that passed. If the PR was created despite failing tests by explicit user approval, state that clearly.
+After creation, show the PR URL and include the validation command that passed. If the PR was created despite failing validation by explicit user approval, state that clearly.
 
 ## Step 5: Update an Existing Pull Request
 
@@ -196,9 +197,9 @@ Report the outcome in this format:
 ```markdown
 PR: <url>
 Branch: <branch>
-Tests: <command> — passed|failed with explicit approval|not run because existing PR update
+Validation: <command> — passed|failed with explicit approval|not run because existing PR update
 Pushed: yes|no
 Description: created|updated|left unchanged
 ```
 
-Do not claim that tests passed, commits were pushed, or the PR was updated unless the relevant command completed successfully.
+Do not claim that validation passed, commits were pushed, or the PR was updated unless the relevant command completed successfully.

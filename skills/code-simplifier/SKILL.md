@@ -21,14 +21,9 @@ Never change what the code does - only how it does it. All original features, ou
 
 ### 2. Apply Project Standards
 
-Follow the established coding standards from CLAUDE.md including:
+Read the project's local convention files before changing style (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.clinerules`, `.github/copilot-instructions.md`, and relevant files under `.claude/rules/` or `.cursor/rules/` when present). Follow the conventions that actually apply to the files being simplified, including import style, typing style, framework patterns, error handling, and naming.
 
-- Use ES modules with proper import sorting and extensions
-- Prefer `function` keyword over arrow functions
-- Use explicit return type annotations for top-level functions
-- Follow proper React component patterns with explicit Props types
-- Use proper error handling patterns (avoid try/catch when possible)
-- Maintain consistent naming conventions
+If no explicit rule exists, match nearby code instead of imposing a generic preference.
 
 ### 3. Enhance Clarity
 

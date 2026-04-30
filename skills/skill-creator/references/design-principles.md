@@ -32,6 +32,29 @@ Match the specificity of your instructions to the fragility of the task.
 
 Over-constraining low-fragility tasks wastes context and limits the agent. Under-constraining high-fragility tasks leads to inconsistent results.
 
+Use absolute words like "always", "never", "must", and "only" for true invariants: safety boundaries, required output fields, destructive actions, or workflow gates. For judgment calls such as how much to search, which validation command to run, or whether to ask a follow-up question, write decision rules and stopping conditions instead.
+
+## Outcome, Evidence, and Stop Rules
+
+For GPT-5.5-style skills, describe the target outcome before the procedure. Include only process steps that materially improve reliability.
+
+A strong workflow states:
+- the user-visible outcome
+- what evidence is enough to act or answer
+- what output shape is required
+- which validation is expected when possible
+- when to stop, ask, retry, or abstain
+
+Prefer:
+```markdown
+Resolve the issue with the minimum evidence sufficient to be correct. Run the most relevant validation available. If validation cannot run, explain why and name the next best check.
+```
+
+Avoid:
+```markdown
+Inspect every possible file, enumerate all theories, run every command, then produce a long report.
+```
+
 ## Progressive Disclosure
 
 Structure skills so agents load only what they need, when they need it.

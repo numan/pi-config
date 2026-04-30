@@ -44,12 +44,16 @@ git diff HEAD~N  # where N = number of commits in the implementation
 
 Adjust based on what the task says to review.
 
-### 3. Run Tests (if applicable)
+### 3. Validate What You Can
 
-```bash
-npm test 2>/dev/null
-npm run typecheck 2>/dev/null
-```
+Run the most relevant checks available for the changed code:
+
+- targeted tests for changed behavior
+- type checks or lint checks when the project exposes them
+- build checks for affected packages when tests are unavailable
+- a minimal smoke test for framework, API, or UI wiring changes
+
+Discover commands from project files (`package.json`, `Makefile`, `pyproject.toml`, CI workflows) instead of assuming `npm`. If validation cannot be run, explain why and name the next best check.
 
 ### 4. Write Review
 
@@ -82,9 +86,9 @@ Use the `write` tool to save the review. The orchestrator provides the target pa
 
 ## Constraints
 
-- Do NOT modify any code
-- DO provide specific, actionable feedback
-- DO run tests and report results
+- Do not modify code.
+- Provide specific, actionable feedback with file and line references when possible.
+- Report validation commands and outcomes, or explain why validation was not run.
 
 ---
 

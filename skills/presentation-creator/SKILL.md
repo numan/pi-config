@@ -12,15 +12,19 @@ Create interactive, data-driven presentation slides using React + Vite + Rechart
 Ask the user:
 1. What is the presentation topic?
 2. How many slides (typically 5-8)?
-3. What data/charts are needed? (time series, comparisons, diagrams, zone charts)
+3. What source material, data, or claims should the deck use?
 4. What is the narrative arc? (problem → solution, before → after, technical deep-dive)
 
-### Data Assessment (CRITICAL)
+### Evidence and Data Assessment
 
-Before designing any slides, assess whether the source content contains **real quantitative data** (numbers, percentages, measurements, time series, costs, metrics). Only create Recharts visualizations for slides where real data exists. Do NOT fabricate, estimate, or invent data to fill charts.
+Separate source-backed facts from creative narrative framing before designing slides.
+
+Use provided or retrieved sources for concrete product, customer, metric, roadmap, date, capability, and competitive claims. If support is missing, use a placeholder or a clearly labeled assumption instead of inventing specifics to make the deck sound stronger.
+
+Assess whether the source content contains **real quantitative data** (numbers, percentages, measurements, time series, costs, metrics). Only create Recharts visualizations for slides where real data exists. Do not fabricate, estimate, or invent data to fill charts.
 
 - **Has real data** → use a Recharts chart (bar, area, line, etc.)
-- **Has no data** → use text-based layouts: cards, tables, bullet columns, diagrams, or quote blocks. Do NOT create a chart with made-up numbers.
+- **Has no data** → use text-based layouts: cards, tables, bullet columns, diagrams, or quote blocks.
 
 If the source content is purely qualitative (narrative, opinions, strategy, process descriptions), the presentation should use zero charts. Recharts and `Charts.jsx` should only be included in the project if at least one slide has real data to visualize.
 
@@ -156,7 +160,7 @@ function App() {
 
 ## Step 4: Create Charts (Only When Data Exists)
 
-**IMPORTANT: Only create charts for slides backed by real, concrete data from the source content.** If a slide's content is qualitative (strategies, learnings, process descriptions, opinions), use text-based layouts instead (cards, tables, bullet lists, columns). Never invent numbers, fabricate percentages, or generate synthetic data to populate a chart. If you are unsure whether data is real or inferred, do NOT create a chart.
+Create charts only for slides backed by real, concrete data from the source content. If a slide's content is qualitative (strategies, learnings, process descriptions, opinions), use text-based layouts instead (cards, tables, bullet lists, columns). If you are unsure whether data is real or inferred, do not create a chart.
 
 If NO slides require charts, skip this step entirely — do not create `Charts.jsx` or import Recharts.
 
@@ -204,9 +208,10 @@ Tag + heading + 3-column layout with category headers and bullet lists.
 
 After initial scaffolding:
 1. Run `npm install && npm run dev` to start the dev server
-2. Iterate on chart data models and visual design
-3. Adjust animations, colors, and layout spacing
-4. Build final output: `npm run build` produces a single HTML file in `dist/`
+2. Render the deck and inspect it for layout, clipping, spacing, missing content, chart legibility, and visual consistency
+3. Iterate on chart data models and visual design
+4. Adjust animations, colors, and layout spacing
+5. Build final output: `npm run build` produces a single HTML file in `dist/`
 
 ## Output Expectations
 

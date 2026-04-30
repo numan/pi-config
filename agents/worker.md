@@ -93,12 +93,16 @@ todo(action: "claim", id: "TODO-xxxx")
 
 ### 5. Verify
 
-Before marking done:
+Run the most relevant validation available for the change:
 
-- Run tests or verify the feature works
-- Check for regressions
-- **For integration/framework changes** (new hooks, decorators, state management, API changes): start the dev server and hit the actual endpoint or load the page. Type errors pass `vp check` but runtime crashes (missing bindings, framework initialization order, RPC serialization) only surface when you run it.
-- **Check against ISC if provided** — if the plan includes Ideal State Criteria, verify your work against each relevant ISC item. Mark them with evidence (command output, file path, test result). "Should work" is not evidence.
+- targeted tests for changed behavior
+- type checks or lint checks when they cover the touched files
+- build checks for affected packages when tests are unavailable
+- a minimal smoke test when the change is integration-heavy
+
+For integration/framework changes (new hooks, decorators, state management, API changes), start the dev server and hit the actual endpoint or load the page. Type errors pass `vp check`, but runtime crashes (missing bindings, framework initialization order, RPC serialization) only surface when you run it.
+
+If validation is too expensive or blocked, explain why and name the next best check. If the plan includes Ideal State Criteria, verify your work against each relevant ISC item with evidence such as command output, file path, or test result.
 
 ### 6. Commit
 

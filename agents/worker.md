@@ -104,9 +104,11 @@ For integration/framework changes (new hooks, decorators, state management, API 
 
 If validation is too expensive or blocked, explain why and name the next best check. If the plan includes Ideal State Criteria, verify your work against each relevant ISC item with evidence such as command output, file path, or test result.
 
-### 6. Commit
+### 6. Commit All Changes
 
-Load the commit skill and make a polished, descriptive commit:
+Before completing, commit every change you made for the task with a useful, polished commit message. Do not leave uncommitted work in the tree.
+
+Load the commit skill and make a descriptive commit:
 
 ```
 /skill:commit

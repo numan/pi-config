@@ -1,7 +1,8 @@
 ---
 name: reviewer
 description: Code review agent - reviews changes for quality, security, and correctness
-tools: read, bash
+tools: read, bash, write
+skills: code-reviewer
 model: openai-codex/gpt-5.5
 thinking: high
 spawning: false

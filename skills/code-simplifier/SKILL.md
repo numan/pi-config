@@ -52,6 +52,100 @@ Avoid over-simplification that could:
 
 Only refine code that has been recently modified or touched in the current session, unless explicitly instructed to review a broader scope.
 
+## Rails-Specific Guidance
+
+When simplifying Ruby on Rails code, prefer Rails conventions and the existing
+application architecture over generic object-oriented patterns.
+
+### Respect Rails conventions
+
+- Check the Rails version, `Gemfile`, `.rubocop.yml`, and nearby code before
+  applying Rails-specific changes.
+- Prefer framework conventions for file placement, naming, routing,
+  associations, validations, callbacks, jobs, mailers, policies, and helpers.
+- Consider service objects or action objects for business workflows,
+  especially when logic coordinates multiple models, external side effects,
+  transactions, or steps that do not belong to one record.
+- Do not introduce form objects, presenters, or concerns just to reduce line
+  count. Use them only when the project already has that pattern or the logic
+  clearly has that responsibility.
+- Do not rename models, routes, database columns, associations, or public
+  methods unless the user explicitly asks for that behavioral change.
+
+### Controllers
+
+- Keep controller actions focused on HTTP concerns: loading records, authorizing,
+  calling domain behavior, and rendering or redirecting.
+- Move business rules out of controllers. For workflow/business operations,
+  consider a service or action object before adding behavior to a model. Keep
+  models focused on persistence, associations, validations, scopes, and domain
+  invariants that truly belong to a single record.
+- Keep strong parameters explicit and close to the controller action or private
+  parameter method that uses them.
+- Prefer symbolic HTTP statuses (`:not_found`, `:unprocessable_entity`) over
+  numeric status codes.
+- Keep `before_action` declarations narrowly scoped and easy to trace.
+
+### Models and Active Record
+
+- Prefer declarative Rails APIs over hand-rolled logic: associations,
+  validations, enums with explicit values, scopes, callbacks, and built-in
+  query methods.
+- Keep model macros grouped in the conventional order used by the project:
+  constants and attributes, associations, validations, callbacks, scopes, then
+  instance and class methods.
+- Prefer `validates :attribute, presence: true` style validations over legacy
+  `validates_presence_of` helpers.
+- Keep callbacks small, ordered by lifecycle, and limited to lifecycle work.
+  Avoid hiding multi-step workflows or external side effects in callbacks.
+- Use scopes for simple reusable query fragments. Use class methods that return
+  `ActiveRecord::Relation` when a scope becomes parameter-heavy or complex.
+- Prefer `find(id)` for primary-key lookups that must raise, `find_by(...)` for
+  nullable lookups, and `exists?` for existence checks.
+- Prefer hash conditions and bound parameters over interpolated SQL. Never
+  simplify into string-interpolated queries.
+- Prefer `pluck`, `pick`, and `ids` when only scalar values are needed; avoid
+  loading full records just to map attributes.
+- Use `find_each` or batch APIs for large record iteration. Do not replace them
+  with `each` unless the collection is intentionally already loaded.
+- Preserve eager loading (`includes`, `preload`, `eager_load`) unless you have
+  verified it is unnecessary. Avoid refactors that reintroduce N+1 queries.
+- Be careful with `count`, `size`, and `length`: choose the one that preserves
+  the current loading and database-query behavior.
+- Use bang persistence methods (`save!`, `create!`, `update!`, `destroy!`) when
+  failure should raise, or explicitly handle false return values when it should
+  not.
+
+### Views, helpers, and jobs
+
+- Keep database queries and business decisions out of views. Prefer helpers,
+  partials, decorators/presenters already used by the project, or prepared data
+  from the controller.
+- Prefer partials and collection rendering over inline rendering or repeated
+  view markup when it improves clarity.
+- Keep helpers presentation-focused. Do not move domain logic into helpers to
+  make models or controllers shorter.
+- Use jobs for asynchronous work and side effects that do not belong in a
+  request/response path, following the project's queueing conventions.
+
+### Migrations and data changes
+
+- Keep migrations reversible when practical and preserve Rails migration DSL
+  clarity over clever raw SQL.
+- Do not combine schema refactors with broad data rewrites unless the existing
+  project convention requires it or the user asks for it.
+- Preserve safety options such as indexes, null constraints, foreign keys, and
+  `dependent:` association behavior when simplifying related code.
+
+### Verification
+
+- Run the narrowest relevant Rails checks after simplification: a focused test
+  file, `bin/rails test`, `bundle exec rspec`, `bundle exec rubocop`, or the
+  project-specific command documented in local instructions.
+- For query refactors, verify behavior with tests or a console-style relation
+  check when safe. Pay attention to generated SQL, result cardinality,
+  ordering, eager loading, and validation/callback side effects.
+
 ## Refinement Process
 
 1. **Identify** the recently modified code sections
@@ -112,4 +206,107 @@ if (isNotEmpty(items)) {
 if (items.length > 0) {
   // ...
 }
+```
+
+### Rails Before: Loading Records for One Attribute
+
+```ruby
+user_emails = User.active.map(&:email)
+```
+
+### Rails After: Query Only the Needed Attribute
+
+```ruby
+user_emails = User.active.pluck(:email)
+```
+
+### Rails Before: Interpolated SQL
+
+```ruby
+orders = Order.where("status = '#{params[:status]}'")
+```
+
+### Rails After: Bound Query Parameter
+
+```ruby
+orders = Order.where(status: params[:status])
+```
+
+### Rails Before: Controller Business Rule
+
+```ruby
+class OrdersController < ApplicationController
+  def cancel
+    @order = Order.find(params[:id])
+
+    if @order.shipped? || @order.refunded?
+      redirect_to @order, alert: "Order cannot be cancelled"
+    else
+      @order.update!(status: :cancelled)
+      redirect_to @order, notice: "Order cancelled"
+    end
+  end
+end
+```
+
+### Rails After: Business Logic in a Service
+
+```ruby
+class OrdersController < ApplicationController
+  def cancel
+    @order = Order.find(params[:id])
+
+    if CancelOrder.call(@order)
+      redirect_to @order, notice: "Order cancelled"
+    else
+      redirect_to @order, alert: "Order cannot be cancelled"
+    end
+  end
+end
+
+class CancelOrder
+  def self.call(order)
+    return false if order.shipped? || order.refunded?
+
+    order.update!(status: :cancelled)
+  end
+end
+```
+
+### Rails Before: Legacy Validations
+
+```ruby
+class User < ApplicationRecord
+  validates_presence_of :email
+  validates_length_of :name, maximum: 100
+end
+```
+
+### Rails After: Modern Validation Style
+
+```ruby
+class User < ApplicationRecord
+  validates :email, presence: true
+  validates :name, length: { maximum: 100 }
+end
+```
+
+### Rails Before: Callback Order Is Hard to Follow
+
+```ruby
+class Account < ApplicationRecord
+  after_commit :sync_billing_provider
+  before_validation :normalize_email
+  before_save :set_default_plan
+end
+```
+
+### Rails After: Lifecycle Order Matches Execution
+
+```ruby
+class Account < ApplicationRecord
+  before_validation :normalize_email
+  before_save :set_default_plan
+  after_commit :sync_billing_provider
+end
 ```

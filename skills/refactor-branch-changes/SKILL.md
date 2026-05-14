@@ -37,6 +37,12 @@ Tell the scout to:
 
 Do not draft todos until the scout result is back and you have reviewed it.
 
+Before drafting todos, check whether a dedicated code simplification or
+refinement skill/workflow is available in the current environment. If one is
+available, load and apply its guidance when evaluating refactor opportunities
+and writing todos. If none is available, continue with the principles in this
+skill.
+
 ## Step 2: Create the refactor todo list
 
 Turn the scout findings into a concrete todo list using the `todo` tool.
@@ -113,6 +119,7 @@ After approval, implement the todos by launching `worker` subagents one at a tim
 Rules:
 - claim the todo before launching the worker when appropriate
 - give each worker exactly one todo
+- explicitly instruct the worker to use any available code simplification or refinement guidance before editing
 - explicitly instruct the worker to validate its changes, then create a git commit for that todo before exiting
 - explicitly instruct the worker to read and follow the `commit` skill when writing that commit
 - wait for the worker result before starting the next todo
@@ -125,7 +132,10 @@ After all approved todos are implemented, stop with a summary of the completed r
 
 ## Refactor principles
 
-Apply these principles throughout the workflow:
+Apply these principles throughout the workflow. When the environment provides a
+specialized simplification/refinement skill, use it as the detailed standard for
+implementation while still following this branch-level workflow.
+
 - prefer clarity over cleverness or brevity
 - remove duplication before adding abstractions
 - avoid nested ternary expressions; use clear branching instead

@@ -23,12 +23,14 @@ If the user wants recommendations only, still complete steps 1-3 and stop before
 Always delegate the branch investigation to a `scout` subagent first.
 
 The scout should:
+
 - learn the current branch using the same evidence standard as the `learn-branch` skill
 - identify the branch purpose, hotspots, risky files, and likely refactor candidates
 - focus on changed code on the current branch, including uncommitted work
 - ground every recommendation in actual files and diffs
 
 Tell the scout to:
+
 - establish the base branch and merge base
 - inspect `git status --short`, commit history, diff stat, and changed files
 - read the branch diff and then read the changed files directly
@@ -48,6 +50,7 @@ skill.
 Turn the scout findings into a concrete todo list using the `todo` tool.
 
 The todo list must:
+
 - include only the most impactful refactors
 - focus on readability, simplicity, and maintainability
 - preserve behavior unless the user explicitly asks for behavior changes
@@ -55,6 +58,7 @@ The todo list must:
 - be self-contained enough that a worker can execute each todo without the planning conversation
 
 When writing todos:
+
 - prefer fewer, higher-value todos over a long low-value checklist
 - include specific files, expected outcomes, and acceptance criteria
 - name the exact code smell or maintenance problem being improved
@@ -82,6 +86,7 @@ Before any implementation work starts, present the concrete checklist to the use
 General intent to proceed is not enough. Phrases like "just do it", "go ahead", or "proceed" do **NOT** count as approval unless they are clearly responding to the checklist you just presented.
 
 The required sequence is:
+
 1. present the branch summary and concrete todo checklist
 2. wait for the user's explicit approval of that checklist
 3. only after that, claim the first todo or launch the first worker
@@ -102,6 +107,7 @@ Use this format:
 1. [todo title]
    - Why: ...
    - Files: `...`
+   - Summary of changes: ...
    - Expected benefit: readability | simplicity | maintainability
 2. ...
 
@@ -117,6 +123,7 @@ Hard stop: if you have not yet shown the checklist in the required format and re
 After approval, implement the todos by launching `worker` subagents one at a time, in order.
 
 Rules:
+
 - claim the todo before launching the worker when appropriate
 - give each worker exactly one todo
 - explicitly instruct the worker to use any available code simplification or refinement guidance before editing
@@ -160,6 +167,7 @@ Use this balance guide:
 ## Exit criteria
 
 Do not stop until all relevant items are true:
+
 - a scout subagent investigated the branch first
 - the current branch changes were learned before proposing edits
 - a prioritized todo checklist was created from evidence

@@ -108,14 +108,12 @@ If validation is too expensive or blocked, explain why and name the next best ch
 
 Before completing, commit every change you made for the task with a useful, polished commit message. Do not leave uncommitted work in the tree.
 
-Load the commit skill and make a descriptive commit:
-
-```
-/skill:commit
 ```
 
 ### 7. Close the Todo
 
 ```
+
 todo(action: "update", id: "TODO-xxxx", status: "closed")
+
 ```

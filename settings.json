@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.75.4",
+  "lastChangelogVersion": "0.75.5",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "medium",
@@ -13,7 +13,8 @@
     "-git:github.com/badlogic/pi-diff-review",
     "npm:pi-web-access",
     "npm:pi-powerline-footer",
-    "npm:@juicesharp/rpiv-ask-user-question"
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:@juicesharp/rpiv-btw"
   ],
   "hideThinkingBlock": false,
   "extensions": [

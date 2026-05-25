@@ -1,6 +1,6 @@
 ---
 name: refactor-branch-changes
-description: Review and refactor changes on the current git branch. Use when asked to "refactor this branch", "clean up this branch", "simplify branch changes", "refactor the current branch", "review this diff for refactors", or "improve code on this branch". Always runs a scout → prioritized refactor todos → user approval → sequential worker implementation workflow focused on readability, simplicity, and maintainability while preserving behavior.
+description: Review and refactor changes on the current git branch. Use when asked to "refactor this branch", "clean up this branch", "simplify branch changes", "refactor the current branch", "review this diff for refactors", or "improve code on this branch". Uses existing evidence when available, otherwise scouts the branch, then runs prioritized refactor todos → user approval → sequential worker implementation focused on readability, simplicity, and maintainability while preserving behavior.
 ---
 
 # Refactor Branch Changes
@@ -11,16 +11,31 @@ This skill must always run the workflow below in order. Do not skip ahead to edi
 
 ## Required workflow
 
-1. scout and learn the current branch changes
+1. learn the current branch changes from existing evidence, or scout if adequate evidence is not already available
 2. create a todo list of the most impactful refactors focused on readability, simplicity, and maintainability
 3. ask the user to approve the checklist
 4. launch worker subagents to implement the approved todos sequentially
 
 If the user wants recommendations only, still complete steps 1-3 and stop before step 4.
 
-## Step 1: Scout and learn the branch
+## Step 1: Learn the branch
 
-Always delegate the branch investigation to a `scout` subagent first.
+First check whether adequate branch context is already available from a recent, evidence-backed artifact or prior result in the current workflow. Look in `.pi/plans/` for recent context reports, especially `context-summary.md` files and any scout artifacts they reference. Examples include:
+
+- a recent `.pi/plans/*/context-summary.md` report
+- scout artifacts referenced by that context summary
+- a recent `learn-branch` briefing that covers the current branch and uncommitted changes
+
+Existing context is adequate only if it:
+
+- identifies the current branch purpose, hotspots, risky files, and likely refactor candidates
+- covers changed code on the current branch, including uncommitted work when relevant
+- cites actual files, diffs, commands, or subagent artifacts as evidence
+- is recent enough that `git status --short` does not reveal materially new changes outside its scope
+
+If adequate evidence exists, read and use it instead of launching a new scout. Cite the artifact or prior result when presenting the branch summary.
+
+If adequate evidence is missing, stale, or too broad to support concrete refactor todos, delegate the branch investigation to a `scout` subagent.
 
 The scout should:
 
@@ -37,7 +52,7 @@ Tell the scout to:
 - read nearby `AGENTS.md`, `CLAUDE.md`, and convention files before suggesting refactors
 - produce a concise branch briefing plus a shortlist of the highest-impact refactor opportunities
 
-Do not draft todos until the scout result is back and you have reviewed it.
+Do not draft todos until you have reviewed adequate branch evidence, either from existing artifacts/results or from the scout result.
 
 Before drafting todos, check whether a dedicated code simplification or
 refinement skill/workflow is available in the current environment. If one is
@@ -47,7 +62,7 @@ skill.
 
 ## Step 2: Create the refactor todo list
 
-Turn the scout findings into a concrete todo list using the `todo` tool.
+Turn the branch evidence into a concrete todo list using the `todo` tool.
 
 The todo list must:
 
@@ -168,7 +183,7 @@ Use this balance guide:
 
 Do not stop until all relevant items are true:
 
-- a scout subagent investigated the branch first
+- adequate branch evidence was reviewed, reusing an existing context artifact/result when sufficient or launching a scout when not
 - the current branch changes were learned before proposing edits
 - a prioritized todo checklist was created from evidence
 - the user explicitly approved the checklist before implementation

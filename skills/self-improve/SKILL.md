@@ -70,11 +70,11 @@ For each approved suggestion:
    - **body**: Full context — what to change, why, which files
 
 2. Work through each todo:
-   - Claim it
+   - Mark it `in_progress`
    - Make the changes
    - Verify the change works (run tests, validate config, etc.)
    - Commit using the `commit` skill if changes touch version-controlled files
-   - Mark the todo as done
+   - Mark the todo as `completed`
 
 3. After completing all todos, print a summary:
 
@@ -83,6 +83,6 @@ For each approved suggestion:
 
 | # | Todo | What Changed | Verified |
 |---|------|-------------|----------|
-| 1 | TODO-xxxx | Added test_x.py — passes ✓ | ✓ |
-| 2 | TODO-yyyy | Updated AGENTS.md worker section | ✓ |
+| 1 | 123 | Added test_x.py — passes ✓ | ✓ |
+| 2 | 124 | Updated AGENTS.md worker section | ✓ |
 ```

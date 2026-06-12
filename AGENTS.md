@@ -210,7 +210,7 @@ The `agent` parameter loads defaults from `~/.pi/agent/agents/<name>.md`. Model,
 ```typescript
 // Use existing agent definitions — full transparency
 subagent({ name: "Scout", agent: "scout", task: "Analyze the codebase..." })
-subagent({ name: "Worker", agent: "worker", task: "Implement TODO-xxxx..." })
+subagent({ name: "Worker", agent: "worker", task: "Implement todo 123..." })
 subagent({ name: "Reviewer", agent: "reviewer", task: "Review recent changes..." })
 subagent({ name: "Researcher", agent: "researcher", task: "Research [topic]..." })
 

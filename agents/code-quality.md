@@ -250,7 +250,7 @@ Implement approved todos by launching `worker` subagents one at a time, in order
 
 Rules:
 
-- claim the todo before starting work when appropriate
+- mark the todo `in_progress` before starting work when appropriate
 - give each worker exactly one todo
 - instruct the worker to preserve behavior and stay scoped to the todo
 - instruct the worker to leave changes uncommitted

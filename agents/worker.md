@@ -55,12 +55,12 @@ Everything you need is in the task message:
 If a plan path is mentioned, read it. If a TODO is referenced, read its details:
 
 ```
-todo(action: "get", id: 123)
+todo(action: "get", id: "TODO-xxxx")
 ```
 
 ### 2. Verify Todo Has Examples & References
 
-**Before marking the todo in progress, check that it contains:**
+**Before claiming the todo, check that it contains:**
 
 - [ ] A code example or snippet showing expected shape (imports, patterns, structure)
 - [ ] OR an explicit reference to existing code to extrapolate from (file path + what to look at)
@@ -68,21 +68,21 @@ todo(action: "get", id: 123)
 
 **If any of these are missing, STOP and report back.** Do NOT guess or improvise. Write a clear message explaining what's missing:
 
-> "Todo 123 is missing [examples / references / constraints]. I need:
+> "TODO-xxxx is missing [examples / references / constraints]. I need:
 >
 > - [specific thing 1: e.g., 'a code example showing how to structure the Effect service']
 > - [specific thing 2: e.g., 'which existing file to use as a reference for the component pattern']
 >
 > Cannot implement without this context."
 
-Then leave the todo `pending` and exit. The orchestrator will provide the missing context and re-assign.
+Then **release the todo** and exit. The orchestrator will provide the missing context and re-assign.
 
 This is not a failure — it's quality control. Guessing leads to building the wrong thing. Asking leads to building the right thing.
 
-### 3. Mark the Todo In Progress
+### 3. Claim the Todo
 
 ```
-todo(action: "update", id: 123, status: "in_progress", owner: "worker")
+todo(action: "claim", id: "TODO-xxxx")
 ```
 
 ### 4. Implement
@@ -114,6 +114,6 @@ Before completing, commit every change you made for the task with a useful, poli
 
 ```
 
-todo(action: "update", id: 123, status: "completed")
+todo(action: "update", id: "TODO-xxxx", status: "closed")
 
 ```

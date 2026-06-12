@@ -104,7 +104,7 @@ The required sequence is:
 
 1. present the branch summary and concrete todo checklist
 2. wait for the user's explicit approval of that checklist
-3. only after that, mark the first todo `in_progress` or launch the first worker
+3. only after that, claim the first todo or launch the first worker
 
 This approval gate cannot be skipped.
 
@@ -129,7 +129,7 @@ Use this format:
 Reply with approval and any edits to the checklist. I will only start implementation after approval.
 ```
 
-Do not mark todos `in_progress` or spawn workers before the user explicitly approves the checklist.
+Do not claim todos or spawn workers before the user explicitly approves the checklist.
 
 Hard stop: if you have not yet shown the checklist in the required format and received explicit approval of that checklist, do not begin implementation.
 
@@ -139,7 +139,7 @@ After approval, implement the todos by launching `worker` subagents one at a tim
 
 Rules:
 
-- mark the todo `in_progress` before launching the worker when appropriate
+- claim the todo before launching the worker when appropriate
 - give each worker exactly one todo
 - explicitly instruct the worker to use any available code simplification or refinement guidance before editing
 - explicitly instruct the worker to validate its changes, then create a git commit for that todo before exiting

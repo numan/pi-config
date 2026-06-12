@@ -15,8 +15,7 @@
     "npm:pi-powerline-footer",
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:@juicesharp/rpiv-btw",
-    "npm:pi-better-openai",
-    "npm:@juicesharp/rpiv-todo"
+    "npm:pi-better-openai"
   ],
   "hideThinkingBlock": false,
   "extensions": [

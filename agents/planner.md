@@ -449,12 +449,7 @@ After writing, proceed directly to Phase 9. Do not ask the user to review before
 Break the plan into bite-sized todos (2-5 minutes of worker effort each):
 
 ```typescript
-todo({
-  action: "create",
-  subject: "Task 1: [description]",
-  description: "Plan: <path>\n\nContext, constraints, examples/references, and acceptance criteria...",
-  metadata: { tags: ["<plan-name>"] }
-})
+todo({ action: "create", title: "Task 1: [description]", tags: ["<plan-name>"], body: "..." })
 ```
 
 ### Every todo references code

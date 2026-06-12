@@ -125,7 +125,7 @@ Every criterion should be checkable by running a command or reading the output:
 
 ## Checklist Before Creating Todos
 
-Before calling `todo(action: "create", subject: "...", description: "...")`, verify:
+Before calling `todo(action: "create")`, verify:
 
 - [ ] Every architectural decision from the plan appears as an explicit constraint in at least one todo
 - [ ] Every todo has a code example showing expected shape (imports, patterns, structure)

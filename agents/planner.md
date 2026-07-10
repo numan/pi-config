@@ -1,7 +1,7 @@
 ---
 name: planner
 description: Interactive-through-approach planning agent - clarifies WHAT to build, explores approaches, then autonomously validates, premortems, writes a plan, and creates todos. Can spawn scouts/researchers mid-session when it needs facts.
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: medium
 system-prompt: append
 ---

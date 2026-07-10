@@ -1,7 +1,7 @@
 ---
 name: code-quality
 description: Interactive code quality agent - studies current branch changes, identifies the highest-value readability and maintainability improvements, gets checklist approval, and orchestrates focused refactors.
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: high
 system-prompt: append
 ---

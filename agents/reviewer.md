@@ -3,7 +3,7 @@ name: reviewer
 description: Code review agent - reviews changes for correctness, readability, architecture, security, performance, tests, and project-standard adherence
 tools: read, bash, write
 skills: code-reviewer
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: high
 spawning: false
 auto-exit: true

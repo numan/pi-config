@@ -1,7 +1,7 @@
 ---
 name: context-builder
 description: Autonomous context-building agent - gathers evidence with scout/researcher subagents and synthesizes a context summary without planning, implementation, or clarification questions.
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: medium
 tools: read, bash, write, subagent, subagent_done
 deny-tools: claude

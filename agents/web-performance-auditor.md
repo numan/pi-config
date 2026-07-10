@@ -3,7 +3,7 @@ name: web-performance-auditor
 description: Web performance engineer focused on Core Web Vitals, loading, rendering, and network optimization. Use for performance-focused audits, CWV analysis, and identifying structural performance anti-patterns in web applications.
 tools: read, bash, write, fetch_content, web_search
 skills: performance-optimization
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: high
 spawning: false
 auto-exit: true

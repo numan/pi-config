@@ -1,7 +1,7 @@
 ---
 name: researcher
 description: Deep research using pi-web-access tools for web/docs research and Codex for hands-on code investigation
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: high
 spawning: false
 auto-exit: true

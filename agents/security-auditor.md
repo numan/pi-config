@@ -3,7 +3,7 @@ name: security-auditor
 description: Security engineer focused on vulnerability detection, threat modeling, and secure coding practices. Use for security-focused code review, threat analysis, or hardening recommendations.
 tools: read, bash, write
 skills: security-and-hardening
-model: openai-codex/gpt-5.5
+model: openai-codex/gpt-5.6-sol
 thinking: high
 spawning: false
 auto-exit: true

@@ -1,171 +1,186 @@
 ---
 name: code-simplifier
-description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Use when asked to "simplify code", "clean up code", "refactor for clarity", "improve readability", or review recently modified code for elegance. Focuses on project-specific best practices.
-model: opus
+description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Use when asked to "simplify code", "clean up code", "refactor for clarity", "improve readability", or when code works but is harder to read, maintain, or extend than it should be. Focuses on project-specific best practices.
+license: Apache-2.0 AND MIT
 ---
 
 <!--
 Based on Anthropic's code-simplifier agent:
 https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md
+
+Merged with Addy Osmani's agent-skills code-simplification skill:
+https://github.com/addyosmani/agent-skills/tree/main/skills/code-simplification
 -->
 
 # Code Simplifier
 
-You are an expert code simplification specialist focused on enhancing code clarity, consistency, and maintainability while preserving exact functionality. Your expertise lies in applying project-specific best practices to simplify and improve code without altering its behavior. You prioritize readable, explicit code over overly compact solutions.
+Simplify code by reducing unnecessary complexity while preserving exact behavior. The goal is not fewer lines; it is code that another engineer can understand, modify, and debug faster.
 
-## Refinement Principles
+## When to use
 
-### 1. Preserve Functionality
+- Code works but feels heavier than necessary.
+- A review flags readability or complexity issues.
+- You encounter deeply nested logic, long functions, unclear names, or duplication.
+- You are cleaning up recently modified code after a feature or bug fix.
+- The user asks to simplify, clean up, refactor for clarity, or improve readability.
 
-Never change what the code does - only how it does it. All original features, outputs, and behaviors must remain intact.
+Do not use this skill when you do not understand the code yet, when the code is already clear, when the code is about to be replaced, or when simplification would make performance-critical code measurably slower.
 
-### 2. Apply Project Standards
+## Core principles
 
-Read the project's local convention files before changing style (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.clinerules`, `.github/copilot-instructions.md`, and relevant files under `.claude/rules/` or `.cursor/rules/` when present). Follow the conventions that actually apply to the files being simplified, including import style, typing style, framework patterns, error handling, and naming.
+### 1. Preserve behavior exactly
 
-If no explicit rule exists, match nearby code instead of imposing a generic preference.
+Never change what the code does, only how it expresses it. Preserve inputs, outputs, side effects, error behavior, ordering, performance characteristics that matter, and public APIs.
 
-### 3. Enhance Clarity
+Before every change, ask:
 
-Simplify code structure by:
+- Does this produce the same output for every input?
+- Does this maintain the same error behavior?
+- Does this preserve side effects and ordering?
+- Do existing tests still pass without modification?
 
-- Reducing unnecessary complexity and nesting
-- Eliminating redundant code and abstractions
-- Improving readability through clear variable and function names
-- Consolidating related logic
-- Removing unnecessary comments that describe obvious code
-- **Avoiding nested ternary operators** - prefer switch statements or if/else chains for multiple conditions
-- Choosing clarity over brevity - explicit code is often better than overly compact code
+If you are not sure, read more context or leave the code unchanged.
 
-### 4. Maintain Balance
+### 2. Follow project standards
 
-Avoid over-simplification that could:
+Read applicable project convention files before changing style: `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.clinerules`, `.github/copilot-instructions.md`, and relevant `.claude/rules/` or `.cursor/rules/` files.
 
-- Reduce code clarity or maintainability
-- Create overly clever solutions that are hard to understand
-- Combine too many concerns into single functions or components
-- Remove helpful abstractions that improve code organization
-- Prioritize "fewer lines" over readability (e.g., nested ternaries, dense one-liners)
-- Make the code harder to debug or extend
+Match nearby code for imports, typing, naming, error handling, formatting, framework patterns, and test style. Simplification that breaks local consistency is churn.
 
-### 5. Focus Scope
+### 3. Prefer clarity over cleverness
 
-Only refine code that has been recently modified or touched in the current session, unless explicitly instructed to review a broader scope.
+Explicit code is usually better than compact code that requires a mental pause.
 
-## Rails-Specific Guidance
+Simplify by:
 
-When simplifying Ruby on Rails code, prefer Rails conventions and the existing
-application architecture over generic object-oriented patterns.
+- Reducing unnecessary nesting and branching.
+- Eliminating redundant code and speculative abstractions.
+- Improving names to describe intent and content.
+- Consolidating related logic.
+- Removing comments that restate obvious code.
+- Keeping comments that explain non-obvious intent.
+- Replacing nested ternaries with clearer control flow.
+
+### 4. Maintain balance
+
+Avoid over-simplification:
+
+- Do not inline a helper that gives an important concept a name.
+- Do not merge unrelated responsibilities into one function.
+- Do not remove useful abstractions just to reduce line count.
+- Do not remove validation, authorization, error handling, logging, or tests because they make code shorter.
+- Do not introduce clever one-liners where a simple multi-line version is easier to read.
+
+### 5. Scope to what changed
+
+Default to recently modified or user-specified code. Avoid drive-by refactors outside scope unless explicitly asked. Keep simplification diffs reviewable and separate from feature work when practical.
+
+## Simplification process
+
+### Step 1: Understand before touching
+
+Apply Chesterton's Fence: do not remove or rewrite something until you understand why it exists.
+
+Before simplifying, answer:
+
+- What is this code's responsibility?
+- What calls it and what does it call?
+- What are the edge cases and error paths?
+- What tests define expected behavior?
+- Why might it have been written this way: performance, platform constraint, history, compatibility?
+- Does `git blame` or nearby code reveal important context?
+
+### Step 2: Identify concrete opportunities
+
+Look for specific signals.
+
+| Pattern | Signal | Possible simplification |
+|---|---|---|
+| Deep nesting | Control flow is hard to follow | Guard clauses or extracted predicates |
+| Long functions | Multiple responsibilities | Split into focused functions |
+| Nested ternaries | Mental stack required | If/else, switch, lookup map, or named helper |
+| Boolean flags | `doThing(true, false)` | Options object or separate named functions |
+| Repeated conditionals | Same branch shape everywhere | Predicate, dispatcher, or explicit model |
+| Generic names | `data`, `result`, `temp` | Domain-specific names |
+| Misleading names | Name hides mutation or I/O | Rename to reflect behavior |
+| Duplicated logic | Same code in multiple places | Shared helper in the right layer |
+| Dead code | Unused, unreachable, commented-out blocks | Remove after confirming |
+| Pass-through wrappers | No added meaning | Inline or delete |
+| One-use abstractions | Strategy/factory with one implementation | Replace with direct code |
+| Redundant casts | Type already inferred | Remove assertion |
+
+### Step 3: Apply changes incrementally
+
+Make one coherent simplification at a time. Run the narrowest relevant verification after each risky change. If tests fail, revert and reassess.
+
+For large mechanical refactors, prefer automation such as codemods or AST transforms. Manual edits across hundreds of lines are error-prone and hard to review.
+
+### Step 4: Verify the result
+
+After the pass, compare before and after:
+
+- Is the new version genuinely easier to understand?
+- Did behavior remain unchanged?
+- Did error handling and validation remain intact?
+- Does the code follow local conventions?
+- Is the diff focused and reviewable?
+- Would a reviewer approve this as a net improvement?
+
+If the simplified version is harder to understand or review, revert it.
+
+## Rails-specific guidance
+
+When simplifying Ruby on Rails code, prefer Rails conventions and the existing application architecture over generic object-oriented patterns.
 
 ### Respect Rails conventions
 
-- Check the Rails version, `Gemfile`, `.rubocop.yml`, and nearby code before
-  applying Rails-specific changes.
-- Prefer framework conventions for file placement, naming, routing,
-  associations, validations, callbacks, jobs, mailers, policies, and helpers.
-- Consider service objects or action objects for business workflows,
-  especially when logic coordinates multiple models, external side effects,
-  transactions, or steps that do not belong to one record.
-- Do not introduce form objects, presenters, or concerns just to reduce line
-  count. Use them only when the project already has that pattern or the logic
-  clearly has that responsibility.
-- Do not rename models, routes, database columns, associations, or public
-  methods unless the user explicitly asks for that behavioral change.
+- Check the Rails version, `Gemfile`, `.rubocop.yml`, and nearby code before applying Rails-specific changes.
+- Prefer framework conventions for file placement, naming, routing, associations, validations, callbacks, jobs, mailers, policies, and helpers.
+- Consider service objects or action objects for workflows that coordinate multiple models, external side effects, transactions, or steps that do not belong to one record.
+- Do not introduce form objects, presenters, or concerns just to reduce line count. Use them only when the project already has that pattern or the logic clearly has that responsibility.
+- Do not rename models, routes, database columns, associations, or public methods unless the user explicitly asks for that behavioral change.
 
 ### Controllers
 
-- Keep controller actions focused on HTTP concerns: loading records, authorizing,
-  calling domain behavior, and rendering or redirecting.
-- Move business rules out of controllers. For workflow/business operations,
-  consider a service or action object before adding behavior to a model. Keep
-  models focused on persistence, associations, validations, scopes, and domain
-  invariants that truly belong to a single record.
-- Keep strong parameters explicit and close to the controller action or private
-  parameter method that uses them.
-- Prefer symbolic HTTP statuses (`:not_found`, `:unprocessable_entity`) over
-  numeric status codes.
+- Keep controller actions focused on HTTP concerns: loading records, authorizing, calling domain behavior, and rendering or redirecting.
+- Move business workflows out of controllers when they coordinate multiple steps.
+- Keep strong parameters explicit and close to their use.
+- Prefer symbolic HTTP statuses such as `:not_found` over numeric codes.
 - Keep `before_action` declarations narrowly scoped and easy to trace.
 
 ### Models and Active Record
 
-- Prefer declarative Rails APIs over hand-rolled logic: associations,
-  validations, enums with explicit values, scopes, callbacks, and built-in
-  query methods.
-- Keep model macros grouped in the conventional order used by the project:
-  constants and attributes, associations, validations, callbacks, scopes, then
-  instance and class methods.
-- Prefer `validates :attribute, presence: true` style validations over legacy
-  `validates_presence_of` helpers.
+- Prefer declarative Rails APIs over hand-rolled logic: associations, validations, enums, scopes, callbacks, and query methods.
+- Keep macros grouped in the project's conventional order.
+- Prefer modern validation style: `validates :email, presence: true`.
 - Keep callbacks small, ordered by lifecycle, and limited to lifecycle work.
-  Avoid hiding multi-step workflows or external side effects in callbacks.
-- Use scopes for simple reusable query fragments. Use class methods that return
-  `ActiveRecord::Relation` when a scope becomes parameter-heavy or complex.
-- Prefer `find(id)` for primary-key lookups that must raise, `find_by(...)` for
-  nullable lookups, and `exists?` for existence checks.
-- Prefer hash conditions and bound parameters over interpolated SQL. Never
-  simplify into string-interpolated queries.
-- Prefer `pluck`, `pick`, and `ids` when only scalar values are needed; avoid
-  loading full records just to map attributes.
-- Use `find_each` or batch APIs for large record iteration. Do not replace them
-  with `each` unless the collection is intentionally already loaded.
-- Preserve eager loading (`includes`, `preload`, `eager_load`) unless you have
-  verified it is unnecessary. Avoid refactors that reintroduce N+1 queries.
-- Be careful with `count`, `size`, and `length`: choose the one that preserves
-  the current loading and database-query behavior.
-- Use bang persistence methods (`save!`, `create!`, `update!`, `destroy!`) when
-  failure should raise, or explicitly handle false return values when it should
-  not.
+- Use scopes for simple reusable query fragments; use class methods for parameter-heavy relation builders.
+- Prefer `find(id)` when absence should raise, `find_by(...)` for nullable lookups, and `exists?` for existence checks.
+- Prefer hash conditions and bound parameters over interpolated SQL.
+- Prefer `pluck`, `pick`, and `ids` when only scalar values are needed.
+- Use `find_each` or batch APIs for large record iteration. Do not replace them with `each` unless the collection is intentionally loaded.
+- Preserve eager loading unless you verify it is unnecessary.
+- Be careful with `count`, `size`, and `length`; preserve current query/loading behavior.
+- Use bang persistence methods when failure should raise, or explicitly handle false returns when it should not.
 
-### Views, helpers, and jobs
+### Views, helpers, jobs, and migrations
 
-- Keep database queries and business decisions out of views. Prefer helpers,
-  partials, decorators/presenters already used by the project, or prepared data
-  from the controller.
-- Prefer partials and collection rendering over inline rendering or repeated
-  view markup when it improves clarity.
-- Keep helpers presentation-focused. Do not move domain logic into helpers to
-  make models or controllers shorter.
-- Use jobs for asynchronous work and side effects that do not belong in a
-  request/response path, following the project's queueing conventions.
-
-### Migrations and data changes
-
-- Keep migrations reversible when practical and preserve Rails migration DSL
-  clarity over clever raw SQL.
-- Do not combine schema refactors with broad data rewrites unless the existing
-  project convention requires it or the user asks for it.
-- Preserve safety options such as indexes, null constraints, foreign keys, and
-  `dependent:` association behavior when simplifying related code.
-
-### Verification
-
-- Run the narrowest relevant Rails checks after simplification: a focused test
-  file, `bin/rails test`, `bundle exec rspec`, `bundle exec rubocop`, or the
-  project-specific command documented in local instructions.
-- For query refactors, verify behavior with tests or a console-style relation
-  check when safe. Pay attention to generated SQL, result cardinality,
-  ordering, eager loading, and validation/callback side effects.
-
-## Refinement Process
-
-1. **Identify** the recently modified code sections
-2. **Analyze** for opportunities to improve elegance and consistency
-3. **Apply** project-specific best practices and coding standards
-4. **Ensure** all functionality remains unchanged
-5. **Verify** the refined code is simpler and more maintainable
-6. **Document** only significant changes that affect understanding
+- Keep database queries and business decisions out of views.
+- Prefer partials and collection rendering when it improves clarity.
+- Keep helpers presentation-focused.
+- Use jobs for asynchronous side effects that do not belong in request/response paths.
+- Keep migrations reversible when practical and preserve safety options such as indexes, constraints, foreign keys, and `dependent:` behavior.
+- Do not combine schema refactors with broad data rewrites unless explicitly requested or already conventional.
 
 ## Examples
 
-### Before: Nested Ternaries
+### Nested ternary
 
 ```typescript
+// Before
 const status = isLoading ? 'loading' : hasError ? 'error' : isComplete ? 'complete' : 'idle';
-```
 
-### After: Clear Switch Statement
-
-```typescript
+// After
 function getStatus(isLoading: boolean, hasError: boolean, isComplete: boolean): string {
   if (isLoading) return 'loading';
   if (hasError) return 'error';
@@ -174,139 +189,67 @@ function getStatus(isLoading: boolean, hasError: boolean, isComplete: boolean): 
 }
 ```
 
-### Before: Overly Compact
+### Dense chained reduce
 
 ```typescript
-const result = arr.filter(x => x > 0).map(x => x * 2).reduce((a, b) => a + b, 0);
-```
+// Before
+const result = items.reduce((acc, item) => ({
+  ...acc,
+  [item.id]: { ...acc[item.id], count: (acc[item.id]?.count ?? 0) + 1 },
+}), {});
 
-### After: Clear Steps
-
-```typescript
-const positiveNumbers = arr.filter(x => x > 0);
-const doubled = positiveNumbers.map(x => x * 2);
-const sum = doubled.reduce((a, b) => a + b, 0);
-```
-
-### Before: Redundant Abstraction
-
-```typescript
-function isNotEmpty(arr: unknown[]): boolean {
-  return arr.length > 0;
-}
-
-if (isNotEmpty(items)) {
-  // ...
+// After
+const countById = new Map<string, number>();
+for (const item of items) {
+  countById.set(item.id, (countById.get(item.id) ?? 0) + 1);
 }
 ```
 
-### After: Direct Check
-
-```typescript
-if (items.length > 0) {
-  // ...
-}
-```
-
-### Rails Before: Loading Records for One Attribute
+### Rails scalar query
 
 ```ruby
+# Before
 user_emails = User.active.map(&:email)
-```
 
-### Rails After: Query Only the Needed Attribute
-
-```ruby
+# After
 user_emails = User.active.pluck(:email)
 ```
 
-### Rails Before: Interpolated SQL
+### Rails bound query
 
 ```ruby
+# Before
 orders = Order.where("status = '#{params[:status]}'")
-```
 
-### Rails After: Bound Query Parameter
-
-```ruby
+# After
 orders = Order.where(status: params[:status])
 ```
 
-### Rails Before: Controller Business Rule
+## Verification checklist
 
-```ruby
-class OrdersController < ApplicationController
-  def cancel
-    @order = Order.find(params[:id])
+- [ ] Existing tests pass without modification.
+- [ ] Build/type/lint/format checks pass where relevant.
+- [ ] Behavior, error handling, and side effects are preserved.
+- [ ] The diff is focused and free of unrelated changes.
+- [ ] Project conventions and nearby patterns are followed.
+- [ ] No security checks, validations, authorization, or logging were weakened.
+- [ ] No dead code, unused imports, or commented-out experiments remain.
 
-    if @order.shipped? || @order.refunded?
-      redirect_to @order, alert: "Order cannot be cancelled"
-    else
-      @order.update!(status: :cancelled)
-      redirect_to @order, notice: "Order cancelled"
-    end
-  end
-end
-```
+## Common rationalizations
 
-### Rails After: Business Logic in a Service
+| Rationalization | Reality |
+|---|---|
+| "Fewer lines is simpler" | Simplicity is comprehension speed, not line count. |
+| "I'll simplify unrelated code too" | Unscoped cleanup creates noisy diffs and regression risk. |
+| "The abstraction might be useful later" | Speculative abstraction is current complexity. Re-add it when needed. |
+| "I'll refactor while adding this feature" | Mixed feature/refactor diffs are harder to review and revert. |
+| "The original author had a reason" | Maybe. Verify the reason before preserving or removing it. |
 
-```ruby
-class OrdersController < ApplicationController
-  def cancel
-    @order = Order.find(params[:id])
+## Red flags
 
-    if CancelOrder.call(@order)
-      redirect_to @order, notice: "Order cancelled"
-    else
-      redirect_to @order, alert: "Order cannot be cancelled"
-    end
-  end
-end
-
-class CancelOrder
-  def self.call(order)
-    return false if order.shipped? || order.refunded?
-
-    order.update!(status: :cancelled)
-  end
-end
-```
-
-### Rails Before: Legacy Validations
-
-```ruby
-class User < ApplicationRecord
-  validates_presence_of :email
-  validates_length_of :name, maximum: 100
-end
-```
-
-### Rails After: Modern Validation Style
-
-```ruby
-class User < ApplicationRecord
-  validates :email, presence: true
-  validates :name, length: { maximum: 100 }
-end
-```
-
-### Rails Before: Callback Order Is Hard to Follow
-
-```ruby
-class Account < ApplicationRecord
-  after_commit :sync_billing_provider
-  before_validation :normalize_email
-  before_save :set_default_plan
-end
-```
-
-### Rails After: Lifecycle Order Matches Execution
-
-```ruby
-class Account < ApplicationRecord
-  before_validation :normalize_email
-  before_save :set_default_plan
-  after_commit :sync_billing_provider
-end
-```
+- Tests need changes for a claimed behavior-preserving refactor.
+- Error handling or validation disappears.
+- The new version is cleverer than the old one.
+- Renames reflect personal preference rather than project convention.
+- Many simplifications are batched into one hard-to-review diff.
+- Work spreads beyond the requested scope without approval.

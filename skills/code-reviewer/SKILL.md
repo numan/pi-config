@@ -1,68 +1,223 @@
 ---
 name: code-reviewer
-description: Reviews code changes for correctness, maintainability, security, tests, and project-standard adherence. Use when asked to "review code", "review my changes", "review PR", "code review", or "check this diff". Supports local staged or unstaged changes and remote pull requests by ID or URL.
-license: Apache-2.0
+description: Reviews code changes for correctness, readability, architecture, security, performance, tests, and project-standard adherence. Use when asked to "review code", "review my changes", "review PR", "code review", "check this diff", or before merging any change. Supports local staged or unstaged changes and remote pull requests by ID or URL.
+license: Apache-2.0 AND MIT
 ---
 
 <!--
-Vendored from Google Gemini CLI:
+Originally vendored from Google Gemini CLI:
 https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/code-reviewer
+
+Merged with Addy Osmani's agent-skills code-review-and-quality skill:
+https://github.com/addyosmani/agent-skills/tree/main/skills/code-review-and-quality
 -->
 
 # Code Reviewer
 
-This skill guides the agent in conducting professional and thorough code reviews for both local development and remote Pull Requests.
+Conduct professional, evidence-backed code reviews for local changes and remote pull requests. Review across five axes: correctness, readability, architecture, security, and performance, with explicit attention to tests and project conventions.
+
+**Approval standard:** approve when the change clearly improves the codebase and follows project conventions, even if it is not exactly how you would have written it. Do not rubber-stamp. Do not block on personal preference.
 
 ## Workflow
 
-### 1. Determine Review Target
-*   **Remote PR**: If the user provides a PR number or URL (e.g., "Review PR #123"), target that remote PR.
-*   **Local Changes**: If no specific PR is mentioned, or if the user asks to "review my changes", target the current local file system states (staged and unstaged changes).
+### 1. Determine the review target
 
-### 2. Preparation
+- **Remote PR:** If the user provides a PR number or URL, target that remote PR.
+- **Local changes:** If no PR is specified, review current staged and unstaged changes.
 
-#### For Remote PRs:
-1.  **Checkout**: Use the GitHub CLI to checkout the PR.
-    ```bash
-    gh pr checkout <PR_NUMBER>
-    ```
-2.  **Preflight**: Execute the project's standard verification suite to catch automated failures early.
-    ```bash
-    npm run preflight
-    ```
-3.  **Context**: Read the PR description and any existing comments to understand the goal and history.
+### 2. Prepare context
 
-#### For Local Changes:
-1.  **Identify Changes**:
-    *   Check status: `git status`
-    *   Read diffs: `git diff` (working tree) and/or `git diff --staged` (staged).
-2.  **Preflight (Optional)**: If the changes are substantial, ask the user if they want to run `npm run preflight` before reviewing.
+For remote PRs:
 
-### 3. In-Depth Analysis
-Analyze the code changes based on the following pillars:
+1. Check out the PR with `gh pr checkout <PR_NUMBER>`.
+2. Read the PR description, linked issues, and existing comments.
+3. Run the project's standard verification command if it is safe and discoverable.
 
-*   **Correctness**: Does the code achieve its stated purpose without bugs or logical errors?
-*   **Maintainability**: Is the code clean, well-structured, and easy to understand and modify in the future? Consider factors like code clarity, modularity, and adherence to established design patterns.
-*   **Readability**: Is the code well-commented (where necessary) and consistently formatted according to our project's coding style guidelines?
-*   **Efficiency**: Are there any obvious performance bottlenecks or resource inefficiencies introduced by the changes?
-*   **Security**: Are there any potential security vulnerabilities or insecure coding practices?
-*   **Edge Cases and Error Handling**: Does the code appropriately handle edge cases and potential errors?
-*   **Testability**: Is the new or modified code adequately covered by tests (even if preflight checks pass)? Suggest additional test cases that would improve coverage or robustness.
+For local changes:
 
-### 4. Provide Feedback
+1. Run `git status`.
+2. Read `git diff` and `git diff --staged` as applicable.
+3. Read the task, plan, spec, or commit message that explains intent.
+4. Review tests first; they reveal intended behavior and coverage.
 
-#### Structure
-*   **Summary**: A high-level overview of the review.
-*   **Findings**:
-    *   **Critical**: Bugs, security issues, or breaking changes.
-    *   **Improvements**: Suggestions for better code quality or performance.
-    *   **Nitpicks**: Formatting or minor style issues (optional).
-*   **Conclusion**: Clear recommendation (Approved / Request Changes).
+Discover validation commands from project files and instructions. Do not assume `npm run preflight` exists.
 
-#### Tone
-*   Be constructive, professional, and friendly.
-*   Explain *why* a change is requested.
-*   For approvals, acknowledge the specific value of the contribution.
+### 3. Review against the five axes
 
-### 5. Cleanup (Remote PRs only)
-*   After the review, ask the user if they want to switch back to the default branch (e.g., `main` or `master`).
+#### Correctness
+
+- Does the code match the task, spec, or PR description?
+- Are edge cases handled: null, empty, boundary values, error paths?
+- Are there off-by-one errors, race conditions, or state inconsistencies?
+- Do tests verify behavior rather than implementation details?
+- Would the tests fail if the new behavior regressed?
+
+#### Readability and simplicity
+
+- Are names descriptive and consistent with nearby code?
+- Is control flow straightforward, without needless nesting or cleverness?
+- Is related code grouped with clear boundaries?
+- Are comments explaining non-obvious intent rather than restating code?
+- Are there dead artifacts: unused variables, commented-out code, no-op shims, or stale fallback paths?
+- Are repeated conditionals signaling a missing model, dispatcher, or helper?
+
+#### Architecture
+
+- Does the change follow existing patterns, or justify a new one?
+- Are module boundaries maintained?
+- Are dependencies flowing in the right direction, without circular dependencies?
+- Is the abstraction level earned, not speculative?
+- Does the change reduce complexity rather than relocate it?
+- Is feature-specific logic kept out of shared/general-purpose modules?
+- Are type boundaries explicit instead of hidden behind broad casts or silent fallbacks?
+
+#### Security
+
+- Is untrusted input validated at system boundaries?
+- Are outputs encoded and queries parameterized?
+- Are authentication and authorization checked where needed?
+- Are secrets kept out of source, logs, prompts, and client-visible state?
+- Are user-supplied URLs protected against SSRF/open redirects?
+- Are new dependencies reviewed for maintenance, license, postinstall scripts, and vulnerabilities?
+
+#### Performance
+
+- Any N+1 queries, unbounded loops, unconstrained fetches, or missing pagination?
+- Any synchronous work that should be asynchronous?
+- Any unnecessary UI re-renders or hot-path allocations?
+- Any sequential awaits that should be parallelized safely?
+- Are claims about performance backed by measurements or clearly labeled as potential impact?
+
+### 4. Propose structural remedies
+
+When you flag a structural issue, propose the concrete move:
+
+- Replace conditional chains with a typed model, lookup, or dispatcher.
+- Collapse duplicate branches into one clearer flow.
+- Separate orchestration from business logic.
+- Move feature-specific logic into the package/layer that owns it.
+- Reuse a canonical helper instead of adding a near-duplicate.
+- Make type boundaries explicit so downstream branching disappears.
+- Delete pass-through wrappers that add indirection without meaning.
+- Extract helpers or split large files when the file is becoming hard to reason about.
+
+Prefer remedies that remove moving pieces over ones that merely spread complexity around.
+
+### 5. Consider change size
+
+Small, focused changes are easier to review and safer to merge.
+
+- ~100 changed lines: good.
+- ~300 changed lines: acceptable if it is one logical change.
+- ~1000 changed lines: too large unless mostly generated, deletions, or mechanical refactor.
+
+Watch total file size too. If a small diff materially grows an already-large file, ask whether to extract helpers, components, or modules before piling more on.
+
+Separate refactors from feature work unless the cleanup is tiny and directly supports the feature.
+
+### 6. Categorize findings
+
+Use severity labels so the author knows what is required.
+
+- **Critical:** Blocks merge. Security vulnerability, data loss risk, broken functionality.
+- **Required:** Must address before merge. Wrong abstraction, missing validation, missing test, poor error handling, maintainability regression.
+- **Optional / Consider:** Useful improvement, not required.
+- **Nit:** Minor style or formatting issue. Author may ignore.
+- **FYI:** Context only.
+
+Lead with high-leverage issues. A few high-confidence findings are better than a long list of cosmetic nits.
+
+### 7. Verify the verification
+
+Report what you checked:
+
+- Tests reviewed and whether they cover the behavior.
+- Commands run and outcomes.
+- Build/type/lint status when relevant.
+- Manual verification or screenshots for UI changes.
+- Any validation you could not run and why.
+
+Never claim tests pass or a build succeeds unless you ran the command and saw success.
+
+## Output format
+
+```markdown
+## Review Summary
+
+**Verdict:** APPROVE | REQUEST CHANGES
+
+**Overview:** [1-2 sentences summarizing the change and overall assessment]
+
+### Critical Issues
+- [File:line] [Description and specific fix]
+
+### Required Changes
+- [File:line] [Description and specific fix]
+
+### Optional / Nits
+- [File:line] [Description]
+
+### What's Done Well
+- [Specific positive observation]
+
+### Verification Story
+- Tests reviewed: [yes/no, observations]
+- Commands run: [`command` → result]
+- Build/type/lint verified: [yes/no]
+- Security checked: [yes/no, observations]
+```
+
+## Review checklist
+
+```markdown
+### Context
+- [ ] I understand what this change does and why
+
+### Correctness
+- [ ] Change matches requirements
+- [ ] Edge cases and error paths are handled
+- [ ] Tests cover behavior adequately
+
+### Readability
+- [ ] Names are clear and consistent
+- [ ] Logic is straightforward
+- [ ] No unnecessary complexity or dead artifacts
+
+### Architecture
+- [ ] Follows existing patterns or justifies new ones
+- [ ] Boundaries and dependency direction are clean
+- [ ] Abstractions earn their complexity
+- [ ] File/module size remains healthy
+
+### Security
+- [ ] No secrets in code/logs/prompts/client-visible state
+- [ ] Input is validated and output encoded
+- [ ] Injection, SSRF, auth, and dependency risks considered
+
+### Performance
+- [ ] No N+1 or unbounded operations
+- [ ] No obvious hot-path regressions
+- [ ] Performance claims are measured or clearly labeled
+
+### Verification
+- [ ] Relevant tests/build/lint/type checks run or explicitly skipped with reason
+- [ ] Verification story documented
+```
+
+## Common red flags
+
+- "LGTM" without evidence of review.
+- Passing tests treated as the only quality gate.
+- Security-sensitive changes without security-focused scrutiny.
+- Large PRs that are too big to review properly.
+- Bug fixes without regression tests.
+- Comments without severity labels.
+- Accepting "I'll clean it up later."
+- Refactors that move code without reducing concepts.
+- New conditionals scattered into unrelated paths.
+- Bespoke helpers duplicating existing canonical helpers.
+- New dependencies without review.
+
+## Cleanup
+
+For remote PRs, ask before switching branches after the review. Do not modify code during a review unless the user explicitly asks you to fix findings.

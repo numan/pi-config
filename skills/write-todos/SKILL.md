@@ -1,25 +1,124 @@
 ---
 name: write-todos
-description: Write clear, actionable todos that workers can execute without losing architectural intent. Use when "create todos", "write todos", "break into tasks", "plan todos", "make todos", or creating work items from a plan. Ensures each todo has unambiguous expected outcomes, concrete examples, and explicit constraints so workers don't drift from the design.
+description: Break work into ordered, verifiable tasks and write clear, actionable todos that workers can execute without losing architectural intent. Use when "create todos", "write todos", "break into tasks", "plan todos", "make todos", when a task feels too large, or when creating work items from a plan.
+license: MIT
 ---
+
+<!--
+Merged with Addy Osmani's agent-skills planning-and-task-breakdown skill:
+https://github.com/addyosmani/agent-skills/tree/main/skills/planning-and-task-breakdown
+-->
 
 # Write Todos
 
-Write todos that a worker agent can execute without access to the planning conversation. Every todo must be **self-contained** — a worker reading only the todo and the plan artifact must produce the correct result.
+Break work into small, ordered, verifiable tasks, then write todos that a worker agent can execute without access to the planning conversation. Every todo must be self-contained: a worker reading only the todo body, referenced plan artifact, and existing code should produce the correct result.
 
-## Why This Matters
+## When to use
 
-Workers implement exactly what's described. If a todo contains a code sketch using plain classes, the worker builds plain classes — even if the plan says "use functional code for everything." Architectural intent that only lives in the plan's prose gets lost. Every constraint must be **in the todo body itself**.
+- You have a spec or clear requirements and need implementable tasks.
+- A task feels too large or vague to start.
+- Work needs dependency ordering or parallelization.
+- You need to communicate scope to a human or worker agent.
+- You are creating todos from a plan.
 
-## Todo Structure
+Do not use for single-file changes with obvious scope, or when a plan already contains well-scoped, worker-ready todos.
 
-Every todo body follows this structure:
+## Planning process
+
+### 1. Stay read-only while planning
+
+Before writing todos or code:
+
+- Read the spec, plan, and relevant codebase sections.
+- Identify existing patterns and conventions.
+- Map dependencies between components.
+- Note risks, unknowns, and required human decisions.
+
+Do not implement during planning. The output is an ordered plan/todo set.
+
+### 2. Identify the dependency graph
+
+Map what depends on what, then order tasks from foundations upward.
+
+```text
+Database schema
+    │
+    ├── Shared types / API contracts
+    │       │
+    │       ├── Validation logic
+    │       ├── API endpoints
+    │       │       └── API client
+    │       │               └── UI components
+    │       └── Tests
+    │
+    └── Seed data / migrations
+```
+
+Foundational shared contracts come before consumers. High-risk tasks should happen early enough to fail fast.
+
+### 3. Prefer vertical slices when possible
+
+Avoid task lists that build every layer horizontally before anything works.
+
+Bad:
+
+```text
+Task 1: Build all database schema
+Task 2: Build all API endpoints
+Task 3: Build all UI components
+Task 4: Connect everything
+```
+
+Better:
+
+```text
+Task 1: User can register (schema + endpoint + UI + test)
+Task 2: User can log in (auth endpoint + UI + test)
+Task 3: User can create a task (task model + endpoint + UI + test)
+Task 4: User can view tasks (query + endpoint + UI + test)
+```
+
+Each slice should leave the system in a working, testable state.
+
+### 4. Size tasks for one worker session
+
+Each todo should be one focused unit of work that a worker can complete, verify, and commit in one session.
+
+| Size | Files | Scope | Guidance |
+|---|---:|---|---|
+| XS | 1 | Single function/config change | Good |
+| S | 1-2 | One component or endpoint | Good |
+| M | 3-5 | One feature slice | Good |
+| L | 5-8 | Multi-component feature | Split if possible |
+| XL | 8+ | Too large | Break down further |
+
+Break a task down further if it would take more than one focused session, touches independent subsystems, has more than a few acceptance criteria, or contains "and" in the title.
+
+### 5. Add checkpoints
+
+After every 2-3 related tasks or each major phase, add a checkpoint:
+
+```markdown
+## Checkpoint: Foundation complete
+- [ ] All foundation tests pass
+- [ ] Application builds without errors
+- [ ] Core contract reviewed before consumers are implemented
+```
+
+Checkpoints keep long plans from drifting.
+
+## Todo structure
+
+Every todo body should follow this structure:
 
 ```markdown
 **Plan:** `plans/YYYY-MM-DD-<name>.md`
 
 ## What
 [One paragraph: what this todo produces and why it matters]
+
+## Dependencies
+- [Todo numbers or files this depends on, or "None"]
 
 ## Constraints
 - [Explicit architectural constraints that MUST be followed]
@@ -34,34 +133,38 @@ Every todo body follows this structure:
 [Concrete description of what the finished code looks like]
 
 ### Example
-[Short code snippet showing the expected shape — imports, key patterns, structure]
+[Short code snippet showing expected imports, patterns, and structure]
 
 ## Acceptance Criteria
 - [ ] [Specific, verifiable criterion]
 - [ ] [Another criterion]
-- [ ] [Build/lint/test passes]
+- [ ] [Build/lint/test command passes]
+
+## Verification
+- [ ] `command to run`
+- [ ] Manual check: [what to verify, if applicable]
 ```
 
-## Rules
+## Rules for worker-ready todos
 
-### 1. Constraints Are Explicit, Not Implied
+### 1. Constraints are explicit, not implied
 
-If the plan says "use Effect v4 for all services," every service todo must repeat that:
+If the plan says "use Effect v4 for services," every relevant todo must repeat it.
 
-| Bad (implicit) | Good (explicit) |
+| Bad | Good |
 |---|---|
-| "Build the EventBus service" | "Build the EventBus as an Effect v4 service. Import from `effect`. Use `Effect.gen`, `Layer`, and `Context.Tag` — not plain classes." |
-| "Add WebSocket support" | "Add WebSocket support using the `ws` package. Do NOT use `socket.io`." |
-| "Create the component" | "Create the component using React 19 + Tailwind v4 utility classes. No CSS modules, no styled-components." |
+| "Build the EventBus service" | "Build EventBus as an Effect v4 service. Import from `effect`. Use `Effect.gen`, `Layer`, and `Context.Tag`; do not use plain classes." |
+| "Add WebSocket support" | "Add WebSocket support using the `ws` package. Do not use `socket.io`." |
+| "Create the component" | "Create the component using React 19 and Tailwind v4 utilities. No CSS modules or styled-components." |
 
-### 2. Examples Show The Real Shape
+### 2. Examples show the real shape
 
-Include a short code snippet showing the expected import style, patterns, and structure. This is the single most effective way to prevent drift.
+Include a small code example when implementation style matters.
 
 ```markdown
 ### Example
 
-The service should look like this (not a plain class):
+The service should look like this, not like a plain class:
 
 \```typescript
 import { Effect, Context, Layer } from "effect"
@@ -72,64 +175,114 @@ class EventBus extends Context.Tag("EventBus")<EventBus, {
 }>() {}
 
 const EventBusLive = Layer.effect(EventBus, Effect.gen(function* () {
-  // ... implementation using Effect primitives
+  // implementation using Effect primitives
 }))
 \```
 ```
 
-Without examples, workers default to the most common pattern they know — which is usually plain TypeScript classes.
+Without examples, workers default to common patterns they already know, which may not match the plan.
 
-### 3. Anti-Patterns Are Named
+### 3. Anti-patterns are named
 
-If there's a wrong way that looks right, call it out:
+If a wrong approach looks plausible, call it out:
 
 ```markdown
 ## Constraints
-- Use Effect v4 services with `Context.Tag` and `Layer`
-- **Do NOT** use plain classes with manual observer patterns (no `new EventBus()`, no `Set<() => void>` listener tracking)
-- **Do NOT** use `useSyncExternalStore` with hand-rolled subscribe — use Effect's reactive primitives
+- Use Effect v4 services with `Context.Tag` and `Layer`.
+- **Do NOT** use plain classes with manual observer patterns.
+- **Do NOT** use `useSyncExternalStore` with hand-rolled subscriptions.
 ```
 
-### 4. Each Todo Is Self-Contained
+### 4. Each todo is self-contained
 
-A worker reads: (1) the todo body, (2) the plan artifact, (3) existing code. That's it. They don't read other todos. So:
+A worker reads the todo body, the referenced plan, and existing code. Do not rely on hidden planning-chat context.
 
-- Reference the plan path in every todo
-- List all files to create or modify
-- Note which existing files to read for context
-- Include any conventions discovered during planning
+Each todo must:
 
-### 5. Todos Are Sequenced
+- Reference the plan path.
+- List all likely files to create or modify.
+- Note existing files to read for examples.
+- Repeat architectural constraints relevant to that task.
+- Include dependencies and ordering.
 
-Number todos and note dependencies:
+### 5. Acceptance criteria are verifiable
 
-```markdown
-**Title:** "Todo 3: Build EventNode state machine"
-**Body includes:** "Depends on Todo 2 (types in `src/core/types.ts`). Read that file first."
-```
-
-### 6. Size Is Right
-
-Each todo should be **one focused unit of work** — a worker can complete it in one session and make one commit. If a todo has more than 3 files to create, consider splitting it.
-
-### 7. Acceptance Criteria Are Verifiable
-
-Every criterion should be checkable by running a command or reading the output:
-
-| Bad (vague) | Good (verifiable) |
+| Vague | Verifiable |
 |---|---|
 | "Code is clean" | "`vp check` passes with no errors" |
-| "Works correctly" | "Running `node -e 'import { EventBus } from \"./src/services/EventBus\"'` succeeds" |
+| "Works correctly" | "Running `node -e 'import { EventBus } from "./src/services/EventBus"'` succeeds" |
 | "Tests pass" | "`vp test src/core/EventNode.test.ts` passes" |
-| "Follows conventions" | "All imports use `effect` package, no plain class instantiation" |
+| "Follows conventions" | "All imports use `effect`; no plain `new EventBus()` instantiation" |
 
-## Checklist Before Creating Todos
+## Plan document template
+
+Use this when the user needs a full plan before todo creation:
+
+```markdown
+# Implementation Plan: [Feature/Project Name]
+
+## Overview
+[One paragraph summary]
+
+## Architecture Decisions
+- [Decision and rationale]
+
+## Task List
+
+### Phase 1: Foundation
+- [ ] Task 1: ...
+- [ ] Task 2: ...
+
+### Checkpoint: Foundation
+- [ ] Tests pass and build is clean
+
+### Phase 2: Core Features
+- [ ] Task 3: ...
+- [ ] Task 4: ...
+
+### Checkpoint: Core Features
+- [ ] End-to-end flow works
+
+### Phase 3: Polish
+- [ ] Task 5: ...
+
+## Risks and Mitigations
+| Risk | Impact | Mitigation |
+|---|---|---|
+| [Risk] | [High/Med/Low] | [Strategy] |
+
+## Open Questions
+- [Question needing human input]
+```
+
+## Parallelization guidance
+
+- **Safe to parallelize:** independent feature slices, tests for already-implemented features, documentation, isolated components with stable contracts.
+- **Must be sequential:** database migrations, shared contracts, shared state changes, dependency chains.
+- **Needs coordination:** work sharing an API contract; define the contract first, then parallelize consumers.
+
+## Checklist before creating todos
 
 Before calling `todo(action: "create")`, verify:
 
-- [ ] Every architectural decision from the plan appears as an explicit constraint in at least one todo
-- [ ] Every todo has a code example showing expected shape (imports, patterns, structure)
-- [ ] No todo relies on context only available in the planning conversation
-- [ ] Anti-patterns are named in relevant todos ("do NOT use X")
-- [ ] Todos are numbered and dependencies noted
-- [ ] Acceptance criteria are verifiable commands, not subjective judgments
+- [ ] Every task has acceptance criteria.
+- [ ] Every task has a verification step.
+- [ ] Dependencies are identified and ordered correctly.
+- [ ] No task is XL-sized or touches too many independent subsystems.
+- [ ] Checkpoints exist between major phases.
+- [ ] Every architectural decision appears as an explicit constraint in relevant todos.
+- [ ] Every todo has a code example when shape/pattern matters.
+- [ ] No todo relies on planning-conversation context only.
+- [ ] Anti-patterns are named where workers might drift.
+- [ ] The human has reviewed and approved the plan when approval is required.
+
+## Common red flags
+
+- Starting implementation without a written task list.
+- Tasks that say "implement the feature" without acceptance criteria.
+- No verification steps.
+- All tasks are large horizontal layers.
+- Dependency order is ignored.
+- Todos omit important constraints from the plan.
+- Todos lack examples for non-obvious architecture.
+- Acceptance criteria are subjective instead of command-checkable.

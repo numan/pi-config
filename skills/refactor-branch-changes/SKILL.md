@@ -1,6 +1,6 @@
 ---
 name: refactor-branch-changes
-description: Review and refactor changes on the current git branch. Use when asked to "refactor this branch", "clean up this branch", "simplify branch changes", "refactor the current branch", "review this diff for refactors", or "improve code on this branch". Uses existing evidence when available, otherwise scouts the branch, then runs prioritized refactor todos → user approval → sequential worker implementation focused on readability, simplicity, and maintainability while preserving behavior.
+description: Review current-branch changes, propose an approval-gated behavior-preserving refactor checklist, and execute approved cleanup sequentially.
 ---
 
 # Refactor Branch Changes

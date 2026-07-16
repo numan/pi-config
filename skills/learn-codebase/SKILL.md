@@ -1,6 +1,6 @@
 ---
 name: learn-codebase
-description: Discover project conventions and surface security concerns. Use when starting work in a new or unfamiliar project, when asked to "learn the codebase", "check project rules", "what are the conventions", "onboard to this project", or "anything shady in this codebase". Scans agent config files (.claude/, .cursor/, CLAUDE.md, etc.) and runs a security/smell sweep for hardcoded secrets, insecure patterns, suspicious dependencies, and dangerous configurations.
+description: Onboard to an unfamiliar codebase by mapping project instructions and conventions and performing a bounded security and configuration smell sweep.
 ---
 
 # Learn Codebase Conventions

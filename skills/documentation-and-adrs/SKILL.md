@@ -1,6 +1,6 @@
 ---
 name: documentation-and-adrs
-description: Records decisions and documentation. Use when making architectural decisions, changing public APIs, shipping features, or when you need to record context that future engineers and agents will need to understand the codebase.
+description: Record durable architecture decisions, public API changes, feature context, and operational knowledge for future maintainers.
 ---
 
 # Documentation and ADRs

@@ -1,18 +1,25 @@
 ---
-description: Start spec-driven development — write a structured specification before writing code
+description: Inspect the project, resolve material product ambiguity, and write an implementation-independent specification
 argument-hint: "[feature]"
 ---
 
-Invoke the `spec-driven-development` skill.
+Invoke `spec-driven-development` for `$ARGUMENTS`.
 
-Begin by understanding what the user wants to build for `$ARGUMENTS`. Ask clarifying questions about:
+First inspect project instructions, existing product behavior, stack, commands,
+and relevant code. Ask the user only for unresolved product preferences or
+constraints that would materially change the specification.
 
-1. Objective and target users.
-2. Core features and acceptance criteria.
-3. Tech stack preferences and constraints.
-4. Project commands and verification requirements.
-5. Known boundaries: always do, ask first, and never do.
+Write a specification covering:
 
-Then generate a structured spec covering objective, requirements, acceptance criteria, commands, project structure, code style, testing strategy, and boundaries.
+- objective, users, and intended outcome
+- in-scope and out-of-scope behavior
+- observable acceptance criteria
+- material edge and failure cases
+- established technical and operational constraints
+- test and documentation expectations
+- authorization boundaries and unresolved assumptions
 
-Save the spec as `SPEC.md` in the project root unless the project has a different convention. Confirm with the user before implementation.
+Don't choose an implementation architecture unless it is itself a stated
+constraint. Save to the project's specification location, or `SPEC.md` when no
+convention exists. Present the artifact and wait for approval before planning or
+implementation.

@@ -1,34 +1,18 @@
 ---
-description: Run a web performance audit via the web-performance-auditor agent
+description: Run a sourced web-performance audit for a URL, route, artifact, or browser-facing change
 argument-hint: "[url-or-scope]"
 ---
 
-`/webperf` targets web applications specifically. Do not use it for utility libraries, CLIs, or server-only code with no browser-facing output.
+Use the `web-performance-auditor` agent for `$ARGUMENTS`. Don't use this command
+for a CLI, utility library, or server-only change without browser output.
 
-## Determine the mode
+Pass the target, framework or route when known, and all available Lighthouse,
+CrUX, PageSpeed, trace, or live-browser artifacts.
 
-**Deep mode** — activate when any of these is available:
+Use measurement mode when valid runtime artifacts are available. Otherwise use
+source mode, mark every finding as `potential impact`, and mark metrics as
+`not measured`.
 
-- Lighthouse JSON report.
-- PageSpeed Insights JSON response with Lighthouse and CrUX data.
-- CrUX API response.
-- DevTools performance trace.
-- A live URL plus configured performance tooling.
-- Chrome DevTools MCP CLI output supplied by the user.
-
-**Quick mode** — default when no measurement artifacts are available. Scan source code for structural anti-patterns and label every finding as `potential impact`.
-
-## Run the audit
-
-Spawn the `web-performance-auditor` subagent. Pass it explicitly:
-
-- `$ARGUMENTS`, interpreted as URL, route, files, components, or diff scope.
-- Any artifact paths or pasted JSON content.
-- The target URL or page name when known.
-- Which mode you expect: Quick or Deep.
-
-The subagent must return a scorecard populated only with sourced values, a ranked list of findings, positive observations, and recommendations. Never fabricate metrics. Mark unmeasured fields as `not measured`.
-
-## Output
-
-Return the full audit report to the user. No merge step is needed; this is a single-agent command.
+Return the full scorecard, artifacts used, relevant findings in priority order,
+positive observations, and concrete verification-oriented recommendations.
+Never infer Core Web Vital measurements from static source.

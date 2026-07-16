@@ -36,7 +36,7 @@ Use absolute words like "always", "never", "must", and "only" for true invariant
 
 ## Outcome, Evidence, and Stop Rules
 
-For GPT-5.5-style skills, describe the target outcome before the procedure. Include only process steps that materially improve reliability.
+For current reasoning models such as GPT-5.6, describe the target outcome before the procedure. Include only process steps that materially improve reliability.
 
 A strong workflow states:
 - the user-visible outcome
@@ -70,8 +70,8 @@ Structure skills so agents load only what they need, when they need it.
 
 | File Extension | Read This Reference |
 |---------------|-------------------|
-| `.py`         | `${CLAUDE_SKILL_ROOT}/references/python.md` |
-| `.js`, `.ts`  | `${CLAUDE_SKILL_ROOT}/references/javascript.md` |
+| `.py`         | `references/python.md` |
+| `.js`, `.ts`  | `references/javascript.md` |
 ```
 
 This keeps the base context small while making deep knowledge available when needed.
@@ -183,6 +183,6 @@ For very large reference files (>10k words), include grep search patterns in SKI
 
 ```markdown
 Find specific metrics using grep:
-- Revenue data: `grep -i "revenue" ${CLAUDE_SKILL_ROOT}/references/finance.md`
-- Pipeline data: `grep -i "pipeline" ${CLAUDE_SKILL_ROOT}/references/sales.md`
+- Revenue data: `grep -i "revenue" <skill-dir>/references/finance.md`
+- Pipeline data: `grep -i "pipeline" <skill-dir>/references/sales.md`
 ```

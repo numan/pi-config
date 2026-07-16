@@ -1,10 +1,6 @@
 ---
 name: cmux
-description: |
-  Manage terminal sessions and browser surfaces via cmux — spawn workspaces
-  for dev servers, test runners, background tasks, and embedded browsers.
-  Read output, send commands, interact with web pages, and orchestrate
-  multi-terminal workflows.
+description: Manage cmux terminal and browser surfaces for observable dev servers, test runners, background processes, and interactive web workflows.
 ---
 
 # cmux Terminal & Browser Management

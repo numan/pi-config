@@ -122,13 +122,9 @@ def validate_skill(skill_path: Path) -> tuple[bool, list[str], list[str]]:
 
             # Quality checks
             lower_desc = desc.lower()
-            if not any(
-                kw in lower_desc
-                for kw in ["use when", "use for", "use to", "trigger", "invoke"]
-            ):
+            if len(desc) < 40:
                 warnings.append(
-                    "description should include trigger phrases "
-                    '(e.g., \'Use when asked to "review code"\')'
+                    "description may be too vague for reliable skill discovery"
                 )
             if lower_desc.startswith(("i ", "i can", "you ")):
                 warnings.append(
@@ -154,11 +150,17 @@ def validate_skill(skill_path: Path) -> tuple[bool, list[str], list[str]]:
         if "scripts/" in content and not scripts_dir.exists():
             errors.append("SKILL.md references 'scripts/' but directory does not exist")
 
-    # Check for hardcoded paths (should use ${CLAUDE_SKILL_ROOT})
+    # Check for non-portable resource paths.
     if re.search(r"(?:plugins|skills)/[a-z-]+/(?:scripts|references|assets)/", content):
         warnings.append(
-            "SKILL.md may contain hardcoded paths. "
-            "Use ${CLAUDE_SKILL_ROOT}/scripts/... instead."
+            "SKILL.md may contain a repository-specific resource path. "
+            "Reference resources relative to the skill directory instead."
+        )
+    claude_skill_root = "$" + "{CLAUDE_SKILL_ROOT}"
+    if claude_skill_root in content or "/mnt/skills/" in content:
+        warnings.append(
+            "SKILL.md contains a harness-specific skill path. "
+            "Use a path relative to the skill directory instead."
         )
 
     return len(errors) == 0, errors, warnings

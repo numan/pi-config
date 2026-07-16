@@ -1,6 +1,6 @@
 ---
 name: github-pr-summary
-description: Generate a comprehensive GitHub Pull Request summary for the current branch. Use when asked to "write a PR summary", "generate a PR description", "summarize this branch for a PR", "draft GitHub PR notes", or "create a pull request summary". Produces GitHub-compatible markdown, focuses on user impact first, and excludes changes merged in from other branches.
+description: Generate a GitHub pull request description for the current branch, focused on user impact and branch-owned changes.
 ---
 
 # Generate a GitHub PR Summary

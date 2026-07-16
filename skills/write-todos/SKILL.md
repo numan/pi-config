@@ -1,6 +1,6 @@
 ---
 name: write-todos
-description: Break work into ordered, verifiable tasks and write clear, actionable todos that workers can execute without losing architectural intent. Use when "create todos", "write todos", "break into tasks", "plan todos", "make todos", when a task feels too large, or when creating work items from a plan.
+description: Convert an approved plan or defined scope into dependency-ordered, independently verifiable, worker-ready todos.
 license: MIT
 ---
 

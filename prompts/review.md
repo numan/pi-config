@@ -1,16 +1,20 @@
 ---
-description: Conduct a five-axis code review — correctness, readability, architecture, security, performance
+description: Review a defined change for material correctness, maintainability, security, performance, and test risks
 argument-hint: "[scope]"
 ---
 
-Invoke the `code-reviewer` skill.
+Invoke `code-reviewer` for `$ARGUMENTS`, or for the current staged, unstaged, or
+branch changes when no scope is supplied.
 
-Review `$ARGUMENTS` if provided; otherwise review the current changes, staged changes, or recent commits. Cover all five axes:
+Establish intended behavior and the correct diff range, inspect tests and code
+directly, and run focused validation when useful. Apply correctness,
+readability, architecture, security, performance, and test checks only where
+relevant.
 
-1. **Correctness** — Does it match the spec/task? Are edge cases and errors handled? Are tests adequate?
-2. **Readability** — Are names clear, logic straightforward, and code well organized?
-3. **Architecture** — Does it follow existing patterns, preserve boundaries, and use the right abstraction level?
-4. **Security** — Is input validated, output encoded, auth checked, and secret handling safe? Use `security-and-hardening` where needed.
-5. **Performance** — Are there N+1 queries, unbounded operations, hot-path allocations, or avoidable re-renders? Use `performance-optimization` where needed.
+Report only discrete, actionable findings supported by evidence. Don't invent a
+finding to populate every axis. For each finding include priority, confidence,
+`file:line` or command evidence, concrete impact, smallest valid remediation,
+and verification.
 
-Categorize findings as Critical, Required, Optional/Consider, Nit, or FYI. Output a structured review with specific file:line references and fix recommendations. Report verification commands run and their outcomes.
+Return an `APPROVED` or `NEEDS CHANGES` verdict, findings in priority order,
+positive observations, commands run and outcomes, and checks not run.

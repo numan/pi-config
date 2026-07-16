@@ -2,6 +2,10 @@
   "name": "pi-config",
   "version": "1.0.0",
   "description": "Personal pi coding agent configuration — clone to ~/.pi/agent/",
+  "scripts": {
+    "test": "node --test scripts/agent-contract.test.mjs && node scripts/validate-prompts.mjs",
+    "validate": "node scripts/validate-prompts.mjs"
+  },
   "keywords": [
     "pi-package"
   ],

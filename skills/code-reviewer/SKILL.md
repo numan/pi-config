@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews code changes for correctness, readability, architecture, security, performance, tests, and project-standard adherence. Use when asked to "review code", "review my changes", "review PR", "code review", "check this diff", or before merging any change. Supports local staged or unstaged changes and remote pull requests by ID or URL.
+description: Review local changes or pull requests for material correctness, maintainability, security, performance, and test issues without modifying code.
 license: Apache-2.0 AND MIT
 ---
 

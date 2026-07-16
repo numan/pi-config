@@ -4,7 +4,7 @@ description: Autonomous experiment worker — runs a batch of autoresearch exper
 tools: read, bash, write, edit
 model: openai-codex/gpt-5.6-sol
 thinking: medium
-spawning: true
+spawning: false
 auto-exit: true
 system-prompt: append
 ---

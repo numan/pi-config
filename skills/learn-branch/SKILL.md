@@ -1,6 +1,6 @@
 ---
 name: learn-branch
-description: Build a comprehensive understanding of everything changed on the current git branch. Use when asked to "learn this branch", "understand what changed on this branch", "review branch changes", "catch me up on this branch", "summarize this PR branch", or "analyze branch diff". Reconstructs branch intent from commit messages, diffs, and changed files, then produces an evidence-backed branch briefing.
+description: Reconstruct the current branch's intent and behavior from its merge-base commits, diffs, changed files, and tests.
 ---
 
 # Learn Branch Changes

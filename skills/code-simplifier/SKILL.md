@@ -1,6 +1,6 @@
 ---
 name: code-simplifier
-description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Use when asked to "simplify code", "clean up code", "refactor for clarity", "improve readability", or when code works but is harder to read, maintain, or extend than it should be. Focuses on project-specific best practices.
+description: Simplify defined code for clarity and maintainability while preserving behavior and following project conventions.
 license: Apache-2.0 AND MIT
 ---
 

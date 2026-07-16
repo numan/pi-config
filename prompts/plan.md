@@ -1,18 +1,18 @@
 ---
-description: Break work into small verifiable tasks with acceptance criteria and dependency ordering
+description: Turn approved requirements into an ordered, verifiable implementation plan and worker-ready todos
 argument-hint: "[feature-or-spec]"
 ---
 
-Invoke the `write-todos` skill.
+Invoke `write-todos` for `$ARGUMENTS`.
 
-Read the existing spec, plan, or requirements for `$ARGUMENTS`, plus relevant codebase sections. Then:
+Read the approved specification or requirements, project instructions, and the
+relevant code and tests. Stay read-only while planning.
 
-1. Enter plan mode: read only, no implementation changes.
-2. Identify the dependency graph between components.
-3. Prefer vertical slices: one complete path per task, not broad horizontal layers.
-4. Write tasks/todos with explicit constraints, acceptance criteria, verification steps, dependencies, and likely files.
-5. Include examples when implementation shape matters.
-6. Add checkpoints between phases.
-7. Present the plan/todos for human review and wait for explicit approval before implementation.
+Produce the smallest dependency-ordered set of vertical tasks that covers the
+accepted behavior. Each task must identify scope, likely files, constraints,
+dependencies, observable acceptance criteria, verification, and an existing
+reference or example when implementation shape isn't obvious.
 
-Save durable artifacts in the project-appropriate planning location. If no project convention exists, use `tasks/plan.md` and `tasks/todo.md`.
+Save durable planning artifacts in the project convention, or under `tasks/`
+when none exists. Present the complete plan and todos, then wait for explicit
+approval before implementation.

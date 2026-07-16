@@ -1,6 +1,6 @@
 ---
 name: create-github-pr
-description: Create or update a GitHub pull request for the current branch. Use when asked to "create a PR", "open a pull request", "submit this branch", "update the PR", "refresh the PR description", or "push this branch and make a PR". Runs required checks, uses gh for GitHub operations, and uses the PR summary skill for descriptions.
+description: Validate and push the current branch, then create or update its GitHub pull request and description.
 ---
 
 # Create or Update a GitHub Pull Request

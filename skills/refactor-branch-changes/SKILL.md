@@ -50,8 +50,7 @@ Tell the scout to:
 - inspect `git status --short`, commit history, diff stat, and changed files
 - read the branch diff and then read the changed files directly
 - read nearby `AGENTS.md`, `CLAUDE.md`, and convention files before suggesting refactors
-- inspect changed and neighboring tests for behavior ownership, cross-layer duplication, full-app/page render cost, repeated accessibility queries, and realistic interaction sequences
-- map expensive test assertions to the lowest layer that already proves or should own each contract
+- identify materially changed, duplicated, slow, flaky, or high-cost tests as refactor candidates
 - produce a concise branch briefing plus a shortlist of the highest-impact refactor opportunities
 
 Do not draft todos until you have reviewed adequate branch evidence, either from existing artifacts/results or from the scout result.
@@ -61,6 +60,8 @@ refinement skill/workflow is available in the current environment. If one is
 available, load and apply its guidance when evaluating refactor opportunities
 and writing todos. If none is available, continue with the principles in this
 skill.
+
+When branch evidence includes a material test refactor candidate, load and apply the `testing-strategy` skill before drafting recommendations. Use its coverage map, layer ownership, interaction fidelity, preservation, and measurement requirements rather than recreating testing rules in this workflow.
 
 ## Step 2: Create the refactor todo list
 
@@ -82,23 +83,14 @@ When writing todos:
 - avoid speculative cleanups or stylistic churn
 - use the conventions from the `write-todos` skill
 
-For test refactor todos, also include:
-
-- a coverage map identifying duplicated assertions and unique higher-level confidence
-- the lower owning layer for every moved or removed assertion
-- acceptance criteria that preserve the unique integration, accessibility, or boundary contract
-- a before/after timing command run under comparable instrumentation
-- targeted validation plus the representative suite, shard, or coverage command when practical
-
-Do not propose splitting one slow page test into several page tests merely to avoid a per-test timeout. Reduce total expensive setup and renders while preserving confidence.
+For test refactor todos, include the coverage ownership, preservation, representative measurement, and validation evidence required by `testing-strategy`. Make those artifacts explicit in the todo acceptance criteria so a worker can execute without the planning conversation.
 
 Prioritize this order:
 
 | Priority | Look for | Preferred refactor |
 |---|---|---|
 | High | duplicated logic across changed files | extract or consolidate at the existing abstraction level |
-| High | rule matrices or state behavior repeated through page/integration/E2E tests | move detailed coverage to the lowest sufficient layer and retain one representative boundary assertion |
-| High | slow tests with repeated full-app renders or interaction sequences | remove redundant setup and use the narrow interaction that still exercises the contract |
+| High | duplicated, slow, flaky, or high-cost tests | apply `testing-strategy` and preserve unique confidence while reducing cost |
 | High | deeply nested conditionals or nested ternaries | flatten control flow with guard clauses, helper functions, or clear `if` chains |
 | High | functions or components mixing multiple concerns | split by responsibility if it improves readability without scattering logic |
 | High | confusing naming in new branch code | rename for intent and consistency |
@@ -191,8 +183,7 @@ Use this balance guide:
 | repetitive and local | simplify inline first |
 | reused in multiple changed call sites | extract a helper near the usage |
 | performance-sensitive | remove redundant work without making the code harder to read |
-| expensive test duplicates lower-level rules | keep the rule matrix below and one unique boundary smoke test above |
-| realistic test interaction is itself the contract | preserve the sequence; optimize duplicated assertions or setup instead |
+| test code needs structural or performance refactoring | apply `testing-strategy` before proposing changes |
 | already simple but verbose | avoid churn for minimal gain |
 | compact but hard to scan | expand it into explicit steps |
 
@@ -206,8 +197,7 @@ Do not stop until all relevant items are true:
 - the user explicitly approved the checklist before implementation
 - worker subagents were launched sequentially, one todo at a time
 - each completed refactor stayed grounded in branch code and preserved behavior
-- test refactors preserved a documented owning layer for every removed contract and unique higher-level confidence
-- test-performance refactors include comparable before/after measurements under representative instrumentation
+- test refactors satisfy the ownership, preservation, interaction, measurement, and validation requirements from `testing-strategy`
 - validation results were captured for implemented todos
 - each completed todo was committed before the next worker started
 - the final response clearly summarized the per-todo commits that were created

@@ -187,33 +187,11 @@ Test fails after code change:
 
 ### Slow or Timed-Out Test Triage
 
-A timeout is a performance failure until evidence shows a deadlock or missing completion signal. Do not increase the timeout first.
+First determine whether the test is blocked or merely exceeds its budget under load. Preserve isolated and CI timing evidence, environment differences, open handles, unresolved requests, timers, shared state, and order dependence.
 
-Measure the same test in progressively more representative conditions:
+Before changing test structure, interactions, coverage, or timeout budgets, load and apply the `testing-strategy` skill. It owns representative measurement, coverage redundancy analysis, lowest-layer placement, interaction fidelity, and coverage-preserving test optimization.
 
-1. Run the test alone without instrumentation.
-2. Run it alone with the CI instrumentation that matters, such as coverage, sanitizers, or tracing.
-3. Run it in the representative full suite, shard, or worker configuration.
-4. Compare runtime, CPU/memory limits, worker count, runtime version, and dependency versions with CI.
-
-Then inspect the test itself:
-
-- Count full application/page renders and state-changing interactions.
-- Identify loops that repeat a rule matrix through an expensive fixture.
-- Search lower-level tests for the same messages, values, and invariants.
-- Distinguish a required user sequence from a direct event contract.
-- Check leaked timers, unresolved requests, shared state, and order dependence when runtime is unbounded rather than merely slow.
-
-Prefer this repair order:
-
-1. Remove duplicate high-level coverage while preserving unique contracts below.
-2. Move rule matrices and state filtering to pure/unit/hook tests.
-3. Keep one representative integration assertion for wiring, accessibility, or the boundary.
-4. Replace realistic interaction sequences with a direct event only when sequencing is not part of the behavior.
-5. Optimize production code only when profiling shows the application code itself is the bottleneck.
-6. Increase a timeout only when the remaining scenario is irreducibly valuable and representative measurements justify its budget.
-
-Verify with before/after measurements under the same commands. An isolated speedup does not prove a CI timeout is resolved; the representative suite or shard must also stay within budget.
+Do not increase the timeout unless that workflow shows the remaining scenario is uniquely valuable and irreducible.
 
 ### Build Failure Triage
 

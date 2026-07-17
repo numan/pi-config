@@ -36,7 +36,7 @@ Build in thin vertical slices — implement one piece, test it, verify it, then 
 For each slice:
 
 1. **Implement** the smallest complete piece of functionality
-2. **Test** — run the test suite (or write a test if none exists)
+2. **Test** — run the test suite (or write a test if none exists); load and apply `testing-strategy` when adding, restructuring, or optimizing tests
 3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
 4. **Commit** -- save your progress with a descriptive message (see `commit` for atomic commit guidance)
 5. **Move to the next slice** — carry forward, don't restart

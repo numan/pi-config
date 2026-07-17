@@ -28,6 +28,7 @@ Common primary routes:
 - substantial implementation: `incremental-implementation`
 - failing behavior: `debugging-and-error-recovery`
 - changed behavior or bug proof: `test-driven-development`
+- test architecture, coverage overlap, test refactoring, or slow tests: `testing-strategy`
 - code review: `code-reviewer`
 - security boundary work: `security-and-hardening`
 - performance bottleneck: `performance-optimization`

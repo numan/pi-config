@@ -72,7 +72,7 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 
 4. **Code Style** — One real code snippet showing your style beats three paragraphs describing it. Include naming conventions, formatting rules, and examples of good output.
 
-5. **Testing Strategy** — What framework, where tests live, coverage expectations, which test levels for which concerns.
+5. **Testing Strategy** — Load and apply `testing-strategy` when defining test levels, coverage ownership, interaction fidelity, and performance expectations. Record the selected framework, test locations, and project-specific quality gates in the spec.
 
 6. **Boundaries** — Three-tier system:
    - **Always do:** Run tests before commits, follow naming conventions, validate inputs

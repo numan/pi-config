@@ -1,6 +1,6 @@
 # Testing Patterns Reference
 
-Quick reference for common testing patterns across the stack. Use alongside the `test-driven-development` skill.
+Load this reference from the `testing-strategy` skill when concrete examples are needed. Use `test-driven-development` separately when the task requires a red-green-refactor workflow.
 
 ## Table of Contents
 

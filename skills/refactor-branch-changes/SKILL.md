@@ -50,6 +50,8 @@ Tell the scout to:
 - inspect `git status --short`, commit history, diff stat, and changed files
 - read the branch diff and then read the changed files directly
 - read nearby `AGENTS.md`, `CLAUDE.md`, and convention files before suggesting refactors
+- inspect changed and neighboring tests for behavior ownership, cross-layer duplication, full-app/page render cost, repeated accessibility queries, and realistic interaction sequences
+- map expensive test assertions to the lowest layer that already proves or should own each contract
 - produce a concise branch briefing plus a shortlist of the highest-impact refactor opportunities
 
 Do not draft todos until you have reviewed adequate branch evidence, either from existing artifacts/results or from the scout result.
@@ -80,11 +82,23 @@ When writing todos:
 - avoid speculative cleanups or stylistic churn
 - use the conventions from the `write-todos` skill
 
+For test refactor todos, also include:
+
+- a coverage map identifying duplicated assertions and unique higher-level confidence
+- the lower owning layer for every moved or removed assertion
+- acceptance criteria that preserve the unique integration, accessibility, or boundary contract
+- a before/after timing command run under comparable instrumentation
+- targeted validation plus the representative suite, shard, or coverage command when practical
+
+Do not propose splitting one slow page test into several page tests merely to avoid a per-test timeout. Reduce total expensive setup and renders while preserving confidence.
+
 Prioritize this order:
 
 | Priority | Look for | Preferred refactor |
 |---|---|---|
 | High | duplicated logic across changed files | extract or consolidate at the existing abstraction level |
+| High | rule matrices or state behavior repeated through page/integration/E2E tests | move detailed coverage to the lowest sufficient layer and retain one representative boundary assertion |
+| High | slow tests with repeated full-app renders or interaction sequences | remove redundant setup and use the narrow interaction that still exercises the contract |
 | High | deeply nested conditionals or nested ternaries | flatten control flow with guard clauses, helper functions, or clear `if` chains |
 | High | functions or components mixing multiple concerns | split by responsibility if it improves readability without scattering logic |
 | High | confusing naming in new branch code | rename for intent and consistency |
@@ -143,6 +157,7 @@ Rules:
 - give each worker exactly one todo
 - explicitly instruct the worker to use any available code simplification or refinement guidance before editing
 - explicitly instruct the worker to validate its changes, then create a git commit for that todo before exiting
+- for test-performance refactors, require the worker to report comparable before/after timings and where removed assertions remain covered
 - explicitly instruct the worker to read and follow the `commit` skill when writing that commit
 - wait for the worker result before starting the next todo
 - if a worker reports missing context, update the todo before retrying
@@ -176,6 +191,8 @@ Use this balance guide:
 | repetitive and local | simplify inline first |
 | reused in multiple changed call sites | extract a helper near the usage |
 | performance-sensitive | remove redundant work without making the code harder to read |
+| expensive test duplicates lower-level rules | keep the rule matrix below and one unique boundary smoke test above |
+| realistic test interaction is itself the contract | preserve the sequence; optimize duplicated assertions or setup instead |
 | already simple but verbose | avoid churn for minimal gain |
 | compact but hard to scan | expand it into explicit steps |
 
@@ -189,6 +206,8 @@ Do not stop until all relevant items are true:
 - the user explicitly approved the checklist before implementation
 - worker subagents were launched sequentially, one todo at a time
 - each completed refactor stayed grounded in branch code and preserved behavior
+- test refactors preserved a documented owning layer for every removed contract and unique higher-level confidence
+- test-performance refactors include comparable before/after measurements under representative instrumentation
 - validation results were captured for implemented todos
 - each completed todo was committed before the next worker started
 - the final response clearly summarized the per-todo commits that were created

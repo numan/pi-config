@@ -171,6 +171,39 @@ Is it a critical user flow that must work end-to-end?
   → E2E test (large) — limit these to critical paths
 ```
 
+## The Lowest Sufficient Test Layer
+
+Place each behavior at the lowest layer that can prove it. Higher-level tests must add confidence that a lower layer cannot provide; they should not repeat an entire lower-level behavior matrix through a more expensive fixture.
+
+| Behavior | Preferred layer | Higher-level coverage |
+|---|---|---|
+| Pure validation rules, transformations, and edge-case matrices | Pure unit test | None unless a boundary can mis-wire the result |
+| Hook, reducer, or state visibility transitions | Unit or hook test | One component smoke test when prop/event wiring matters |
+| Component rendering, accessibility, and local interactions | Focused component test | Page test only when page composition changes the behavior |
+| Routing, persistence, network, or multi-component flow | Integration test | E2E only for a critical user journey |
+| Browser focus order, keyboard sequence, or cross-page journey | Browser/E2E test | Keep the scenario narrow and outcome-focused |
+
+Before writing or retaining a page, integration, or E2E test, answer:
+
+1. What unique boundary or user-flow failure can this layer catch?
+2. Which rules are already proven below this layer?
+3. Can the higher-level test be reduced to one representative wiring or accessibility assertion?
+
+If the higher-level test has no unique answer, move or delete it rather than paying for duplicate confidence.
+
+### Coverage Redundancy Audit
+
+Before adding, expanding, or optimizing an integration, page, or E2E test:
+
+1. Search nearby tests for the same expected messages, outcomes, inputs, and invariants.
+2. Build a short coverage map with `behavior`, `current layer`, and `unique confidence`.
+3. Mark each assertion as unique, representative wiring, or duplicated rule coverage.
+4. Preserve every unique contract, but keep each rule matrix at one owning layer.
+
+Do not treat all repetition as valuable defense in depth. Repeating three validation inputs and exact messages through a pure validator, hook, full page, and browser flow multiplies runtime without multiplying confidence. Keep the matrix in the pure test, state visibility in the hook test, and one representative page assertion for accessible wiring.
+
+When refactoring an existing test, document where removed assertions remain covered. If coverage does not exist at a lower layer, add it before deleting the expensive assertion.
+
 ## Writing Good Tests
 
 ### Test State, Not Interactions
@@ -248,6 +281,22 @@ it('marks overdue tasks when deadline has passed', () => {
   expect(result.isOverdue).toBe(true);
 });
 ```
+
+### Match Interaction Fidelity to the Contract
+
+Use the least expensive interaction that still exercises the behavior being specified.
+
+Use realistic user interaction helpers when the contract includes:
+
+- focus traversal or tab order
+- keyboard or pointer sequencing
+- default browser behavior across multiple events
+- disabled-state enforcement or interaction timing
+- a user journey whose order is itself meaningful
+
+Use a direct event when the contract is a single handler or state transition, such as proving that blur reveals a touched-field error. Do not simulate click, focus, tab traversal, and blur merely to reach an `onBlur` contract.
+
+This is not permission to bypass behavior. If replacing a realistic sequence would skip code that users rely on, keep the realistic interaction and move duplicated rule assertions to a lower test layer instead.
 
 ### One Assertion Per Concept
 

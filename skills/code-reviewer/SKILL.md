@@ -88,6 +88,19 @@ Discover validation commands from project files and instructions. Do not assume 
 - Any sequential awaits that should be parallelized safely?
 - Are claims about performance backed by measurements or clearly labeled as potential impact?
 
+#### Test quality and cost
+
+- Does each behavior live at the lowest sufficient test layer?
+- Does a page, integration, or E2E test add unique boundary confidence, or repeat a pure validation/state matrix already covered below?
+- Did the author search neighboring tests before duplicating exact messages, inputs, and invariants?
+- Does the test render the full application or page more times than its unique scenarios require?
+- Are repeated accessibility-tree queries or realistic user-event sequences necessary to the contract?
+- Could a direct event prove a single handler transition without losing meaningful browser behavior?
+- When expensive assertions were removed, is their remaining coverage explicit and verified?
+- For test-performance changes, are before/after timings measured under comparable representative commands?
+
+Treat duplicated high-level coverage as a maintainability and CI reliability issue, not harmless extra defense. Recommend moving rule matrices to pure tests, state visibility to unit/hook tests, and retaining one representative higher-level wiring or accessibility assertion.
+
 ### 4. Propose structural remedies
 
 When you flag a structural issue, propose the concrete move:
@@ -199,6 +212,12 @@ Never claim tests pass or a build succeeds unless you ran the command and saw su
 - [ ] No obvious hot-path regressions
 - [ ] Performance claims are measured or clearly labeled
 
+### Tests
+- [ ] Behaviors are tested at the lowest sufficient layer
+- [ ] Higher-level tests provide unique boundary confidence
+- [ ] Expensive renders, queries, and interactions are necessary
+- [ ] Removed assertions remain covered at an owning layer
+
 ### Verification
 - [ ] Relevant tests/build/lint/type checks run or explicitly skipped with reason
 - [ ] Verification story documented
@@ -211,6 +230,8 @@ Never claim tests pass or a build succeeds unless you ran the command and saw su
 - Security-sensitive changes without security-focused scrutiny.
 - Large PRs that are too big to review properly.
 - Bug fixes without regression tests.
+- Validation matrices repeated through full page or E2E fixtures without unique boundary confidence.
+- Multiple full-app renders or realistic interaction sequences used to prove a single handler contract.
 - Comments without severity labels.
 - Accepting "I'll clean it up later."
 - Refactors that move code without reducing concepts.

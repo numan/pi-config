@@ -9,6 +9,7 @@ Quick reference for common testing patterns across the stack. Use alongside the 
 - [Common Assertions](#common-assertions)
 - [Mocking Patterns](#mocking-patterns)
 - [React/Component Testing](#reactcomponent-testing)
+- [Layered Test Refactoring](#layered-test-refactoring)
 - [API / Integration Testing](#api--integration-testing)
 - [E2E Testing (Playwright)](#e2e-testing-playwright)
 - [Test Anti-Patterns](#test-anti-patterns)
@@ -153,6 +154,71 @@ describe('TaskForm', () => {
   });
 });
 ```
+
+## Layered Test Refactoring
+
+When a slow page test repeats rule coverage, separate the contracts by ownership rather than splitting the scenario into more full-page tests.
+
+### 1. Keep the rule matrix pure
+
+```typescript
+it.each([
+  ['not a price', 'Price must be a number.'],
+  ['-1', 'Price cannot be negative.'],
+  ['12.345', 'Price can include up to two decimal places.'],
+])('validates price %j', (value, message) => {
+  expect(validatePrice(value)).toBe(message);
+});
+```
+
+This layer owns all representative invalid inputs and exact messages.
+
+### 2. Test visibility as state
+
+```typescript
+it('reveals only touched errors', () => {
+  const errors = {
+    clientName: 'Client name is required.',
+    price: 'Price must be a number.',
+  };
+
+  expect(filterTouchedErrors(errors, new Set(['price']))).toEqual({
+    price: 'Price must be a number.',
+  });
+});
+```
+
+This layer owns touched, hidden, reveal-all, and recovery state transitions.
+
+### 3. Keep one page-level wiring assertion
+
+```tsx
+it('shows the required error after the field is touched', async () => {
+  render(<QuotePage />);
+
+  const clientName = await screen.findByLabelText(/client name/i);
+  expect(clientName).not.toHaveAccessibleDescription();
+
+  fireEvent.blur(clientName);
+
+  expect(clientName).toHaveAccessibleDescription('Client name is required.');
+});
+```
+
+This layer proves the input is wired to touched state and exposes its error accessibly. It does not repeat every validation input or state transition.
+
+### Redundancy checklist
+
+Before refactoring, search the suite and record:
+
+| Contract | Owning layer | Higher-level unique confidence |
+|---|---|---|
+| Validation values and messages | Pure validator test | None |
+| Touched/error filtering | Unit or hook test | None |
+| Input blur reaches touched state | Component/page smoke test | Event wiring and accessible description |
+| Multi-page user journey | Browser/E2E | Routing and browser integration |
+
+Remove an expensive assertion only after identifying where its contract remains covered. If no owning test exists, add the lower-level test first. Measure before and after with the same isolated and representative suite/coverage commands; splitting one slow page test into several page tests is not an optimization when total renders increase.
 
 ## API / Integration Testing
 

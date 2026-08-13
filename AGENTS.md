@@ -69,6 +69,14 @@ Read every file before modifying it. Understand the surrounding pattern,
 related tests, types, and callers. Prefer an existing project pattern over an
 invented one.
 
+### Discover repository commands
+
+Before running or recommending project commands, inspect the nearest
+instructions, manifests, checked-in wrappers, CI, and neighboring tests. Use the
+repository's package manager or build tool and its scripts or wrappers.
+Distinguish focused iteration commands from representative completion checks.
+Skill commands are examples, not defaults; do not assume npm.
+
 ### Find the root cause
 
 For failures, first reproduce or observe the issue, form a hypothesis from the
@@ -92,7 +100,32 @@ Remove temporary scripts, debug output, commented-out experiments, hardcoded
 test values, disabled tests, and other artifacts created during the work.
 Don't alter unrelated user changes.
 
+### Testing strategy
+
+For any feature, bug fix, or refactor that creates, changes, removes, or
+restructures automated tests, load and apply the `testing-strategy` skill
+before choosing the test layer or editing assertions. For new or changed
+behavior, pair it with `test-driven-development` when a red-green-refactor
+workflow is practical.
+
+Before completion, verify and report when relevant that:
+
+- every meaningful contract has an owning test
+- higher-level coverage adds unique boundary or user-flow confidence
+- removed assertions remain covered or are explicitly shown to be redundant
+- interaction fidelity matches the behavior under test
+- targeted and representative affordable regression checks pass, or any
+  limitation is reported
+
+For non-trivial test ownership or removal decisions, include the coverage map
+required by `testing-strategy`.
+
 ### Validate behavior
+
+When browser testing requires authentication, check for a project-local
+`.testing-credentials` file before asking the user for credentials. Treat the
+file as sensitive: verify it is ignored by version control, never commit it,
+and do not expose its contents in logs or responses.
 
 Choose validation that exercises the changed behavior:
 
@@ -111,12 +144,14 @@ Material completion claims require direct verification. Descriptive findings
 must cite the inspected source. Label unresolved hypotheses and uncertainty
 instead of overstating confidence.
 
+Lead reports with conclusions and include only substantive sections unless an
+exact schema applies. Omit empty headings and repeated process narration.
+
 ## Context and skills
 
-Load only context relevant to the current task. Read the target files, related
-tests and types, and one useful analogous implementation before widening the
-search. Summarize or start a focused session when accumulated context becomes
-stale.
+Keep context as compact as practical. Load only task-relevant files, tests,
+types, and one useful analogue before widening. Prefer summaries over raw
+history, and start a focused session when context becomes stale.
 
 Use the minimum skill set that fully covers the task. A skill owns its
 specialized procedure; don't restate that procedure in agent prompts or task
@@ -124,15 +159,18 @@ templates. Follow an activated skill's required gates and verification steps.
 Keep security and authorization invariants in this global policy rather than in
 optional skills.
 
+Use the `agent-browser` skill whenever browser interaction would be useful for
+the current task.
+
 The `commit` skill is mandatory before every git commit. Don't commit unless the
 user or active workflow authorizes a commit.
 
 ## Subagents
 
-Delegate only when work divides into independent, bounded streams and the
-expected benefit from parallelism, specialist focus, or context isolation
-justifies the additional cost and coordination. Keep small tasks, sequential
-reasoning, and shared-state edits in one agent.
+Prefer delegation whenever work can be isolated into a bounded job. Use
+subagents to keep main context compact and gain specialist focus or
+parallelism. Keep tightly sequential or shared-state work in one agent when
+delegation would add more coordination than value.
 
 Use specialists according to their role:
 

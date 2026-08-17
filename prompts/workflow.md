@@ -16,8 +16,10 @@ validation, and an independent final review.
 2. Spawn a `scout` only when focused codebase facts are still needed for
    planning. Wait for it and read its artifact.
 3. Spawn the interactive `planner` with the user request, known constraints,
-   scout evidence, and a target plan path. Let it resolve material ambiguity,
-   get approach approval, validate the design, write the plan, and create todos.
+   scout evidence, a target plan path, and access to `subagent_done`. Let it
+   resolve material ambiguity, get approach approval, validate the design,
+   write the plan, and create todos. Instruct it to call `subagent_done`
+   immediately after reporting its completed planning artifacts and todos.
 4. Read and present the concrete plan and ordered todos. Wait for explicit user
    approval before implementation.
 5. Execute approved todos sequentially with `worker` agents in the same

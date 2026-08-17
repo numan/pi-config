@@ -1,6 +1,6 @@
 ---
 name: create-github-pr
-description: Validate and push the current branch, then create or update its GitHub pull request and description.
+description: Validate and push the current branch, then create or update its GitHub pull request, including verified stacked-PR navigation.
 ---
 
 # Create or Update a GitHub Pull Request
@@ -34,6 +34,15 @@ Stop before creating a PR from the default branch. Confirm the default branch wi
 ```bash
 git symbolic-ref --quiet --short refs/remotes/origin/HEAD
 ```
+
+Resolve the intended PR base before generating the summary or creating the PR:
+
+1. Use an explicit base supplied by the user or project instructions.
+2. Otherwise check `git config --get branch."$BRANCH".gh-merge-base`.
+3. Otherwise use the repository default branch.
+4. If same-repository PR metadata and git ancestry identify a unique closest open PR head as a plausible non-default parent, ask the user to confirm that stacked base instead of silently targeting the default branch.
+
+Verify that the selected remote base exists. Use this same base for branch-only summary scope and PR creation.
 
 Check whether a PR already exists for the current branch:
 
@@ -100,17 +109,27 @@ If the branch already has an upstream, `git push` is sufficient. If push fails, 
 
 Generate a comprehensive GitHub Pull Request summary for the current branch and use it as the PR body. Save the exact GitHub markdown to a temporary file, with no prose before or after the markdown.
 
+If verified PR metadata shows that the branch is part of a stack, request the summary's `## Stack navigation` section. Before the current PR has a number and URL, generate the rest of the body without inventing navigation links; add navigation after creation.
+
 Derive a concise PR title from the branch intent and commits. If the title is ambiguous, ask the user for the title.
 
 ### 4.4 Create the PR
 
-Create the PR with `gh`:
+Create the PR against the verified base with `gh`:
 
 ```bash
-gh pr create --title "$TITLE" --body-file "$BODY_FILE"
+gh pr create --base "$BASE_BRANCH" --title "$TITLE" --body-file "$BODY_FILE"
 ```
 
-After creation, show the PR URL and include the validation command that passed. If the PR was created despite failing validation by explicit user approval, state that clearly.
+After creation, inspect the new PR's `headRefName` and `baseRefName` plus repository PR metadata. If it belongs to a verified stack, regenerate the description now that the current PR number and URL exist, then apply it with:
+
+```bash
+gh pr edit --body-file "$BODY_FILE"
+```
+
+Update only the newly created PR. Do not edit neighboring stack PRs unless the user explicitly asks.
+
+After creation and any stacked-navigation update, show the PR URL and include the validation command that passed. If the PR was created despite failing validation by explicit user approval, state that clearly.
 
 ## Step 5: Update an Existing Pull Request
 
@@ -159,28 +178,30 @@ Fetch the current PR body:
 gh pr view --json body --jq '.body'
 ```
 
-Regenerate the PR description if either condition is true:
+Choose one update mode:
 
-- New commits were pushed during this workflow.
-- The existing PR body is empty or does not contain a detailed PR description.
+- **Full regeneration:** Use when new commits were pushed, or when the existing body is empty or lacks a detailed description.
+- **Navigation-only update:** Use when no commits were pushed, the body is detailed, and verified stack relationships show that `## Stack navigation` is missing, stale, or inconsistent.
+- **No update:** Use when neither condition applies.
 
-Treat a body as detailed when it includes meaningful `## Problem`, `## Solution`, and `## QA` sections or an equivalent reviewer-focused structure. Do not overwrite a detailed body when no new commits were pushed.
+Treat a body as detailed when it includes meaningful `## Problem`, `## Solution`, and `## QA` sections or an equivalent reviewer-focused structure.
 
 ### 5.4 Update the PR Description
 
-If regeneration is needed:
+For full regeneration:
 
 1. Generate a comprehensive GitHub Pull Request summary for the current branch and use it as the new body.
 2. Save the exact GitHub markdown to a temporary file.
-3. Update the PR with `gh`:
+3. Update the PR with `gh pr edit --body-file "$BODY_FILE"`.
 
-```bash
-gh pr edit --body-file "$BODY_FILE"
-```
+For a navigation-only update:
 
-After updating, show the PR URL and summarize whether commits were pushed and whether the description changed.
+1. Generate only the verified `## Stack navigation` section.
+2. Remove any existing `## Stack navigation` section from its heading through the byte before the next `## ` heading, then prepend the generated section.
+3. Preserve the remainder of the existing body byte-for-byte, including screenshots, manual QA notes, comments, and formatting.
+4. Save the composed body to a temporary file and update it with `gh pr edit --body-file "$BODY_FILE"`.
 
-If regeneration is not needed, show the PR URL and state that no description update was necessary.
+After updating, show the PR URL and summarize whether commits were pushed and whether the description changed. For no update, show the PR URL and state that no description update was necessary.
 
 ## Step 6: Final Validation
 
@@ -190,7 +211,7 @@ Before reporting completion, verify the final PR state:
 gh pr view --json number,url,author,headRefName,baseRefName,state
 ```
 
-For new PRs, also verify the PR exists on the expected branch. For updates, verify the PR author is the authenticated user.
+For new PRs, also verify the PR exists on the expected branch. For updates, verify the PR author is the authenticated user. When stack navigation is present, verify that it is the first section and that every PR number, title, URL, layer, endpoint label, and current marker matches GitHub metadata.
 
 Report the outcome in this format:
 

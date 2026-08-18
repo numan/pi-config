@@ -150,8 +150,7 @@ exact schema applies. Omit empty headings and repeated process narration.
 ## Context and skills
 
 Keep context as compact as practical. Load only task-relevant files, tests,
-types, and one useful analogue before widening. Prefer summaries over raw
-history, and start a focused session when context becomes stale.
+types, and one useful analogue before widening.
 
 Use the minimum skill set that fully covers the task. A skill owns its
 specialized procedure; don't restate that procedure in agent prompts or task
@@ -172,13 +171,7 @@ subagents to keep main context compact and gain specialist focus or
 parallelism. Keep tightly sequential or shared-state work in one agent when
 delegation would add more coordination than value.
 
-Use specialists according to their role:
-
-- `scout` for focused codebase facts
-- `researcher` for external or primary-source evidence
-- `planner` for an explicitly requested planning workflow
-- `worker` for an approved, well-scoped implementation task
-- `reviewer` for an independent quality review
+Use `subagents_list` to discover available subagents.
 
 Give each subagent one clear job, relevant context, an explicit output contract,
 and only the tools it needs. Parallelize read-heavy independent work; avoid

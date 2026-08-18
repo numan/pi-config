@@ -1,130 +1,136 @@
 # Pi Config
 
-My personal [pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) configuration — agents, skills, extensions, and prompts that shape how pi works for me.
+Personal [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)
+configuration for evidence-backed engineering workflows, visible subagents,
+specialized review, and durable todo/QA artifacts.
 
 ## Setup
 
-Clone this repo directly to `~/.pi/agent/` — pi auto-discovers everything from there (extensions, skills, agents, AGENTS.md, mcp.json). No symlinks, no manual wiring.
-
-### Fresh machine
-
-```bash
-# 1. Install pi (https://github.com/badlogic/pi)
-
-# 2. Clone this repo as your agent config
-mkdir -p ~/.pi
-git clone git@github.com:HazAT/pi-config ~/.pi/agent
-
-# 3. Run setup (installs packages + extension deps)
-cd ~/.pi/agent && ./setup.sh
-
-# 4. Add your API keys to ~/.pi/agent/auth.json
-
-# 5. Restart pi
-```
-
-### Updating
+Pi discovers global resources from `~/.pi/agent`, so clone this repository there.
+This checkout intentionally uses a local development checkout of
+`pi-interactive-subagents` at `~/Repos/pi-interactive-subagents`.
 
 ```bash
-cd ~/.pi/agent && git pull
+# Install Pi first.
+mkdir -p ~/.pi ~/Repos
+git clone git@github.com:numan/pi-interactive-subagents.git \
+  ~/Repos/pi-interactive-subagents
+git clone git@github.com:numan/pi-config.git ~/.pi/agent
+cd ~/.pi/agent
+./setup.sh
 ```
 
----
+Add provider credentials through Pi's normal authentication flow or
+`~/.pi/agent/auth.json`, then restart Pi. `setup.sh` treats the tracked
+`settings.json` as the source of truth, verifies local package paths, and runs
+`pi update --extensions`; it does not maintain a second embedded settings file.
+
+To update:
+
+```bash
+cd ~/.pi/agent
+git pull
+./setup.sh
+```
 
 ## Architecture
 
-This config uses **subagents** — visible pi sessions spawned in cmux terminals. Each subagent is a full pi session with its own identity, tools, and skills. The user can watch agents work in real-time and interact when needed.
-
-### Key Concepts
-
-- **Subagents** — visible cmux terminals running pi. Autonomous agents self-terminate via `subagent_done`. Interactive agents wait for the user.
-- **Agent definitions** (`agents/*.md`) — one source of truth for model, tools, skills, and identity per role.
-- **Plan workflow** — `/plan` spawns an interactive planner subagent, then orchestrates workers and reviewers.
-- **Iterate pattern** — `/iterate` forks the session into a subagent for quick fixes without polluting the main context.
-
----
+- **Global policy:** `AGENTS.md` defines authorization, evidence, testing,
+  validation, context, and delegation boundaries.
+- **Named agents:** `agents/*.md` defines each role's model, thinking level,
+  tools, skills, spawning behavior, and completion contract.
+- **Visible subagents:** `pi-interactive-subagents` launches observable Pi
+  sessions, with cmux integration when cmux is available.
+- **Durable work state:** the local todos extension stores file-backed tasks;
+  workers append structured completion evidence before closing a todo.
+- **Durable review state:** `/review`, `/workflow`, and `/ship` use the current
+  session's adjacent `*.review.md` record when `PI_SESSION_FILE` is available.
+- **Progressive disclosure:** specialist procedures live in `skills/` and load
+  only when their descriptions match the task.
 
 ## Agents
 
-Specialized roles with baked-in identity, workflow, and review rubrics. Most agents now ship with the [pi-interactive-subagents](https://github.com/HazAT/pi-interactive-subagents) package; local overrides live in `agents/`.
+All role overrides in this repository are local:
 
-| Agent | Source | Purpose |
-|-------|--------|---------|
-| **planner** | local | Interactive planning — clarifies WHAT to build lightly, figures out HOW, writes the plan, and creates todos |
-| **scout** | package | Fast codebase reconnaissance — gathers context without making changes |
-| **worker** | package | Implements tasks from todos, commits with polished messages |
-| **reviewer** | package | Reviews code for quality, security, correctness |
-| **visual-tester** | package | General visual QA agent — available for ad hoc browser/UI checks |
-| **claude-code** | package | Delegates autonomous tasks to Claude Code |
-| **researcher** | local | Deep research using parallel.ai tools + Claude Code for code analysis |
-| **browser-tester** | local | Dedicated visually-test-branch browser tester — executes feature handoffs, captures run-dir evidence, writes deterministic outcomes |
-| **autoresearch** | local | Autonomous experiment loop — runs, measures, and optimizes iteratively |
+| Agent | Purpose |
+|---|---|
+| `planner` | Resolve material decisions, write a plan, and create todos |
+| `worker` | Implement one scoped task and return verified completion evidence |
+| `reviewer` | Independent correctness and quality review |
+| `scout` | Read-only repository reconnaissance |
+| `researcher` | External and primary-source research |
+| `context-builder` | Coordinate bounded evidence gathering |
+| `code-quality` | Approval-gated behavior-preserving simplification |
+| `security-auditor` | Trust-boundary and exploitability review |
+| `test-engineer` | Coverage analysis or test-only implementation |
+| `web-performance-auditor` | Source- or measurement-backed web performance audit |
+| `visual-tester` | General browser-based visual QA |
+| `browser-tester` | Branch visual-QA artifact execution |
+| `autoresearch` | Bounded autonomous experiment batches |
 
-## Skills
+The installed subagent package also provides runtime tools and any additional
+package-owned roles visible through `subagents_list`.
 
-Loaded on-demand when the context matches.
+## Skills and prompts
 
-| Skill | When to Load |
-|-------|-------------|
-| **commit** | Making git commits (mandatory for every commit) |
-| **code-simplifier** | Simplifying or cleaning up code |
-| **frontend-design** | Building web components, pages, or apps |
-| **github** | Working with GitHub via `gh` CLI |
-| **iterate-pr** | Iterating on a PR until CI passes |
-| **learn-codebase** | Onboarding to a new project, checking conventions |
-| **session-reader** | Reading and analyzing pi session JSONL files |
-| **skill-creator** | Scaffolding new agent skills |
-| **write-todos** | Writing clear, actionable todos from a plan |
-| **spec-visual-brainstorming** | Visual mockups, diagrams, and comparisons inside the planner's requirements-clarification phase |
-| **self-improve** | End-of-session retrospective — surfaces improvements and creates todos |
-| **cmux** | Managing terminal sessions via cmux |
-| **presentation-creator** | Creating data-driven presentation slides |
-| **add-mcp-server** | Adding MCP server configurations |
-| **visually-test-branch** | Running branch-focused visual QA for the current local branch with researcher + browser-testing subagents |
+The tracked skills cover planning, implementation, TDD and testing strategy,
+debugging, review, security, performance, observability, API/UI design,
+documentation, CI/CD, migration, GitHub, launch, and Pi configuration. Use
+`/skill:name` for direct invocation or let Pi load matching skills on demand.
 
-## Extensions
+Tracked prompt templates:
 
-| Extension | What it provides |
-|-----------|------------------|
-| **answer/** | `/answer` command + `Ctrl+.` — extracts questions into interactive Q&A UI |
-| **cmux/** | cmux integration — notifications, sidebar, workspace tools |
-| **cost/** | `/cost` command — API cost summary |
-| **execute-command/** | `execute_command` tool — lets the agent self-invoke slash commands |
-| **todos/** | `/todos` command + `todo` tool — file-based todo management |
-| **visually-test-branch/** | `/visually-test-branch` launcher — seeds one `pi/visual-tests/...` run directory, then injects the branch QA workflow |
+| Command | Purpose |
+|---|---|
+| `/workflow` | Plan, approve, implement sequentially, and review |
+| `/review` | Review a defined change and update the durable review record |
+| `/ship` | Fan out release checks and synthesize GO or NO-GO |
+| `/test` | Apply the repository's testing strategy |
+| `/code-simplify` | Find and perform scoped simplifications |
+| `/webperf` | Audit browser-facing performance |
 
-## Commands
+Package-provided commands include `/plan`, `/subagent`, and `/iterate`. Local
+extension commands include `/todos`, `/cost`, and `/visually-test-branch`.
 
-| Command | Description |
-|---------|-------------|
-| `/plan <description>` | Start a planning session — spawns planner subagent, then orchestrates execution |
-| `/subagent <agent> <task>` | Spawn a subagent (e.g., `/subagent scout analyze the auth module`) |
-| `/iterate [task]` | Fork session into interactive subagent for quick fixes |
-| `/answer` | Extract questions into interactive Q&A |
-| `/todos` | Visual todo manager |
-| `/cost` | API cost summary |
-| `/visually-test-branch` | Analyze the current local branch, use `researcher` for branch understanding, run dedicated `browser-tester` subagents backed by `agent-browser`, and save `report/index.html` + `summary.json` inside one `pi/visual-tests/...` run directory |
+## Local extensions
 
-`/visually-test-branch` is for local branch QA only. It keeps all run artifacts in one seeded directory, summarizes non-UI changes separately, and only claims indirect validation evidence for those changes when the run actually observed it.
+| Extension | Purpose |
+|---|---|
+| `extensions/cmux/` | cmux status, notifications, and session metadata |
+| `extensions/cost/` | `/cost` API-cost summary |
+| `extensions/execute-command/` | Agent-triggered commands and steering |
+| `extensions/todos/` | `/todos` TUI and the file-backed `todo` tool |
+| `extensions/visually-test-branch/` | Branch QA run seeding and report contracts |
 
-## Packages
+## Package configuration
 
-Installed via `pi install`, managed in `settings.json`.
+`settings.json` is authoritative. Its package sources are:
 
-| Package | Description |
-|---------|-------------|
-| [pi-interactive-subagents](https://github.com/HazAT/pi-interactive-subagents) | Subagent tools + agent definitions + `/plan`, `/subagent`, `/iterate` commands |
-| [pi-parallel](https://github.com/HazAT/pi-parallel) | Parallel web search, extract, research, and enrich tools |
-| [pi-smart-sessions](https://github.com/HazAT/pi-smart-sessions) | AI-generated session names |
-| [pi-diff-review](https://github.com/badlogic/pi-diff-review) | Interactive diff review UI |
-| [chrome-cdp-skill](https://github.com/pasky/chrome-cdp-skill) | Chrome DevTools Protocol CLI for visual testing |
+| Source | Purpose |
+|---|---|
+| `git:github.com/HazAT/pi-smart-sessions` | AI-generated session names; only `extensions/smart-sessions.ts` is enabled |
+| `../../Repos/pi-interactive-subagents` | Local development checkout for subagent tools and commands |
+| `npm:pi-web-access` | Web search, source checking, and content retrieval |
+| `npm:pi-powerline-footer` | Footer status information |
+| `npm:@juicesharp/rpiv-ask-user-question` | Structured question UI |
+| `npm:@juicesharp/rpiv-btw` | Side-channel interaction support |
+| `npm:pi-better-openai` | OpenAI provider behavior customization |
 
----
+The default model is `openai-codex/gpt-5.6-sol` at medium thinking. Local model
+providers and overrides live in `models.json`; MCP is currently empty.
+
+## Validation
+
+```bash
+npm test
+node --test test/visually-test-branch.test.ts
+bash -n setup.sh
+jq empty settings.json models.json mcp.json package.json
+pi list
+```
 
 ## Credits
 
-Extensions from [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff): `answer`, `todos`
-
-Skills from [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff): `commit`, `github`
-
-Skills from [getsentry/skills](https://github.com/getsentry/skills): `code-simplifier`
+Selected skills originate from or incorporate work by mitsuhiko/agent-stuff,
+getsentry/skills, Google Gemini CLI, and Addy Osmani's agent-skills collection.
+Individual files retain their source and license metadata.

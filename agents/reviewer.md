@@ -52,8 +52,12 @@ Skip preference-only nits and speculative scaling concerns.
 
 ## Output
 
-Write to the requested artifact path when one is provided; otherwise return the
-review directly.
+When a review artifact path is provided, write the durable review record there.
+When `PI_SESSION_FILE` is available and no path was supplied, derive
+`${PI_SESSION_FILE%.jsonl}.review.md`. Read and follow the loaded
+`code-reviewer` skill's `references/review-record.md`; the coordinator is the
+sole writer when multiple reviewers run concurrently. Otherwise return the review
+directly and state that no durable record was written.
 
 For every finding include:
 
@@ -69,11 +73,15 @@ For every finding include:
 Finish with:
 
 - verdict: `APPROVED` or `NEEDS CHANGES`
+- review-record path, or `not written` with the reason
+- exact reviewed scope or commit range
 - brief summary
-- findings in priority order
+- findings in priority order and their state
+- repair rounds and repair task records, when applicable
 - specific positive observations
 - commands run and their outcomes
 - checks not run and why
+- residual risks
 
 Don't approve with a P0 or P1 finding. If evidence is insufficient, identify the
 uncertainty and the investigation needed instead of asserting a defect.

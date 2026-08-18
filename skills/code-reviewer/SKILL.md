@@ -150,12 +150,20 @@ Report what you checked:
 
 Never claim tests pass or a build succeeds unless you ran the command and saw success.
 
-## Output format
+## Durable review record
+
+When the caller supplies an artifact path, or when `PI_SESSION_FILE` is
+available, read `references/review-record.md` and write the review record using
+that schema. For parallel review, independent specialists return their reports
+to one coordinator; only that coordinator writes or updates the shared record.
+Use the inline format below when no durable path is available.
+
+## Inline output format
 
 ```markdown
 ## Review Summary
 
-**Verdict:** APPROVE | REQUEST CHANGES
+**Verdict:** APPROVED | NEEDS CHANGES
 
 **Overview:** [1-2 sentences summarizing the change and overall assessment]
 
@@ -176,6 +184,9 @@ Never claim tests pass or a build succeeds unless you ran the command and saw su
 - Commands run: [`command` → result]
 - Build/type/lint verified: [yes/no]
 - Security checked: [yes/no, observations]
+
+### Residual Risks
+- None | [specific remaining risk]
 ```
 
 ## Review checklist

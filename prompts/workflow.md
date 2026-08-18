@@ -28,8 +28,30 @@ validation, and an independent final review.
 6. Run `code-quality` only when the resulting branch has material
    behavior-preserving simplification opportunities. Its checklist requires
    approval before cleanup.
-7. Run `reviewer` after implementation and approved cleanup. Fix P0/P1 findings
-   through scoped todos, then re-review when fixes are substantial.
+7. Run `reviewer` after implementation and approved cleanup. When
+   `PI_SESSION_FILE` is available, use `${PI_SESSION_FILE%.jsonl}.review.md` as
+   the durable review record and keep one coordinator as its sole writer. Fix
+   P0/P1 findings through scoped todos, then re-review when fixes are
+   substantial. Record each attempt, finding state, and repair result before
+   continuing.
+
+Every implementation or review-repair worker must return this exact completion
+contract:
+
+```markdown
+Status: DONE | BLOCKED
+Task ID: TODO-... | REVIEW-FIX-...
+Files changed:
+- `path` — delivered behavior
+Verification:
+- `command` — pass, fail, or blocked with key output
+Commit SHA: `<full SHA>` | not authorized | none — blocked before commit
+Residual risks: none | specific remaining risk or blocker
+```
+
+For repair work, copy the verified contract into the review record and the
+repair todo before closing it. Do not infer completion from subagent exit or
+idle state.
 
 ## Boundaries
 
@@ -45,4 +67,5 @@ validation, and an independent final review.
 ## Completion
 
 Report the plan path, todos completed, commits created, validation commands and
-results, review verdict, addressed findings, and remaining risks or blockers.
+results, review-record path or why none was written, review verdict, addressed
+findings, repair rounds, and remaining risks or blockers.

@@ -1,7 +1,7 @@
 ---
 name: worker
 description: Implements one well-scoped task, validates the changed behavior, updates its todo, and commits only when explicitly authorized.
-tools: read, bash, write, edit
+tools: read, bash, write, edit, todo
 deny-tools: claude
 model: openai-codex/gpt-5.6-sol
 thinking: medium
@@ -62,10 +62,25 @@ report the exact blocker and the next-best validation.
 If the task explicitly authorizes a commit, load the `commit` skill and commit
 only this task's changes. Otherwise leave changes uncommitted.
 
-Close the todo only after implementation and validation succeed. The final
-response must include:
+Use this completion contract for every task, including review repairs:
 
-- files changed and behavior delivered
-- validation commands and results
-- todo and commit status
-- blockers or remaining risks
+```markdown
+Status: DONE | BLOCKED
+Task ID: TODO-... | REVIEW-FIX-... | supplied task identifier
+Files changed:
+- `path` — delivered behavior
+Verification:
+- `command` — pass, fail, or blocked with key output
+Commit SHA: `<full SHA>` | not authorized | none — blocked before commit
+Residual risks: none | specific remaining risk or blocker
+```
+
+Use `not authorized` whenever the task did not explicitly authorize a commit.
+Do not substitute a branch name, abbreviated SHA, or vague statement such as
+"tests pass" for the required evidence.
+
+For a claimed todo, append this completed record to the todo body before setting
+its status to closed. Close it only when `Status: DONE` and the required
+validation succeeded. For `Status: BLOCKED`, append the record, release the todo,
+and leave it open. The final response must reproduce the same contract so the
+coordinator can verify it without reconstructing evidence from the transcript.

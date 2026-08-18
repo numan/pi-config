@@ -5,6 +5,13 @@ argument-hint: "[scope]"
 
 Invoke `shipping-and-launch` for `$ARGUMENTS` or the current change.
 
+When `PI_SESSION_FILE` is available, derive
+`${PI_SESSION_FILE%.jsonl}.review.md` as the durable review-record path and
+follow the durable review record section of the loaded `code-reviewer` skill.
+The coordinator alone writes this shared record; specialists return reports to
+the coordinator. If no persistent session is available, return the synthesis
+inline and state that no durable record was written.
+
 For a material release, spawn these independent analysis-only agents in
 parallel:
 
@@ -28,7 +35,13 @@ Synthesize:
 ### Acknowledged risks
 ### Rollback triggers and procedure
 ### Specialist reports
+### Review record
 ```
+
+Write the synthesis to the durable review record using `Decision: GO | NO-GO`,
+the exact reviewed range, verification evidence, finding states, specialist
+reports, any repair task records, and residual risks. Preserve relevant evidence
+from an existing record instead of silently discarding it.
 
 A Critical security or P0 review finding is a blocker unless the user explicitly
 accepts the documented risk. A GO decision requires a concrete rollback plan

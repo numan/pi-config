@@ -9,6 +9,13 @@ description: Prepare a production launch with release checks, monitoring, staged
 
 Ship with confidence. The goal is not just to deploy — it's to deploy safely, with monitoring in place, a rollback plan ready, and a clear understanding of what success looks like. Every launch should be reversible, observable, and incremental.
 
+When a durable review-record path is supplied, or when `PI_SESSION_FILE` is
+available, read `../code-reviewer/references/review-record.md`. The coordinator
+alone updates that record with the GO or NO-GO decision, exact reviewed range,
+verification, specialist reports, finding states, repair task evidence, and
+residual risks. Independent specialists must not write the shared record
+concurrently.
+
 ## When to Use
 
 - Deploying a feature to production for the first time
@@ -293,6 +300,7 @@ Every deployment needs a rollback plan before it happens:
 
 Before deploying:
 
+- [ ] Durable review record updated, or inline-only reporting reason stated
 - [ ] Pre-launch checklist completed (all sections green)
 - [ ] Feature flag configured (if applicable)
 - [ ] Rollback plan documented

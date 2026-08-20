@@ -19,7 +19,8 @@
   ],
   "hideThinkingBlock": false,
   "extensions": [
-    "+extensions/cmux/index.ts"
+    "+extensions/cmux/index.ts",
+    "+extensions/herdr-agent-state.ts"
   ],
   "theme": "dark"
 }

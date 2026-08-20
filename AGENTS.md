@@ -94,6 +94,21 @@ consumer, migration requirement, or explicit user requirement establishes it.
 Otherwise prefer the clean forward design and remove obsolete product paths
 instead of maintaining hypothetical legacy behavior.
 
+### Limit the blast radius
+
+When planning a new feature, refactor, or update to existing code, identify the
+smallest affected surface before implementation. Trace direct callers,
+consumers, contracts, persisted data, configuration, and tests that could be
+impacted, and avoid changing unrelated modules or behavior.
+
+Prefer narrow, independently verifiable changes over broad rewrites. Reuse
+existing boundaries and abstractions when they fit; don't widen public APIs,
+shared types, schemas, dependencies, or deployment scope without a demonstrated
+need. For changes that cannot be isolated, make the coupling and affected
+areas explicit in the plan and ask the user whether to preserve a rollback
+path; don't add one without explicit authorization. Sequence the work so each
+step can be validated before expanding scope.
+
 ### Keep the workspace clean
 
 Remove temporary scripts, debug output, commented-out experiments, hardcoded

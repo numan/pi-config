@@ -65,7 +65,6 @@ All role overrides in this repository are local:
 | `test-engineer` | Coverage analysis or test-only implementation |
 | `web-performance-auditor` | Source- or measurement-backed web performance audit |
 | `visual-tester` | General browser-based visual QA |
-| `browser-tester` | Branch visual-QA artifact execution |
 | `autoresearch` | Bounded autonomous experiment batches |
 
 The installed subagent package also provides runtime tools and any additional
@@ -90,7 +89,7 @@ Tracked prompt templates:
 | `/webperf` | Audit browser-facing performance |
 
 Package-provided commands include `/plan`, `/subagent`, and `/iterate`. Local
-extension commands include `/todos`, `/cost`, and `/visually-test-branch`.
+extension commands include `/todos` and `/cost`.
 
 ## Local extensions
 
@@ -100,7 +99,6 @@ extension commands include `/todos`, `/cost`, and `/visually-test-branch`.
 | `extensions/cost/` | `/cost` API-cost summary |
 | `extensions/execute-command/` | Agent-triggered commands and steering |
 | `extensions/todos/` | `/todos` TUI and the file-backed `todo` tool |
-| `extensions/visually-test-branch/` | Branch QA run seeding and report contracts |
 
 ## Package configuration
 
@@ -123,7 +121,6 @@ providers and overrides live in `models.json`; MCP is currently empty.
 
 ```bash
 npm test
-node --test test/visually-test-branch.test.ts
 bash -n setup.sh
 jq empty settings.json models.json mcp.json package.json
 pi list

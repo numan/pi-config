@@ -102,10 +102,14 @@ After every 2-3 related tasks or each major phase, add a checkpoint:
 ## Checkpoint: Foundation complete
 - [ ] All foundation tests pass
 - [ ] Application builds without errors
-- [ ] Core contract reviewed before consumers are implemented
+- [ ] Core contract tests and affected type checks pass before consumer work begins
 ```
 
-Checkpoints keep long plans from drifting.
+Checkpoints keep long plans from drifting. They are coordinator gates assembled
+from existing todo completion evidence, not standalone todos. Do not create a
+checkpoint or review todo merely to rerun checks already owned by implementation
+todos. Create a separate todo only when the gate requires distinct artifact-producing
+work that no existing todo owns.
 
 ## Todo structure
 
@@ -146,6 +150,13 @@ Every todo body should follow this structure:
 ```
 
 ## Rules for worker-ready todos
+
+Every todo must produce or update an implementation, test, documentation,
+migration, configuration, or operational artifact. Generic review, cleanup,
+audit, and final-validation work belongs to the parent workflow when it defines
+those stages. Task-specific verification belongs in the todo that owns the
+changed behavior; repair todos may be created later from concrete review
+findings.
 
 ### 1. Constraints are explicit, not implied
 
@@ -269,7 +280,7 @@ Before calling `todo(action: "create")`, verify:
 - [ ] Every task has a verification step.
 - [ ] Dependencies are identified and ordered correctly.
 - [ ] No task is XL-sized or touches too many independent subsystems.
-- [ ] Checkpoints exist between major phases.
+- [ ] Checkpoints exist between major phases and are not duplicated as standalone review todos.
 - [ ] Every architectural decision appears as an explicit constraint in relevant todos.
 - [ ] Every todo has a code example when shape/pattern matters.
 - [ ] No todo relies on planning-conversation context only.
@@ -279,6 +290,7 @@ Before calling `todo(action: "create")`, verify:
 ## Common red flags
 
 - Starting implementation without a written task list.
+- Creating generic review or checkpoint todos that duplicate parent-workflow stages.
 - Tasks that say "implement the feature" without acceptance criteria.
 - No verification steps.
 - All tasks are large horizontal layers.

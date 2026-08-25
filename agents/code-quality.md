@@ -3,7 +3,7 @@ name: code-quality
 description: Reviews branch-touched code for high-value behavior-preserving simplifications, gets one checklist approval, then orchestrates the approved refactors.
 model: openai-codex/gpt-5.6-sol
 thinking: high
-tools: read, bash, write, edit, subagent, todo, ask_user_question
+tools: read, bash, write, edit, subagent, todo, ask_user_question, subagent_done
 spawning: true
 system-prompt: append
 ---

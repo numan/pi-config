@@ -50,6 +50,29 @@ Use priorities:
 
 Skip preference-only nits and speculative scaling concerns.
 
+## Proportionality
+
+A deterministic reproduction is not enough to make a finding P1. Evaluate:
+
+1. Likelihood in ordinary supported workflows.
+2. Severity of the resulting harm.
+3. Existing containment, especially authoritative backend checks.
+4. Complexity and regression risk of the smallest repair.
+5. Whether the behavior is inside the approved requirements.
+
+Rare UI timing races that do not bypass authorization, corrupt data, move money
+incorrectly, or defeat backend enforcement should normally be P2 or an
+accepted-risk candidate rather than a merge-blocking P1.
+
+If the smallest repair requires a new state machine, operation-generation
+system, or cross-cutting coordination absent from the approved plan, report a
+risk decision with simple and hardened options. Do not prescribe the larger
+implementation as automatically required unless the issue affects security,
+data integrity, financial correctness, or a common user path.
+
+Do not recursively expand review into adjacent theoretical races unless they
+are independently likely and material.
+
 ## Output
 
 When a review artifact path is provided, write the durable review record there.
@@ -83,5 +106,6 @@ Finish with:
 - checks not run and why
 - residual risks
 
-Don't approve with a P0 or P1 finding. If evidence is insufficient, identify the
+Don't approve with an unresolved P0 or an unaccepted P1. A user-approved,
+documented risk is not unresolved. If evidence is insufficient, identify the
 uncertainty and the investigation needed instead of asserting a defect.

@@ -35,16 +35,36 @@ validation, and an independent final review.
    `worker` agents in the same repository. Give each worker one todo, the plan
    path, relevant context, and explicit commit authorization. Read each result
    before starting the next.
-6. Run `code-quality` only when the resulting branch has material
-   behavior-preserving simplification opportunities. Its checklist requires
-   approval before cleanup.
-7. Run `reviewer` after implementation and approved cleanup. This is the sole
-   independent final-review stage. When `PI_SESSION_FILE` is available, use
+6. Run `reviewer` after implementation. This is the sole independent review
+   stage. When `PI_SESSION_FILE` is available, use
    `${PI_SESSION_FILE%.jsonl}.review.md` as the durable review record and keep
-   one coordinator as its sole writer. Create scoped review-repair todos only
-   from concrete findings, fix P0/P1 findings, then re-review when fixes are
-   substantial. Record each attempt, finding state, and repair result before
-   continuing.
+   one coordinator as its sole writer. Record each attempt, finding state, and
+   repair result before continuing.
+
+   Before creating a review-repair todo, triage each finding by:
+
+   - likelihood in normal supported use
+   - consequence, affected users, and expected frequency
+   - existing backend or system containment
+   - whether it violates an approved acceptance criterion
+   - remediation complexity and blast radius
+
+   Automatically repair P0 findings and P1 findings involving security,
+   authorization, data integrity, financial correctness, irreversible effects,
+   or a direct violation of approved requirements. For other P1 findings, do not
+   let review silently expand the approved scope. If the scenario is rare,
+   timing-dependent, and contained by an authoritative backend, present it as an
+   accepted-risk candidate and ask the user before creating a repair todo.
+
+   Stop and request a user risk decision when a proposed repair requires a new
+   state machine or cross-cutting abstraction, is materially broader than the
+   original implementation, creates another finding of comparable severity, or
+   follows an already completed autonomous repair round. Offer three choices:
+   accept the risk, implement the hardening, or revert to the simpler design.
+   Re-review substantial repairs after the decision.
+7. After independent review and any approved repairs are complete, run
+   `code-quality` only when the resulting branch has material behavior-preserving
+   simplification opportunities. Its checklist requires approval before cleanup.
 
 Every implementation or review-repair worker must return this exact completion
 contract:

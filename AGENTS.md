@@ -94,6 +94,16 @@ consumer, migration requirement, or explicit user requirement establishes it.
 Otherwise prefer the clean forward design and remove obsolete product paths
 instead of maintaining hypothetical legacy behavior.
 
+### Risk proportionality
+
+A reproducible edge case is not automatically worth fixing. Compare likelihood,
+harm, existing containment, and repair complexity. Do not widen an approved
+scope for rare, bounded UI timing cases without explicit user approval.
+
+Preventative hardening remains appropriate for security, authorization, data
+integrity, financial correctness, irreversible effects, and realistically
+common failure paths.
+
 ### Limit the blast radius
 
 When planning a new feature, refactor, or update to existing code, identify the

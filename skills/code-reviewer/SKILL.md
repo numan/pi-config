@@ -126,19 +126,42 @@ Watch total file size too. If a small diff materially grows an already-large fil
 
 Separate refactors from feature work unless the cleanup is tiny and directly supports the feature.
 
-### 6. Categorize findings
+### 6. Apply a proportionality gate
+
+A reproducible edge case is not automatically merge-blocking. Before assigning
+severity, weigh:
+
+- likelihood in ordinary supported workflows
+- severity and reversibility of the harm
+- number of affected users and expected frequency
+- existing containment, especially authoritative server checks
+- whether the behavior violates an approved requirement
+- complexity and regression risk of the smallest repair
+
+Reserve merge-blocking findings for realistic incorrect behavior, security or
+authorization exposure, data or financial integrity risk, irreversible effects,
+or substantial regressions on active paths. Treat rare, bounded scenarios as
+optional or accepted-risk candidates when the system already contains the harm.
+
+If remediation requires a new state machine, cross-cutting operation tracking,
+or more concepts than the reviewed change, present the simple and hardened
+options instead of assuming the larger fix is required. Do not recursively
+broaden review into adjacent theoretical races unless they are independently
+likely and material.
+
+### 7. Categorize findings
 
 Use severity labels so the author knows what is required.
 
-- **Critical:** Blocks merge. Security vulnerability, data loss risk, broken functionality.
-- **Required:** Must address before merge. Wrong abstraction, missing validation, missing test, poor error handling, maintainability regression.
-- **Optional / Consider:** Useful improvement, not required.
+- **Critical:** Blocks merge. Security vulnerability, data loss risk, financial integrity failure, or broadly broken functionality.
+- **Required:** Must address before merge because it causes realistic incorrect behavior, security exposure, data or financial integrity risk, or a substantial maintainability regression on an active path.
+- **Optional / Consider:** Useful improvement, rare bounded edge case, or accepted-risk candidate; not required.
 - **Nit:** Minor style or formatting issue. Author may ignore.
 - **FYI:** Context only.
 
 Lead with high-leverage issues. A few high-confidence findings are better than a long list of cosmetic nits.
 
-### 7. Verify the verification
+### 8. Verify the verification
 
 Report what you checked:
 

@@ -1,257 +1,129 @@
 ---
 name: dispatching-parallel-agents
-description: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies using pi subagents
+description: Splits substantial independent work across Pi subagents and integrates their results. Use when asked to parallelize, delegate, fan out, or investigate multiple unrelated failures or subsystems. Do not use when tasks share mutable state or require sequential conclusions.
 ---
 
 # Dispatching parallel agents
 
-Use this skill to split independent work across multiple pi subagents and keep
-this session focused on orchestration. It is intentionally standalone: it does
-not replace the `pi-interactive-subagents` extension or any bundled agent
-skills. It gives the dispatch pattern; the extension supplies the runtime tools.
+Finish independent work concurrently without shared-state conflicts, then
+integrate and verify the combined result in the parent session.
 
-## Core principle
+## Decide whether to dispatch
 
-Dispatch one subagent per independent problem domain. Give each subagent a
-narrow, self-contained task, let them run concurrently, then integrate their
-results in the main session.
+Dispatch only when all of these are true:
 
-With `pi-interactive-subagents`, `subagent()` is asynchronous: it returns
-immediately, the child runs in its own multiplexer pane, and completion is
-steered back to the parent session. Do not poll, sleep, tail logs, or repeatedly
-check status. The harness wakes the parent when a child finishes or asks for
-help.
+- At least two substantial tasks can proceed without each other's conclusions.
+- Each child can work from a self-contained handoff.
+- Mutable files and resources can have one clear owner.
+- Delegation will save more time or context than coordination will cost.
 
-## When to use
+Do not dispatch trivial tasks, duplicate investigations, or work that needs one
+coherent design first.
 
-Use parallel dispatch when all of these are true:
+Treat dependencies as a graph. Dispatch tasks with no unmet dependencies in the
+same wave. Wait for their results, integrate what later tasks need, then dispatch
+the next wave.
 
-- There are 2 or more separable problems or work streams.
-- Each stream can be understood without conclusions from the others.
-- Subagents will not edit the same files or mutate the same fragile state.
-- The main session can integrate results after all relevant subagents return.
+## Choose the child mode
 
-Good examples:
+Call `subagents_list` once when the available agent definitions are unknown.
+Choose the narrowest matching role rather than assuming a particular named agent
+exists.
 
-- Separate test files fail for different reasons.
-- Different subsystems need reconnaissance.
-- Independent docs, frontend, backend, and infrastructure checks can happen at
-  the same time.
-- Multiple candidate libraries or APIs need evidence-backed research.
+Use a fresh, focused child session by default. Use `fork: true` only when the
+child needs the full parent conversation. Prefer autonomous, auto-exiting
+children for bounded work and interactive children only when the user must drive
+the child directly.
 
-Do not use parallel dispatch when:
+## Isolate mutable state
 
-- A fix in one domain is likely to change the others.
-- The task needs one coherent system-wide design first.
-- Subagents would race on the same files, database, dev server state,
-  credentials, or external resource.
-- The user wants a tightly interactive planning conversation in one pane.
+Read-only children may inspect overlapping files. Writing children must have
+disjoint ownership of every mutable resource they may affect, including:
 
-## Choose the right subagent mode
+- source files, generated files, snapshots, and lockfiles
+- the Git index and worktree operations
+- databases, credentials, external resources, and dev servers
+- build output or caches that a command may delete or rewrite
 
-Prefer named agents from the installed subagent extension when they match the
-role:
+Assign shared changes to one worker or keep them in the parent session. If clean
+ownership is uncertain, dispatch read-only investigation first and decide the
+edits after the findings return.
 
-- `scout` for fast codebase reconnaissance.
-- `researcher` for external or deep technical research, if available.
-- `worker` for implementation from a concrete todo or handoff.
-- `reviewer` for code review.
-- `planner` only for interactive planning, not for parallel implementation.
+## Prepare the handoff
 
-Use fresh, focused child sessions by default. Do not use `fork: true` for normal
-parallel work, because it copies the current conversation into every child and
-wastes context. Use `fork: true` only when the child truly needs the full current
-conversation, such as an `/iterate`-style follow-up.
+Give each child:
 
-Autonomous subagents should usually be non-interactive and allowed to auto-exit
-through their agent definition. Interactive subagents, such as `planner` or an
-iterate fork, are user-driven and can remain open without waking the parent on
-status changes.
+- **Scope:** Exact subsystem, files, tests, issue, or artifact.
+- **Goal:** One concrete outcome.
+- **Mode:** Read-only investigation or implementation.
+- **Ownership:** Mutable resources it owns and resources it must not change.
+- **Context:** Relevant evidence, reproduction, decisions, and constraints.
+- **Output:** Findings, changed files, verification, risks, and open questions.
 
-## Pattern
+Do not make a child rediscover decisions already made by the parent. Do not give
+two children responsibility for the same outcome.
 
-### 1. Identify independent domains
-
-Group work by ownership and likely files touched. Each group must have a clear
-boundary.
-
-Example:
-
-- Auth scout: map login/session flow only.
-- Billing scout: map subscription and invoice flow only.
-- Email scout: map template/rendering flow only.
-
-If two groups would likely edit the same file, keep them sequential or assign
-one subagent to investigate while the main session decides the edit.
-
-### 2. Prepare focused handoffs
-
-Each subagent task needs:
-
-- **Role:** Which agent to use and why.
-- **Scope:** Exact files, subsystem, test names, issue, or artifact to inspect.
-- **Goal:** The concrete outcome.
-- **Constraints:** Files or behavior not to change, shared resources to avoid,
-  and whether implementation is allowed.
-- **Output:** A concise summary with evidence, changed files, verification run,
-  and open questions.
-
-For implementation work, prefer creating explicit todos first and assign one
-todo per worker. Workers need enough context to execute without redesigning the
-plan.
-
-### 3. Spawn subagents concurrently
-
-Call `subagent()` once per independent domain. Because the tool is async, just
-issue the calls; do not wait between them unless later tasks depend on earlier
-results.
-
-```typescript
-subagent({
-  name: "Scout: Auth",
-  agent: "scout",
-  task: "Map the auth/session flow. Read relevant files only. Return key files, patterns, risks, and recommended next steps. Do not edit files."
-});
-
-subagent({
-  name: "Scout: Billing",
-  agent: "scout",
-  task: "Map the billing/subscription flow. Read relevant files only. Return key files, patterns, risks, and recommended next steps. Do not edit files."
-});
-
-subagent({
-  name: "Scout: Email",
-  agent: "scout",
-  task: "Map email template rendering and delivery. Read relevant files only. Return key files, patterns, risks, and recommended next steps. Do not edit files."
-});
-```
-
-If the domains are truly independent, multiple tool calls can be made in the
-same assistant turn. After spawning, either end the turn or work on unrelated
-coordination tasks. Do not fabricate results before the harness reports them.
-
-### 4. Handle child results as they arrive
-
-Subagents finish independently. When each result is steered back:
-
-1. Read the summary.
-2. Note touched files, decisions, verification, and open questions.
-3. Check whether it conflicts with completed or running subagents.
-4. Decide whether to integrate now, wait for remaining results, or resume that
-   child with extra guidance.
-
-If a child asks for help through the subagent help flow, answer only the missing
-question and resume that same session. Do not start a duplicate subagent unless
-the original context is unusable.
-
-### 5. Integrate and verify
-
-After all relevant results arrive:
-
-1. Review the combined diff or findings.
-2. Resolve overlapping edits or contradictory recommendations.
-3. Run the smallest meaningful verification first.
-4. Run the broader suite or build required to support the final claim.
-5. Report evidence-backed outcomes to the user.
-
-## Prompt template
-
-Use this structure for each child task:
+Use this compact task template:
 
 ```markdown
-You are the [role] subagent for [domain].
+You are responsible for [domain].
 
-Scope:
-- [Files, tests, subsystem, issue, or artifact]
-
-Goal:
-- [Concrete outcome]
-
-Constraints:
-- Work only in this domain.
-- Do not edit [shared files/resources] unless explicitly necessary.
-- Do not spawn more subagents.
-- Do not broaden the task into unrelated cleanup.
-
-Required process:
-1. Read the relevant project instructions and files before changing anything.
-2. Investigate the root cause or current pattern.
-3. Make only the minimal changes needed, if implementation is in scope.
-4. Run targeted verification that proves your result.
+Goal: [concrete outcome]
+Scope: [files, tests, subsystem, issue, or artifact]
+Mode: [read-only | implementation]
+Owned resources: [files and mutable resources, or none]
+Do not change: [shared files, behavior, or resources]
+Context: [reproduction, evidence, and settled decisions]
 
 Return:
-- Root cause or findings.
-- Files changed, if any.
-- Verification command and result.
-- Risks, conflicts, or questions for the parent session.
+- findings or root cause, with file or command evidence
+- files changed, if any
+- verification command and result
+- conflicts, risks, or questions for the parent
 ```
 
-## Implementation example
+## Dispatch and wait
 
-```typescript
-subagent({
-  name: "Worker: Abort tests",
-  agent: "worker",
-  task: `Fix the failing tests in src/agents/agent-tool-abort.test.ts only.
+Call `subagent()` once per independent task without waiting between calls. The
+tool is asynchronous. Do not poll, sleep, tail logs, or repeatedly inspect
+session files; completion is delivered back to the parent.
 
-Failures:
-1. "should abort tool with partial output capture" expects "interrupted at".
-2. "should handle mixed completed and aborted tools" aborts the fast tool.
-3. "should properly track pendingToolCount" expects 3 results but gets 0.
+After dispatching, either work on unrelated coordination tasks or end the turn.
+If no independent work remains, end the turn and wait for the harness rather
+than filling the gap with speculative work.
 
-These look like timing or race issues. Read the test and implementation before editing.
-Do not just increase timeouts. Prefer event-based waiting or a production fix if the
-implementation is wrong. Do not modify unrelated tests.
+Track every required result:
 
-Return root cause, files changed, and verification output.`
-});
+| Child | Scope | Mode | Owned resources | Required | Status |
+|---|---|---|---|---|---|
+| [name] | [boundary] | [read/write] | [resources] | [yes/no] | [running/done/failed] |
 
-subagent({
-  name: "Worker: Batch completion",
-  agent: "worker",
-  task: `Fix the failing tests in src/agents/batch-completion-behavior.test.ts only.
-Read the relevant implementation first. Keep changes limited to the batch completion
-path unless evidence proves a shared root cause. Return root cause, files changed,
-and verification output.`
-});
+Do not give the final answer while a required child is still running.
 
-subagent({
-  name: "Worker: Approval races",
-  agent: "worker",
-  task: `Fix the failing test in src/agents/tool-approval-race-conditions.test.ts only.
-Investigate why execution count is 0. Avoid unrelated refactors. Return root cause,
-files changed, and verification output.`
-});
-```
+## Handle results and failures
 
-## Common mistakes
+For each returned result:
 
-- **Too broad:** "Fix all tests." Use one subagent per independent test file or
-  subsystem.
-- **Too much inherited context:** Avoid `fork: true` unless the child needs the
-  whole conversation.
-- **No boundaries:** State what files or resources are off limits.
-- **No evidence:** Require verification commands and results.
-- **Polling:** Do not watch session files or run status loops. The extension
-  returns completion automatically.
-- **Over-parallelizing implementation:** If workers would edit the same files,
-  run them sequentially or split into investigate-only scouts first.
+1. Read the reported artifact and evidence.
+2. Record findings, changed files, verification, and unresolved questions.
+3. Check for conflicts with completed or running work.
+4. Integrate it now only if doing so cannot interfere with another child.
 
-## Verification checklist
+Resume the same child when its existing context is useful. Do not create a
+duplicate merely because a child stalled or asked for guidance. If a child exits
+without its required artifact, retry once with the missing requirement stated
+explicitly. If it still fails, report the gap instead of inventing a result.
 
-Before claiming the parallel work is complete, confirm:
+## Integrate and verify
 
-- Every spawned subagent returned or was intentionally interrupted/resumed.
-- Each result includes findings and verification, or a clear reason verification
-  was not possible.
-- No two subagents made conflicting edits.
-- The combined diff is coherent and minimal.
-- The final verification command ran in the main session and supports the claim.
+After every required child has returned or its failure has been accounted for:
 
-## Key benefits
+1. Review every reported artifact and the combined diff.
+2. Resolve overlapping edits or contradictory conclusions.
+3. Run focused checks for each changed behavior.
+4. Run representative parent-session verification for the integrated result.
+5. Report what was proved, what failed, and any remaining risk.
 
-- **Speed:** Independent work completes concurrently.
-- **Focus:** Each child has a narrow context and clear ownership.
-- **Clean orchestration:** The parent session tracks decisions, not every detail.
-- **Better supervision:** pi's subagent widget shows live state while async
-  completion messages deliver the results when ready.
+Stop dispatching when another child would duplicate work, need shared writes,
+depend on an unfinished result, or cost more coordination than doing the work in
+the parent session.

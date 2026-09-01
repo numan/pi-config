@@ -133,35 +133,68 @@ test("setup and README treat settings.json as the package source of truth", () =
   }
 });
 
-test("setup validates local packages and reconciles settings through Pi", (context) => {
+for (const [platform, reposName] of [
+  ["Darwin", "Repos"],
+  ["Linux", "repos"],
+]) {
+  test(`setup bridges ${reposName} on ${platform} to the stable package path`, (context) => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "pi-config-setup-"));
+    context.after(() => fs.rmSync(home, { recursive: true, force: true }));
+
+    const agentDir = path.join(home, ".pi", "agent");
+    const binDir = path.join(home, "bin");
+    const callsPath = path.join(home, "pi-calls.txt");
+    const packageSource = path.join(home, reposName, "pi-interactive-subagents");
+    const packageLink = path.join(home, ".pi", "local-packages", "pi-interactive-subagents");
+    fs.mkdirSync(agentDir, { recursive: true });
+    fs.mkdirSync(binDir);
+    fs.mkdirSync(packageSource, { recursive: true });
+    fs.cpSync(path.join(root, "setup.sh"), path.join(agentDir, "setup.sh"));
+    fs.writeFileSync(path.join(agentDir, "settings.json"), read("settings.json"));
+    fs.writeFileSync(path.join(binDir, "uname"), `#!/usr/bin/env bash\necho ${platform}\n`, {
+      mode: 0o755,
+    });
+    fs.writeFileSync(
+      path.join(binDir, "pi"),
+      `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> "${callsPath}"\n`,
+      { mode: 0o755 },
+    );
+
+    execFileSync("bash", [path.join(agentDir, "setup.sh")], {
+      cwd: agentDir,
+      env: { ...process.env, HOME: home, PATH: `${binDir}:${process.env.PATH}` },
+    });
+
+    assert.equal(fs.realpathSync(packageLink), fs.realpathSync(packageSource));
+    assert.equal(fs.readFileSync(callsPath, "utf8").trim(), "update --extensions");
+  });
+}
+
+test("setup accepts a custom repository directory", (context) => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "pi-config-setup-"));
   context.after(() => fs.rmSync(home, { recursive: true, force: true }));
 
   const agentDir = path.join(home, ".pi", "agent");
   const binDir = path.join(home, "bin");
-  const callsPath = path.join(home, "pi-calls.txt");
+  const reposDir = path.join(home, "code");
+  const packageSource = path.join(reposDir, "pi-interactive-subagents");
+  const packageLink = path.join(home, ".pi", "local-packages", "pi-interactive-subagents");
   fs.mkdirSync(agentDir, { recursive: true });
   fs.mkdirSync(binDir);
+  fs.mkdirSync(packageSource, { recursive: true });
   fs.cpSync(path.join(root, "setup.sh"), path.join(agentDir, "setup.sh"));
-
-  const settings = JSON.parse(read("settings.json"));
-  for (const entry of settings.packages) {
-    const source = typeof entry === "string" ? entry : entry.source;
-    if (source && !/^(npm:|git:|https?:|ssh:)/.test(source)) {
-      fs.mkdirSync(path.resolve(agentDir, source), { recursive: true });
-    }
-  }
-  fs.writeFileSync(path.join(agentDir, "settings.json"), JSON.stringify(settings));
-  fs.writeFileSync(
-    path.join(binDir, "pi"),
-    `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> "${callsPath}"\n`,
-    { mode: 0o755 },
-  );
+  fs.writeFileSync(path.join(agentDir, "settings.json"), read("settings.json"));
+  fs.writeFileSync(path.join(binDir, "pi"), "#!/usr/bin/env bash\n", { mode: 0o755 });
 
   execFileSync("bash", [path.join(agentDir, "setup.sh")], {
     cwd: agentDir,
-    env: { ...process.env, HOME: home, PATH: `${binDir}:${process.env.PATH}` },
+    env: {
+      ...process.env,
+      HOME: home,
+      PATH: `${binDir}:${process.env.PATH}`,
+      PI_REPOS_DIR: reposDir,
+    },
   });
 
-  assert.equal(fs.readFileSync(callsPath, "utf8").trim(), "update --extensions");
+  assert.equal(fs.realpathSync(packageLink), fs.realpathSync(packageSource));
 });

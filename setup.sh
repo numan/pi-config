@@ -21,6 +21,32 @@ if [ ! -f "$EXPECTED_DIR/settings.json" ]; then
   exit 1
 fi
 
+if [ -n "${PI_REPOS_DIR:-}" ]; then
+  REPOS_DIR="$PI_REPOS_DIR"
+elif [ "$(uname -s)" = "Darwin" ]; then
+  REPOS_DIR="$HOME/Repos"
+else
+  REPOS_DIR="$HOME/repos"
+fi
+
+SUBAGENTS_SOURCE="$REPOS_DIR/pi-interactive-subagents"
+SUBAGENTS_LINK="$HOME/.pi/local-packages/pi-interactive-subagents"
+
+if [ ! -d "$SUBAGENTS_SOURCE" ]; then
+  echo "Error: pi-interactive-subagents checkout not found at $SUBAGENTS_SOURCE" >&2
+  echo "Clone it there or set PI_REPOS_DIR to its parent directory." >&2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$SUBAGENTS_LINK")"
+if [ -L "$SUBAGENTS_LINK" ]; then
+  rm "$SUBAGENTS_LINK"
+elif [ -e "$SUBAGENTS_LINK" ]; then
+  echo "Error: stable package path exists and is not a symlink: $SUBAGENTS_LINK" >&2
+  exit 1
+fi
+ln -s "$SUBAGENTS_SOURCE" "$SUBAGENTS_LINK"
+
 node -e '
   const fs = require("node:fs");
   const path = require("node:path");

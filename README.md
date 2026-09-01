@@ -8,16 +8,28 @@ specialized review, and durable todo/QA artifacts.
 
 Pi discovers global resources from `~/.pi/agent`, so clone this repository there.
 This checkout intentionally uses a local development checkout of
-`pi-interactive-subagents` at `~/Repos/pi-interactive-subagents`.
+`pi-interactive-subagents`. `setup.sh` looks under `~/Repos` on macOS and
+`~/repos` on other systems, then exposes the checkout through the stable
+`~/.pi/local-packages/pi-interactive-subagents` path used by `settings.json`.
 
 ```bash
 # Install Pi first.
-mkdir -p ~/.pi ~/Repos
+case "$(uname -s)" in
+  Darwin) REPOS_DIR="$HOME/Repos" ;;
+  *) REPOS_DIR="$HOME/repos" ;;
+esac
+mkdir -p ~/.pi "$REPOS_DIR"
 git clone git@github.com:numan/pi-interactive-subagents.git \
-  ~/Repos/pi-interactive-subagents
+  "$REPOS_DIR/pi-interactive-subagents"
 git clone git@github.com:numan/pi-config.git ~/.pi/agent
 cd ~/.pi/agent
 ./setup.sh
+```
+
+Set `PI_REPOS_DIR` when your checkouts live elsewhere:
+
+```bash
+PI_REPOS_DIR="$HOME/code" ./setup.sh
 ```
 
 Add provider credentials through Pi's normal authentication flow or
@@ -107,7 +119,7 @@ extension commands include `/todos` and `/cost`.
 | Source | Purpose |
 |---|---|
 | `git:github.com/HazAT/pi-smart-sessions` | AI-generated session names; only `extensions/smart-sessions.ts` is enabled |
-| `../../Repos/pi-interactive-subagents` | Local development checkout for subagent tools and commands |
+| `../local-packages/pi-interactive-subagents` | Stable link to the platform-specific local development checkout |
 | `npm:pi-web-access` | Web search, source checking, and content retrieval |
 | `npm:pi-powerline-footer` | Footer status information |
 | `npm:@juicesharp/rpiv-ask-user-question` | Structured question UI |

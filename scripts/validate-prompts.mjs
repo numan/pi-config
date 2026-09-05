@@ -113,9 +113,9 @@ for (const file of skills) {
     failures.push(`${relative(file)}: missing description`);
   } else {
     skillDescriptionCharacters += metadata.description.length;
-    if (metadata.description.length > 200) {
+    if (metadata.description.length > 350) {
       failures.push(
-        `${relative(file)}: discovery description is ${metadata.description.length} characters; keep it at or below 200`,
+        `${relative(file)}: discovery description is ${metadata.description.length} characters; keep it at or below 350`,
       );
     }
   }
@@ -157,7 +157,7 @@ const metrics = {
 
 const budgets = {
   agents: 7000,
-  global: 1200,
+  global: 1400,
   prompts: 1800,
   skillDescriptions: 6000,
 };

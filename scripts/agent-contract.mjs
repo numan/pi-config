@@ -30,6 +30,7 @@ const knownTools = new Set([
   "openai_image",
   "read",
   "set_tab_title",
+  "source_check",
   "subagent",
   "subagent_done",
   "subagent_interrupt",

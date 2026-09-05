@@ -1,16 +1,13 @@
 # Durable review record
 
-Use a review record when a review artifact path is supplied or when
-`PI_SESSION_FILE` is available. For a persistent session, derive the path as:
+Use a review record only when the caller supplies its path and explicitly
+designates the current agent or coordinator as the record owner.
+`PI_SESSION_FILE` alone does not grant ownership; coordinator prompts derive and
+supply persistent-session paths.
 
-```bash
-REVIEW_FILE="${PI_SESSION_FILE%.jsonl}.review.md"
-```
-
-The coordinator owns the record. Independent reviewers return evidence to the
-coordinator rather than writing the same file concurrently. Update the record
-after each review or repair attempt so interruption does not erase the latest
-verdict.
+Independent reviewers return evidence to the coordinator rather than writing
+the same file concurrently. The record owner updates the record after each
+review or repair attempt so interruption does not erase the latest verdict.
 
 ```markdown
 # Review Record

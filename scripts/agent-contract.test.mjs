@@ -36,6 +36,10 @@ test("accepts the runtime-controlling agent contract", () => {
   assert.deepEqual(issues({}), []);
 });
 
+test("accepts source_check for evidence-focused researchers", () => {
+  assert.deepEqual(issues({ tools: "read, source_check" }), []);
+});
+
 for (const [name, overrides, expected] of [
   ["thinking", { thinking: "definitely-invalid" }, /invalid thinking level/],
   ["boolean", { spawning: "sometimes" }, /invalid boolean spawning/],
@@ -79,6 +83,17 @@ test("worker and repair workflows share the completion contract", () => {
 test("review and ship workflows use the shared durable review record", () => {
   const schemaPath = "skills/code-reviewer/references/review-record.md";
   const schema = read(schemaPath);
+  assert.match(
+    schema,
+    /explicitly\s+designates[\s\S]*record owner/,
+    `${schemaPath} must require explicit record ownership`,
+  );
+  assert.doesNotMatch(
+    schema,
+    /derive the path/,
+    `${schemaPath} must leave path derivation to the coordinator`,
+  );
+
   for (const field of [
     "**Decision:**",
     "**Session:**",
@@ -111,6 +126,7 @@ test("review and ship workflows use the shared durable review record", () => {
 
   for (const [skillFile, reference] of [
     ["skills/code-reviewer/SKILL.md", "references/review-record.md"],
+    ["skills/code-reviewer/SKILL.md", "references/strict-maintainability.md"],
     ["skills/shipping-and-launch/SKILL.md", "../code-reviewer/references/review-record.md"],
   ]) {
     assert.ok(

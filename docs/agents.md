@@ -1,123 +1,122 @@
-# Agent Personas
+# Agents
 
-Specialist personas that play a single role with a single perspective. Each persona is a Markdown file consumed as a system prompt by your harness (Claude Code, Cursor, Copilot, etc.).
+This repository defines Pi agents for GPT-5.6 Sol. Each file in `agents/`
+combines a bounded role with an explicit model, thinking level, tool set, skill
+set, and completion behavior. `AGENTS.md` supplies the global engineering and
+authorization policy.
 
-| Persona | Role | Best for |
-|---------|------|----------|
-| [reviewer](../agents/reviewer.md) | Senior Staff Engineer | Five-axis review before merge |
-| [security-auditor](../agents/security-auditor.md) | Security Engineer | Vulnerability detection, OWASP-style audit |
-| [test-engineer](../agents/test-engineer.md) | QA Engineer | Test strategy, coverage analysis, Prove-It pattern |
-| [web-performance-auditor](../agents/web-performance-auditor.md) | Web Performance Engineer | Core Web Vitals audit, loading/rendering/network analysis |
+## Agent inventory
 
-## How personas relate to skills and commands
+| Agent | Category | Purpose |
+|---|---|---|
+| `scout` | Read-only specialist | Map a bounded code area, its behavior, tests, and risks |
+| `researcher` | Read-only specialist | Answer an external or technical question with primary-source evidence |
+| `reviewer` | Read-only specialist | Review a defined change for material engineering issues |
+| `security-auditor` | Read-only specialist | Audit applicable trust boundaries and exploitable risks |
+| `test-engineer` | Specialist writer | Analyze coverage or, when explicitly authorized, write tests only |
+| `visual-tester` | Read-only specialist | Exercise browser-visible UI behavior and report visual defects |
+| `web-performance-auditor` | Read-only specialist | Audit measured or potential browser performance problems |
+| `worker` | Implementer | Complete one scoped task and return validation evidence |
+| `autoresearch` | Implementer | Run a bounded batch of documented experiments |
+| `planner` | Orchestrator | Resolve material choices and write an implementation-ready plan |
+| `context-builder` | Orchestrator | Coordinate bounded evidence gathering and write one context artifact |
+| `code-quality` | Orchestrator | Propose and coordinate approved behavior-preserving simplifications |
 
-Three layers, each with a distinct job:
+“Read-only specialist” describes product-code behavior. Some specialists have
+`write` so they can produce a requested report artifact. Their role instructions
+limit that permission to the artifact.
 
-| Layer | What it is | Example | Composition role |
-|-------|-----------|---------|------------------|
-| **Skill** | A workflow with steps and exit criteria | `code-reviewer` | The *how* — invoked from inside a persona or command |
-| **Persona** | A role with a perspective and an output format | `reviewer` | The *who* — adopts a viewpoint, produces a report |
-| **Command** | A user-facing entry point | `/review`, `/ship` | The *when* — composes personas and skills |
+## Execution contract
 
-The user (or a slash command) is the orchestrator. **Personas do not call other personas.** Skills are mandatory hops inside a persona's workflow.
+Every local agent declares `model: openai-codex/gpt-5.6-sol`. The repository
+validator rejects another model. Thinking levels vary by role:
 
-## When to use each
+- `low` for bounded repository reconnaissance
+- `medium` for planning, implementation, browser QA, and routine orchestration
+- `high` for broad review, security, performance, and external research
 
-### Direct persona invocation
-Pick this when you want one perspective on the current change and the user is in the loop.
+Agent system prompts append to the global policy. Do not switch them to
+`replace` unless the replacement preserves authorization, evidence, testing,
+and commit boundaries.
 
-- "Review this PR" → invoke `reviewer` directly
-- "Are there security issues in `auth.ts`?" → invoke `security-auditor` directly
-- "What tests are missing for the checkout flow?" → invoke `test-engineer` directly
-- "Audit Core Web Vitals on the product page" → invoke `web-performance-auditor` directly
+Agents with `spawning: false` are leaves. The three orchestrators may launch
+bounded children:
 
-### Slash command (single persona behind it)
-Pick this when there's a repeatable workflow you'd otherwise re-explain every time.
+- `planner` delegates only to close a blocking codebase or research gap.
+- `context-builder` coordinates independent scouts and researchers.
+- `code-quality` may use scouts during analysis and workers after checklist
+  approval.
 
-- `/review` → wraps `reviewer` with the project's review skill
-- `/test` → wraps `test-engineer` with TDD skill
-- `/webperf` → wraps `web-performance-auditor` for performance-focused audits on web apps
+Do not add delegation to a leaf agent merely to route work. Give each child one
+job, clear resource ownership, relevant evidence, and an output contract.
+Parallelize independent read-only work; serialize changes to shared files.
 
-### Slash command (orchestrator — fan-out)
-Pick this only when **independent** investigations can run in parallel and produce reports that a single agent then merges.
+## Agents, skills, and prompts
 
-- `/ship` → fans out to `reviewer` + `security-auditor` + `test-engineer` in parallel, then synthesizes their reports into a go/no-go decision
+These layers have separate responsibilities:
 
-This is the only orchestration pattern this repo endorses. See [references/orchestration-patterns.md](references/orchestration-patterns.md) for the full pattern catalog and anti-patterns.
+| Layer | Responsibility | Example |
+|---|---|---|
+| Agent | Role, judgment boundary, tools, and output contract | `reviewer` |
+| Skill | Specialized procedure loaded when relevant | `code-reviewer` |
+| Prompt | User-facing command that composes a workflow | `/review` |
 
-## Decision matrix
+Keep detailed procedures in skills. Agent files should state only the role,
+permission boundary, role-specific judgment, and result contract. Prompt
+templates decide when to compose agents and who owns shared artifacts.
 
-```
-Is the work a single perspective on a single artifact?
-├── Yes → Direct persona invocation
-└── No  → Are the sub-tasks independent (no shared mutable state, no ordering)?
-         ├── Yes → Slash command with parallel fan-out (e.g. /ship)
-         └── No  → Sequential slash commands run by the user (/spec → /plan → /build → /test → /review)
-```
+## Choosing an entry point
 
-## Worked example: valid orchestration
+Invoke a named agent when one bounded role is enough:
 
-`/ship` is the canonical fan-out orchestrator in this repo:
+- Use `scout` to understand a code path without designing a solution.
+- Use `researcher` for current external facts or primary-source evidence.
+- Use `reviewer`, `security-auditor`, or `web-performance-auditor` for one
+  specialist assessment.
+- Use `worker` for one approved, implementation-ready task.
+- Use `planner` when material product or architecture choices remain.
 
-```
-/ship
-  ├── (parallel) reviewer         → review report
-  ├── (parallel) security-auditor → audit report
-  └── (parallel) test-engineer    → coverage report
-                  ↓
-        merge phase (main agent)
-                  ↓
-        go/no-go decision + rollback plan
-```
+Use a prompt template for a repeatable workflow:
 
-Why this works:
-- Each sub-agent operates on the same diff but produces a **different perspective**
-- They have no dependencies on each other → genuine parallelism, real wall-clock savings
-- Each runs in a fresh context window → main session stays uncluttered
-- The merge step is small and benefits from full context, so it stays in the main agent
+| Command | Behavior |
+|---|---|
+| `/workflow` | Gather necessary context, approve a plan, implement sequentially, and review |
+| `/review` | Review a defined change and update the durable review record when available |
+| `/ship` | Run proportional release checks and synthesize a GO or NO-GO decision |
+| `/test` | Apply TDD and testing strategy to new or corrected behavior |
+| `/code-simplify` | Perform scoped behavior-preserving simplification |
+| `/webperf` | Run a browser-facing performance audit |
 
-## Worked example: invalid orchestration (do not build this)
+Use `/ship` for independent release perspectives that can run concurrently.
+Use `/workflow` for ordered work where planning, approval, implementation, and
+review depend on previous stages. An automated sequential workflow is valid
+when it preserves its approval boundary and verifies every child result.
 
-A `meta-orchestrator` persona whose job is "decide which other persona to call":
+## Shared artifacts
 
-```
-/work-on-pr → meta-orchestrator
-                  ↓ (decides "this needs a review")
-              reviewer
-                  ↓ (returns)
-              meta-orchestrator (paraphrases result)
-                  ↓
-              user
-```
+A task may ask a specialist to write an isolated report. Shared records require
+one owner:
 
-Why this fails:
-- Pure routing layer with no domain value
-- Adds two paraphrasing hops → information loss + 2× token cost
-- The user already knows they want a review; let them call `/review` directly
-- Replicates work that slash commands and `AGENTS.md` intent-mapping already do
+- In `/ship`, specialists return reports to the coordinator.
+- In `/workflow`, the coordinator owns the durable review record and repair
+  history.
+- A reviewer writes the shared record only when the task explicitly designates
+  it as record owner and supplies the path.
 
-## Rules for personas
+When `PI_SESSION_FILE` is available, coordinator prompts derive the adjacent
+`*.review.md` path. Children must not independently derive or update that file.
 
-1. A persona is a single role with a single output format. If you find yourself adding a second role, create a second persona.
-2. **Personas do not invoke other personas.** Composition is the job of slash commands or the user. On Claude Code this is also a hard platform constraint — *"subagents cannot spawn other subagents"* — so the rule is enforced for you.
-3. A persona may invoke skills (the *how*).
-4. Every persona file ends with a "Composition" block stating where it fits.
+## Adding or changing an agent
 
-## Claude Code interop
+1. Create or edit `agents/<name>.md`.
+2. Keep the role bounded to one deliverable.
+3. Select the minimum tools needed for that role.
+4. Load a skill only when it owns a distinct procedure not repeated in the
+   agent body.
+5. Set the GPT-5.6 Sol model and an explicit thinking level.
+6. Enable spawning only for an agent that performs substantive orchestration.
+7. Run `npm test`.
 
-The personas in this repo are designed to work as Claude Code subagents and as Agent Teams teammates without modification:
-
-- **As subagents:** auto-discovered when this plugin is enabled (no path config needed). Use the Agent tool with `subagent_type: reviewer` (or `security-auditor`, `test-engineer`). `/ship` is the canonical example.
-- **As Agent Teams teammates** (experimental, requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`): reference the same persona name when spawning a teammate. The persona's body is **appended to** the teammate's system prompt as additional instructions (not a replacement), so your persona text sits on top of the team-coordination instructions the lead installs (SendMessage, task-list tools, etc.).
-
-Subagents only report results back to the main agent. Agent Teams let teammates message each other directly. Use subagents when reports are enough; use Agent Teams when sub-agents need to challenge each other's findings (e.g. competing-hypothesis debugging). See [references/orchestration-patterns.md](references/orchestration-patterns.md) for the full mapping.
-
-Plugin agents do not support `hooks`, `mcpServers`, or `permissionMode` frontmatter — those fields are silently ignored. Avoid relying on them when authoring new personas here.
-
-## Adding a new persona
-
-1. Create `agents/<role>.md` with the same frontmatter format used by existing personas.
-2. Define the role, scope, output format, and rules.
-3. Add a **Composition** block at the bottom (Invoke directly when / Invoke via / Do not invoke from another persona).
-4. Add the persona to the table at the top of this file.
-5. If the persona enables a new orchestration pattern, document it in `references/orchestration-patterns.md` rather than inventing the pattern in the persona file itself.
+Update the inventory above when adding or removing an agent. If a prompt
+references the agent, verify the command still assigns ownership, approval, and
+shared artifacts unambiguously.

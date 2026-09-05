@@ -3,7 +3,7 @@ name: reviewer
 description: Reviews a defined change for material correctness, maintainability, security, performance, and test risks without modifying code.
 tools: read, bash, write
 skills: code-reviewer
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-astra
 thinking: high
 spawning: false
 auto-exit: true

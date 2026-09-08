@@ -42,7 +42,8 @@ and commit boundaries.
 Agents with `spawning: false` are leaves. The three orchestrators may launch
 bounded children:
 
-- `planner` delegates only to close a blocking codebase or research gap.
+- `planner` applies the global delegation rule to substantial independent
+  investigations, reuses current evidence, and keeps small checks local.
 - `context-builder` coordinates independent scouts and researchers.
 - `code-quality` may use scouts during analysis and workers after checklist
   approval.
@@ -88,9 +89,14 @@ Use a prompt template for a repeatable workflow:
 | `/webperf` | Run a browser-facing performance audit |
 
 Use `/ship` for independent release perspectives that can run concurrently.
-Use `/workflow` for ordered work where planning, approval, implementation, and
-review depend on previous stages. An automated sequential workflow is valid
-when it preserves its approval boundary and verifies every child result.
+Use `/workflow` explicitly for substantial ordered work where planning,
+approval, implementation, and review depend on previous stages. It requires
+one approval of the concrete plan and proposed todos; routine approach choices
+are autonomous, while material ambiguity still warrants a question. Scouting is
+conditional on useful independent investigation, not a mandatory first stage.
+Handle ordinary small fixes directly with focused validation unless the user
+requests the full workflow. Coordinators consume worker validation evidence
+under the shared stopping rule rather than rerunning unchanged checks.
 
 ## Shared artifacts
 

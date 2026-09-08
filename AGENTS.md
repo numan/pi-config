@@ -47,6 +47,9 @@ When an activated workflow requires approval of a concrete plan, checklist, or
 todo list, present that artifact and wait for explicit approval before
 implementation. General enthusiasm doesn't count as approval.
 
+When a skill requires a pause, cite its exact file and instruction and explain
+why it applies. Distinguish requirements from your interpretation.
+
 ## Questions and ambiguity
 
 Inspect available context before asking. Ask only when an unresolved ambiguity
@@ -165,6 +168,11 @@ validation is blocked or disproportionately expensive, report why and name the
 best next check. Don't claim that work is complete or that tests pass without
 running the supporting command and checking its output.
 
+Once appropriate checks pass, stop verification. Broaden or repeat checks only
+for new changes, failures, uncovered acceptance criteria, or specific unresolved
+regression risks. Coordinators consume worker evidence rather than rerunning
+unchanged checks. Always complete required repository checks.
+
 Material completion claims require direct verification. Descriptive findings
 must cite the inspected source. Label unresolved hypotheses and uncertainty
 instead of overstating confidence.
@@ -191,10 +199,10 @@ user or active workflow authorizes a commit.
 
 ## Subagents
 
-Prefer delegation whenever work can be isolated into a bounded job. Use
-subagents to keep main context compact and gain specialist focus or
-parallelism. Keep tightly sequential or shared-state work in one agent when
-delegation would add more coordination than value.
+Delegate substantial independent investigations when parallelism, specialist
+judgment, or reduced parent context justifies coordination cost. Reuse current
+evidence. Keep small or tightly coupled work local; don't introduce a planning
+workflow for ordinary small fixes unless requested.
 
 Use `subagents_list` to discover available subagents.
 

@@ -12,15 +12,17 @@ validation, and an independent final review.
 
 ## Orchestration
 
-1. Inspect project instructions and use subagents to gather enough repository
-   context to scope the work. Wait for them and read their artifacts.
-2. Spawn additional `scout`s only when focused codebase facts are still needed for
-   planning. Wait for them and read their artifacts.
+1. Inspect project instructions and reuse current repository evidence to scope
+   the work.
+2. Apply the global delegation rule where substantial independent investigation
+   is useful. Gather small or tightly coupled facts directly. Wait for required
+   subagent results and read their artifacts; don't require a scout round.
 3. Spawn the interactive `planner` with the user request, known constraints,
-   scout evidence, a target plan path, and access to `subagent_done`. Let it
-   resolve material ambiguity, get approach approval, validate the design, and
-   write the plan with a worker-ready proposed todo breakdown. Tell it that this
-   workflow owns concrete-plan approval and that it must not create actionable
+   available evidence, a target plan path, and access to `subagent_done`. Let it
+   resolve material ambiguity, choose routine design details autonomously,
+   validate the design, and write a worker-ready plan and proposed todo breakdown.
+   Tell it that this workflow owns the single concrete-plan approval, with no
+   separate approach checkpoint, and that it must not create actionable
    todo records, final-review, generic QA, audit, cleanup, or final-validation
    todos. Instruct it to call `subagent_done` immediately after reporting its
    completed planning artifact and proposed breakdown.

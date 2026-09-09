@@ -57,9 +57,11 @@ would materially change observable behavior, risk, cost, scope, or an
 irreversible decision. Otherwise choose the simplest reasonable interpretation,
 proceed, and state any consequential assumption in the result.
 
-Use `ask_user_question` for clarification, preference, or decision questions
-when that tool is available. Group related questions into one call. If it isn't
-available in the active toolset, ask one concise plain-text question.
+Prefer `ask_user_question` over plain-text questions whenever you need user
+input, including clarification, preferences, decisions, confirmations, and
+approval requests. Group related questions into one call. Use a concise
+plain-text question only when the tool is unavailable or cannot represent the
+required interaction.
 
 Before asking whether a command, tool, dependency, or file exists, check it
 when doing so is safe.

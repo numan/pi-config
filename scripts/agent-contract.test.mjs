@@ -14,7 +14,7 @@ const skillNames = new Set(["code-reviewer"]);
 const valid = {
   name: "reviewer",
   description: "Review code.",
-  model: "openai-codex/gpt-5.6-sol",
+  model: "openai-codex/gpt-6-astra",
   thinking: "high",
   tools: "read, bash, write",
   skills: "code-reviewer",
@@ -36,11 +36,16 @@ test("accepts the runtime-controlling agent contract", () => {
   assert.deepEqual(issues({}), []);
 });
 
+test("accepts explicitly pinned Sol agents", () => {
+  assert.deepEqual(issues({ model: "openai-codex/gpt-5.6-sol" }), []);
+});
+
 test("accepts source_check for evidence-focused researchers", () => {
   assert.deepEqual(issues({ tools: "read, source_check" }), []);
 });
 
 for (const [name, overrides, expected] of [
+  ["model", { model: "openai-codex/unknown-model" }, /model must be/],
   ["thinking", { thinking: "definitely-invalid" }, /invalid thinking level/],
   ["boolean", { spawning: "sometimes" }, /invalid boolean spawning/],
   ["session mode", { "session-mode": "shared" }, /invalid session-mode/],

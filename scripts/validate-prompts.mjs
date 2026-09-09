@@ -85,9 +85,9 @@ const skillNames = new Set(
 );
 const settings = JSON.parse(read(path.join(root, "settings.json")));
 
-if (settings.defaultProvider !== "openai-codex" || settings.defaultModel !== "gpt-5.6-sol") {
+if (settings.defaultProvider !== "openai-codex" || settings.defaultModel !== "gpt-6-astra") {
   failures.push(
-    `settings.json: default model must be openai-codex/gpt-5.6-sol, found ${settings.defaultProvider}/${settings.defaultModel}`,
+    `settings.json: default model must be openai-codex/gpt-6-astra, found ${settings.defaultProvider}/${settings.defaultModel}`,
   );
 }
 
@@ -167,7 +167,7 @@ for (const [name, maximum] of Object.entries(budgets)) {
   }
 }
 
-console.log("GPT-5.6 Sol prompt metrics:");
+console.log("GPT-6 Astra prompt metrics:");
 for (const [name, value] of Object.entries(metrics)) {
   console.log(`- ${name}: ${value}`);
 }
@@ -178,4 +178,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`\nValidated the GPT-5.6 Sol default, ${agents.length} agents, ${skills.length} skills, and ${prompts.length} prompts.`);
+console.log(`\nValidated the GPT-6 Astra default, ${agents.length} agents, ${skills.length} skills, and ${prompts.length} prompts.`);

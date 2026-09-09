@@ -78,8 +78,8 @@ export function validateAgentMetadata({ metadata, fileName, skillNames }) {
     issues.push(`name must match filename ${expectedName}`);
   }
   if (!metadata.description) issues.push("missing description");
-  if (metadata.model !== "openai-codex/gpt-5.6-sol") {
-    issues.push("model must be openai-codex/gpt-5.6-sol");
+  if (!["openai-codex/gpt-6-astra", "openai-codex/gpt-5.6-sol"].includes(metadata.model)) {
+    issues.push("model must be openai-codex/gpt-6-astra or openai-codex/gpt-5.6-sol");
   }
   if (metadata.skill) issues.push("use plural skills frontmatter");
 

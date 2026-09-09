@@ -7,7 +7,10 @@ description: Verify version-sensitive framework or library implementation decisi
 
 ## Overview
 
-Every framework-specific code decision must be backed by official documentation. Don't implement from memory — verify, cite, and let the user see your sources. Training data goes stale, APIs get deprecated, best practices evolve. This skill ensures the user gets code they can trust because every pattern traces back to an authoritative source they can check.
+Verify version-sensitive framework and library decisions against official
+documentation for the installed or explicitly requested version. Cite evidence
+for material decisions. Routine, version-independent code does not require
+external research or citations.
 
 ## When to Use
 
@@ -16,7 +19,7 @@ Every framework-specific code decision must be backed by official documentation.
 - The user explicitly asks for documented, verified, or "correct" implementation
 - Implementing features where the framework's recommended approach matters (forms, routing, data fetching, state management, auth)
 - Reviewing or improving code that uses framework-specific patterns
-- Any time you are about to write framework-specific code from memory
+- Framework-specific behavior depends on an API or version detail not established by current evidence
 
 **When NOT to use:**
 
@@ -48,7 +51,7 @@ Cargo.toml      → Rust
 Gemfile         → Ruby/Rails
 ```
 
-State what you found explicitly:
+Report the detected versions when they affect the recommendation. For example:
 
 ```
 STACK DETECTED:
@@ -58,11 +61,20 @@ STACK DETECTED:
 → Fetching official docs for the relevant patterns.
 ```
 
-If versions are missing or ambiguous, **ask the user**. Don't guess — the version determines which patterns are correct.
+If versions are missing or ambiguous, inspect lockfiles and relevant runtime or
+build configuration. Ask only when the unresolved version materially affects
+the implementation. Preserve an explicitly requested target; don't substitute
+the latest release.
 
 ### Step 2: Fetch Official Documentation
 
-Fetch the specific documentation page for the feature you're implementing. Not the homepage, not the full docs — the relevant page.
+Fetch the specific documentation page needed to resolve the version-sensitive
+decision. Reuse already-inspected evidence when it is current and applicable.
+
+Prefer current official documentation for the target version over bundled skill
+references. If remote documentation is unavailable and a bundled fallback is
+used, disclose that fallback and any stale or unverified version assumptions.
+Don't present bundled model or API guidance as current without verification.
 
 **Source hierarchy (in order of authority):**
 
@@ -99,31 +111,23 @@ When official sources conflict with each other (e.g. a migration guide contradic
 Write code that matches what the documentation shows:
 
 - Use the API signatures from the docs, not from memory
-- If the docs show a new way to do something, use the new way
-- If the docs deprecate a pattern, don't use the deprecated version
+- Use patterns compatible with the installed or requested version and task scope
+- Flag relevant deprecations; don't expand the task into an unrequested migration
 - If the docs don't cover something, flag it as unverified
 
-**When docs conflict with existing project code:**
-
-```
-CONFLICT DETECTED:
-The existing codebase uses useState for form loading state,
-but React 19 docs recommend useActionState for this pattern.
-(Source: react.dev/reference/react/useActionState)
-
-Options:
-A) Use the modern pattern (useActionState) — consistent with current docs
-B) Match existing code (useState) — consistent with codebase
-→ Which approach do you prefer?
-```
-
-Surface the conflict. Don't silently pick one.
+When documentation differs from existing code, check whether the difference is
+a compatibility issue or merely an alternative pattern. Preserve compatible
+project conventions. Ask only when an unresolved choice materially changes
+behavior, risk, or scope.
 
 ### Step 4: Cite Your Sources
 
-Every framework-specific pattern gets a citation. The user must be able to verify every decision.
+Cite the official evidence supporting non-trivial, version-sensitive decisions
+in the response. Don't add citations for routine code or repeat the same source
+for every use of a pattern. Add a source comment only when it explains a durable
+constraint or non-obvious choice future maintainers need.
 
-**In code comments:**
+**When a code comment is warranted:**
 
 ```typescript
 // React 19 form handling with useActionState
@@ -147,9 +151,9 @@ pending states automatically"
 
 - Full URLs, not shortened
 - Prefer deep links with anchors where possible (e.g. `/useActionState#usage` over `/useActionState`) — anchors survive doc restructuring better than top-level pages
-- Quote the relevant passage when it supports a non-obvious decision
-- Include browser/runtime support data when recommending platform features
-- If you cannot find documentation for a pattern, say so explicitly:
+- Quote a relevant passage when paraphrasing would lose a material distinction
+- Include browser/runtime support data when compatibility affects the decision
+- If a bounded lookup cannot verify a material claim, state the uncertainty and stop rather than widening indefinitely:
 
 ```
 UNVERIFIED: I could not find official documentation for this
@@ -167,28 +171,28 @@ Honesty about what you couldn't verify is more valuable than false confidence.
 | "Fetching docs wastes tokens" | Hallucinating an API wastes more. The user debugs for an hour, then discovers the function signature changed. One fetch prevents hours of rework. |
 | "The docs won't have what I need" | If the docs don't cover it, that's valuable information — the pattern may not be officially recommended. |
 | "I'll just mention it might be outdated" | A disclaimer doesn't help. Either verify and cite, or clearly flag it as unverified. Hedging is the worst option. |
-| "This is a simple task, no need to check" | Simple tasks with wrong patterns become templates. The user copies your deprecated form handler into ten components before discovering the modern approach exists. |
+| "This is a simple task, no need to check" | Check when correctness depends on a version-sensitive API; skip research for routine, version-independent code. |
 
 ## Red Flags
 
-- Writing framework-specific code without checking the docs for that version
+- Making a version-sensitive decision without applicable evidence
 - Using "I believe" or "I think" about an API instead of citing the source
 - Implementing a pattern without knowing which version it applies to
 - Citing Stack Overflow or blog posts instead of official documentation
 - Using deprecated APIs because they appear in training data
 - Not reading `package.json` / dependency files before implementing
-- Delivering code without source citations for framework-specific decisions
+- Making material, version-sensitive claims without source citations
 - Fetching an entire docs site when only one page is relevant
 
 ## Verification
 
 After implementing with source-driven development:
 
-- [ ] Framework and library versions were identified from the dependency file
-- [ ] Official documentation was fetched for framework-specific patterns
-- [ ] All sources are official documentation, not blog posts or training data
-- [ ] Code follows the patterns shown in the current version's documentation
-- [ ] Non-trivial decisions include source citations with full URLs
-- [ ] No deprecated APIs are used (checked against migration guides)
-- [ ] Conflicts between docs and existing code were surfaced to the user
-- [ ] Anything that could not be verified is explicitly flagged as unverified
+- [ ] Relevant framework and library versions were established
+- [ ] Material, version-sensitive decisions have applicable official evidence
+- [ ] Bundled fallbacks and stale-source limitations are disclosed when used
+- [ ] Code matches the installed or explicitly requested version
+- [ ] Non-trivial, version-sensitive decisions include source citations
+- [ ] Relevant deprecations are reported without unrequested migration
+- [ ] Material conflicts are resolved or reported as blockers
+- [ ] Material claims that could not be verified are identified as unverified

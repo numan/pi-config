@@ -37,7 +37,11 @@ Structure context from most persistent to most transient:
 
 ### Level 1: Rules Files
 
-Create a rules file that persists across sessions. This is the highest-leverage context you can provide.
+Create or update persistent rules when the task calls for durable guidance.
+Define outcomes, constraints, success criteria, and stopping conditions; leave
+routine execution choices to the agent. Reserve absolute rules for true
+invariants and explicit workflow gates. Remove obsolete or conflicting guidance
+instead of accumulating model-specific patches.
 
 **CLAUDE.md** (for Claude Code):
 ```markdown
@@ -200,7 +204,10 @@ Spec says:         "Use REST for all endpoints"
 Existing code has: GraphQL for the user profile query
 ```
 
-**Do NOT** silently pick one interpretation. Surface it:
+Resolve conflicts using applicable instruction precedence and project evidence.
+If an unresolved choice materially changes behavior, risk, or scope, ask a
+focused question. Otherwise proceed with the simplest reasonable interpretation
+and state any consequential assumption. For a material conflict:
 
 ```
 CONFUSION:
@@ -219,9 +226,11 @@ C) Ask — this seems like an intentional decision I shouldn't override
 
 If the spec doesn't cover a case you need to implement:
 
-1. Check existing code for precedent
-2. If no precedent exists, **stop and ask**
-3. Don't invent requirements — that's the human's job
+1. Check existing code and task context for precedent.
+2. Ask only if the missing requirement materially changes behavior, risk, cost,
+   scope, or an irreversible decision.
+3. Otherwise choose the simplest reasonable interpretation and proceed. State
+   consequential assumptions without presenting them as user requirements.
 
 ```
 MISSING REQUIREMENT:
@@ -238,7 +247,9 @@ C) Append a number suffix like "Task (2)" (most user-friendly)
 
 ### The Inline Planning Pattern
 
-For multi-step tasks, emit a lightweight plan before executing:
+When a multi-step task benefits from a visible plan, briefly state the intended
+outcome, affected files, and validation. Use the following pattern only when
+implementation is already authorized and no workflow approval gate applies:
 
 ```
 PLAN:
@@ -259,7 +270,7 @@ This catches wrong directions before you've built on them. It's a 30-second inve
 | Stale context | Agent references outdated patterns or deleted code | Start fresh sessions when context drifts |
 | Missing examples | Agent invents a new style instead of following yours | Include one example of the pattern to follow |
 | Implicit knowledge | Agent doesn't know project-specific rules | Write it down in rules files — if it's not written, it doesn't exist |
-| Silent confusion | Agent guesses when it should ask | Surface ambiguity explicitly using the confusion management patterns above |
+| Silent confusion | Agent guesses about a material decision | Resolve from context or ask a focused question when the material ambiguity remains |
 
 ## Common Rationalizations
 

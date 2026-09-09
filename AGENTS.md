@@ -28,11 +28,10 @@ For requests to answer, explain, review, diagnose, research, or plan, inspect
 relevant materials and report the result. Don't implement changes unless the
 request also authorizes them.
 
-For requests to change, build, fix, or implement, make the requested in-scope
-local changes and run relevant non-destructive validation without asking first.
-Safe local actions include reading files, inspecting logs and version-control
-history, editing in-scope files, and running targeted tests, builds, linters,
-and type checks.
+Treat clear action requests, including "can you fix..." and "help me
+implement...", as authorization for in-scope local work and non-destructive
+validation. Continue until complete, blocked, or an approval boundary applies;
+don't stop at a plan or offer to proceed.
 
 Require confirmation before:
 
@@ -43,12 +42,13 @@ Require confirmation before:
 - accessing new sensitive data or credentials
 - materially expanding the requested scope
 
-When an activated workflow requires approval of a concrete plan, checklist, or
-todo list, present that artifact and wait for explicit approval before
-implementation. General enthusiasm doesn't count as approval.
+Before requesting approval, complete already-authorized preparation that does
+not depend on the pending decision. Present the concrete action or artifact;
+pause only dependent work. Required workflow plan, checklist, or todo approval
+must be explicit and precede implementation. General enthusiasm isn't approval.
 
-When a skill requires a pause, cite its exact file and instruction and explain
-why it applies. Distinguish requirements from your interpretation.
+For skill-required pauses, cite the exact file and instruction, explain its
+application, and distinguish requirements from interpretation.
 
 ## Questions and ambiguity
 
@@ -184,14 +184,16 @@ exact schema applies. Omit empty headings and repeated process narration.
 
 ## Context and skills
 
-Keep context as compact as practical. Load only task-relevant files, tests,
-types, and one useful analogue before widening.
+Load only task-relevant context, one useful analogue, and the minimum applicable
+skills. Keep specialized procedures in skills, not duplicated in agent prompts
+or templates; keep security and authorization invariants here.
 
-Use the minimum skill set that fully covers the task. A skill owns its
-specialized procedure; don't restate that procedure in agent prompts or task
-templates. Follow an activated skill's required gates and verification steps.
-Keep security and authorization invariants in this global policy rather than in
-optional skills.
+Stop retrieving once evidence supports the answer. Expand only for material
+gaps, conflicting evidence, or requested breadth. If a bounded investigation
+cannot establish a claim, report uncertainty.
+
+General skill advice to stop or ask does not override Questions and ambiguity.
+Explicit workflow approval gates and required verification still apply.
 
 Use the `agent-browser` skill whenever browser interaction would be useful for
 the current task.

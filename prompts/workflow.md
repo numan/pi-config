@@ -35,8 +35,8 @@ validation, and an independent final review.
 5. After approval, create actionable todo records exactly from the approved
    breakdown, preserving order and dependencies. Execute them sequentially with
    `worker` agents in the same repository. Give each worker one todo, the plan
-   path, relevant context, and explicit commit authorization. Read each result
-   before starting the next.
+   path, relevant context, and the verbatim commit instruction below. Verify each
+   completion contract and commit before accepting completion or starting the next.
 6. Run `reviewer` after implementation. This is the sole independent review
    stage. When `PI_SESSION_FILE` is available, use
    `${PI_SESSION_FILE%.jsonl}.review.md` as the durable review record and keep
@@ -68,6 +68,16 @@ validation, and an independent final review.
    `code-quality` only when the resulting branch has material behavior-preserving
    simplification opportunities. Its checklist requires approval before cleanup.
 
+Include this instruction verbatim in every implementation and review-repair
+worker's task message:
+
+> You are explicitly authorized and required to commit this task's changes.
+> Load the `commit` skill, validate, commit only this task's changes, and append
+> the completion record with the full commit SHA to the todo before closing it.
+> Do not report DONE or close the todo without successful required validation
+> and a commit. If committing is blocked, report BLOCKED, append the record,
+> release the todo, and leave it open.
+
 Every implementation or review-repair worker must return this exact completion
 contract:
 
@@ -78,9 +88,15 @@ Files changed:
 - `path` — delivered behavior
 Verification:
 - `command` — pass, fail, or blocked with key output
-Commit SHA: `<full SHA>` | not authorized | none — blocked before commit
+Commit SHA: `<full SHA>` | none — blocked before commit
 Residual risks: none | specific remaining risk or blocker
 ```
+
+Before accepting completion or starting the next worker, verify that the reported
+full SHA identifies a commit in the working branch and that its diff contains
+only the task's changes. Require `Status: DONE`, successful required validation,
+and that verified SHA. Reject `not authorized` or a missing commit; keep the todo
+open (or reopen it if closed prematurely) and resolve the blocker before proceeding.
 
 For repair work, copy the verified contract into the review record and the
 repair todo before closing it. Do not infer completion from subagent exit or

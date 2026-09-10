@@ -17,6 +17,7 @@
   ],
   "hideThinkingBlock": false,
   "terminal": {
+    "showImages": false,
     "images": "kitty"
   },
   "extensions": ["+extensions/cmux/index.ts", "+extensions/herdr-agent-state.ts"],

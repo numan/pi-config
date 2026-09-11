@@ -24,14 +24,12 @@ as `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.clinerules`,
 
 ## Authorization and approval
 
-For requests to answer, explain, review, diagnose, research, or plan, inspect
-relevant materials and report the result. Don't implement changes unless the
-request also authorizes them.
+For explanation, review, diagnosis, research, or planning requests, inspect and
+report; don't implement without authorization.
 
-Treat clear action requests, including "can you fix..." and "help me
-implement...", as authorization for in-scope local work and non-destructive
-validation. Continue until complete, blocked, or an approval boundary applies;
-don't stop at a plan or offer to proceed.
+Clear action requests, including "can you fix...", authorize in-scope local work
+and non-destructive validation. Continue until complete, blocked, or an approval
+boundary applies; don't stop at a plan.
 
 Require confirmation before:
 
@@ -42,10 +40,15 @@ Require confirmation before:
 - accessing new sensitive data or credentials
 - materially expanding the requested scope
 
-Before requesting approval, complete already-authorized preparation that does
-not depend on the pending decision. Present the concrete action or artifact;
-pause only dependent work. Required workflow plan, checklist, or todo approval
-must be explicit and precede implementation. General enthusiasm isn't approval.
+"Publish to GitHub" authorizes pushing and creating or synchronizing the branch's
+PR and description through `create-github-pr`, without reconfirmation. A push
+alone isn't completion. Explicit push-only requests exclude PR changes.
+Unrelated changes, merging, and deployment remain outside scope.
+
+Before requesting approval, finish authorized preparation. Present
+the concrete action or artifact; pause only dependent work. Required plan,
+checklist, or todo approval must explicitly precede implementation. Enthusiasm
+isn't approval.
 
 For skill-required pauses, cite the exact file and instruction, explain its
 application, and distinguish requirements from interpretation.

@@ -1,6 +1,6 @@
 ---
 name: create-github-pr
-description: Validate and push the current branch, then create or update its GitHub pull request, including verified stacked-PR navigation.
+description: Publish to GitHub by validating and pushing the current branch, then creating or synchronizing its pull request and description, including verified stacked-PR navigation. Use for publish-to-GitHub and PR creation or update requests, not explicit push-only requests.
 ---
 
 # Create or Update a GitHub Pull Request
@@ -12,7 +12,7 @@ Create a new GitHub pull request for the current branch, or update the existing 
 Before each category of work, invoke the matching workflow using its natural task phrasing:
 
 - For GitHub operations, interact with GitHub using the `gh` CLI. Use `gh pr`, `gh run`, and `gh api` for PRs, CI runs, and advanced queries.
-- For PR bodies, generate a comprehensive GitHub Pull Request summary for the current branch. The result must be GitHub-compatible markdown.
+- Before writing a PR body, read and apply `../github-pr-summary/SKILL.md`. Generate reviewer-focused GitHub markdown, not a session completion report.
 - For approved local commits, create a git commit using a polished Conventional Commit message.
 
 Use `gh` for GitHub operations. Do not use raw web UI steps.
@@ -168,9 +168,11 @@ If the branch is ahead of upstream, push it with:
 git push
 ```
 
-Track whether this workflow pushed new commits. If push fails, stop and report the failure.
+Track whether this workflow pushed new commits for the completion report, not as the condition for reviewing the description. If push fails, stop and report the failure.
 
-### 5.3 Decide Whether to Regenerate the Description
+### 5.3 Check the Description Against the Current Branch
+
+On every publish or PR update request, assess whether the description accurately covers the current branch against the PR's actual base and follows the summary skill's writing rules. Do this even when commits were pushed earlier or by another workflow.
 
 Fetch the current PR body:
 
@@ -180,9 +182,9 @@ gh pr view --json body --jq '.body'
 
 Choose one update mode:
 
-- **Full regeneration:** Use when new commits were pushed, or when the existing body is empty or lacks a detailed description.
-- **Navigation-only update:** Use when no commits were pushed, the body is detailed, and verified stack relationships show that `## Stack navigation` is missing, stale, or inconsistent.
-- **No update:** Use when neither condition applies.
+- **Full regeneration:** Use when the user requests a rewrite, or the body is empty, incomplete, stale, or violates the writing rules, including session commentary.
+- **Navigation-only update:** Use when the rest of the body is accurate and follows the writing rules, but verified stack relationships show that `## Stack navigation` is missing, stale, or inconsistent.
+- **No update:** Use only when the body already accurately covers the current branch and follows the writing and navigation rules.
 
 Treat a body as detailed when it includes meaningful `## Problem`, `## Solution`, and `## QA` sections or an equivalent reviewer-focused structure.
 
@@ -190,7 +192,7 @@ Treat a body as detailed when it includes meaningful `## Problem`, `## Solution`
 
 For full regeneration:
 
-1. Generate a comprehensive GitHub Pull Request summary for the current branch and use it as the new body.
+1. Generate a reviewer-focused summary of the current branch. Remove obsolete session commentary instead of appending progress reports. Preserve useful reviewer-authored content and screenshots.
 2. Save the exact GitHub markdown to a temporary file.
 3. Update the PR with `gh pr edit --body-file "$BODY_FILE"`.
 
@@ -208,12 +210,15 @@ After updating, show the PR URL and summarize whether commits were pushed and wh
 Before reporting completion, verify the final PR state:
 
 ```bash
-gh pr view --json number,url,author,headRefName,baseRefName,state
+git rev-parse HEAD
+gh pr view --json number,url,author,headRefName,headRefOid,baseRefName,state,body
 ```
+
+Verify that the PR's remote `headRefOid` matches the intended local `HEAD`. Read back the published body and verify that it matches the prepared markdown (allowing line-ending normalization) and meets the summary skill's writing rules. If no body edit was needed, verify that the existing body still accurately describes the current branch. Report any mismatch as incomplete publication, not success.
 
 For new PRs, also verify the PR exists on the expected branch. For updates, verify the PR author is the authenticated user. When stack navigation is present, verify that it is the first section and that every PR number, title, URL, layer, endpoint label, and current marker matches GitHub metadata.
 
-Report the outcome in this format:
+Report execution results and validation limitations only in the chat completion report, never by copying this report into the PR body. Report the outcome in this format:
 
 ```markdown
 PR: <url>

@@ -219,6 +219,18 @@ When the calling workflow requests a navigation-only update, output only the ver
 
 ## Step 8: Apply writing rules
 
+### Keep the PR description independent of the agent session
+
+Write a durable explanation of the branch, not a report of the agent's work session. Include the problem, final solution, relevant tradeoffs, concrete QA instructions, and deployment requirements.
+
+Exclude session history, agent or subagent references, temporary paths, tool failures and retries, commit-hook workarounds, validation chronology, and disclaimers such as "tests not verified," "not rerun this session," or "earlier reported validation."
+
+Keep execution results and validation limitations in the chat completion report. Never imply that unperformed checks passed. Describe genuine unresolved product defects or release risks in concrete technical terms, not as agent limitations.
+
+When updating a description, remove obsolete session commentary rather than appending another progress report. Preserve useful reviewer-authored content and screenshots.
+
+### General writing rules
+
 Follow these rules strictly:
 - Write for the PR reviewer first and the end user second.
 - Put **user-facing impact** before implementation detail.
@@ -228,7 +240,7 @@ Follow these rules strictly:
 - Include **Why not X?** bullets only when the choice is non-obvious.
 - Include environment variables in backticks and note defaults inline when known.
 - Omit any section that genuinely does not apply.
-- Leave **Screenshots** as a header only with no placeholder text under it.
+- Preserve existing **Screenshots** content. When no screenshots are available, leave only the header with no placeholder text.
 - Keep the tone direct, specific, and conversational without filler.
 
 ## Step 9: Check section-specific requirements
@@ -243,7 +255,7 @@ Explain the gap being fixed from the user's perspective when possible. Avoid rep
 Start high-level, then expand into subsections only when they add useful detail.
 
 ### QA
-Write manual test steps as a numbered list. Use specific actions and verifications such as click targets, routes, filters, API actions, or expected text changes.
+Write manual test steps as a numbered list. Use specific actions and verifications such as click targets, routes, filters, API actions, or expected text changes. Present these as instructions for QA, not claims that the steps were performed. Do not include a history of test runs or checks skipped during the session.
 
 ### Deploy Notes
 Include only if there are migrations, data backfills, new jobs, feature flags, config changes, env vars, rollout sequencing, or operational caveats.
@@ -260,9 +272,10 @@ Before returning the full summary, verify:
 - Every file mentioned was actually changed by a branch-authored commit.
 - The markdown is valid GitHub markdown.
 - Empty sections were omitted.
-- `Screenshots` is blank except for the header.
+- Existing screenshots were preserved; otherwise `Screenshots` is blank except for the header.
 - Claims about behavior or deployment are supported by code, tests, or commit evidence.
+- The body describes the branch's final state, contains no agent-session commentary or execution report, and does not imply unperformed validation passed.
 
 For navigation-only output, verify the stack metadata checks above and return no content outside the navigation section.
 
-If branch-only authorship is ambiguous because history was rewritten or commits were cherry-picked, say so briefly in the relevant section instead of presenting speculation as fact.
+If branch-only authorship is ambiguous because history was rewritten or commits were cherry-picked, resolve it from evidence or omit unsupported claims. Report any remaining uncertainty in chat, separately from the PR markdown; do not insert the agent's investigation limitations into the description.

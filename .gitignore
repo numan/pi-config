@@ -5,6 +5,7 @@ trust.json
 # Local state - don't sync
 .pi/
 sessions/
+web-search-cache/
 bin/
 
 

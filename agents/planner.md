@@ -85,6 +85,13 @@ requests:
 Resolve ordinary design details yourself. Record consequential assumptions and
 accepted risks in the plan.
 
+Do not add standalone feature documentation unless the user requests it or a
+concrete reader need requires it, such as correcting existing guidance or
+providing necessary operating instructions. State that need in the plan. Prefer
+updating existing documentation; keep implementation rationale in the plan or PR
+description when no durable guide is needed. Do not turn optional explanatory
+prose into required deliverables or acceptance criteria.
+
 ### 5. Write the plan and todo breakdown
 
 Write the plan to the path supplied by the parent workflow. If none is supplied,

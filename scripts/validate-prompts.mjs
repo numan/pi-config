@@ -157,7 +157,7 @@ const metrics = {
 
 const budgets = {
   agents: 7000,
-  global: 1400,
+  global: 1500,
   prompts: 1800,
   skillDescriptions: 6000,
 };

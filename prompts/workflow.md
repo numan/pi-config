@@ -7,10 +7,11 @@ Run the full planning workflow for: `$ARGUMENTS`.
 
 ## Ownership and state
 
-The coordinator owns plan approval, task acceptance, workflow state, and the
-review record. The planner produces planning artifacts only. `code-quality`
-owns cleanup-checklist approval and orchestration. Reviewers return findings
-without implementing repairs.
+The coordinator owns plan and cleanup-checklist approval, implementation and
+cleanup orchestration, task acceptance, workflow state, and the review record.
+The planner produces planning artifacts only. `code-quality` returns findings
+and a proposed cleanup checklist only. Reviewers return findings without
+implementing repairs.
 
 Keep state in the plan: approved revision, repository, branch, starting HEAD,
 review base SHA, ordered todo IDs, accepted commit SHAs, current stage, repair
@@ -81,20 +82,31 @@ only for material scope or design changes.
    P0 acceptance cannot permit completion. Review repair diffs and affected
    behavior; reopen settled findings only with new evidence.
 7. Always spawn `code-quality` after review and repairs, supplying the plan,
-   review base, current HEAD, verification evidence, accepted risks, and contract
-   below. Apply its agent criteria; require evidence of behavioral equivalence
-   and official documentation for version-sensitive recommendations. Route
-   defects through step 6.
+   review base, current HEAD, verification evidence, accepted risks, and
+   `subagent_done`. Apply its agent criteria; require evidence of behavioral
+   equivalence and official documentation for version-sensitive recommendations.
+   Override its approval and execution workflow: this assignment produces findings
+   and a proposed cleanup checklist only. It must not request approval, create
+   actionable todos, edit code, or launch cleanup workers.
 
-   It owns one concrete checklist approval before cleanup todos or workers;
-   don't duplicate approval. No improvements means no checklist/todos.
-   Record declined cleanup; continue without edits.
+   Require a handoff recording reviewed SHAs, findings with concrete files and
+   evidence, and a proposed checklist with the smallest behavior-preserving
+   changes, expected benefits, and validation. Distinguish cleanup recommendations
+   from defects and uncertainty using step 6's thresholds. Require `subagent_done`
+   immediately after reporting the handoff, including when no improvements are
+   needed; in that case, return no checklist or todos.
 
-   Override direct editing: approved cleanup uses sequential workers, one todo
-   each, with the same mandatory validation, commits, and contract as implementation.
-   Require `code-quality` to verify each contract/commit before launching the next
-   worker and return contracts for coordinator acceptance. Review cleanup diffs
-   and affected behavior through step 6; record the resulting HEAD.
+   The coordinator reads the handoff and records findings and dispositions in
+   the same review record as step 6. Route defects through step 6. For cleanup,
+   present one concrete checklist and proposed todo breakdown, and obtain explicit
+   user approval before creating actionable todos or implementing. No improvements
+   means no approval request. Record declined cleanup; continue without edits.
+
+   The coordinator creates approved cleanup todos and runs sequential workers,
+   one todo each, with the same mandatory validation, commits, and contract as
+   implementation. Verify each contract and commit before accepting completion
+   or launching the next worker. Review cleanup diffs and affected behavior
+   through step 6; record the resulting HEAD.
 
 ## Worker completion contract
 

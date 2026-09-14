@@ -31,6 +31,29 @@ Examine each area below. Skip areas with no findings — only report what's acti
 | **Code quality** | Did the session reveal patterns worth refactoring, error handling gaps, or repeated boilerplate? |
 | **Workflow** | Were there unnecessary back-and-forth cycles, wasted API calls, or inefficient tool usage patterns? |
 
+### Prefer mechanical enforcement for recurring corrections
+
+Before proposing another instruction for a recurring mistake, check whether a
+validator, lint rule, type constraint, runtime check, or existing tool can prevent
+it reliably. Use the observed failure as evidence; don't generalize a one-off
+into a global rule.
+
+Choose the smallest mechanism that covers the demonstrated problem without
+rejecting legitimate work. Check whether an existing mechanism was bypassed or
+misconfigured before proposing a new one. If the decision requires judgment,
+tighten the relevant existing instruction instead and explain why enforcement
+would not fit.
+
+In the suggestion, identify the failure, proposed mechanism or instruction,
+affected files, and how to verify both rejection of the failure and acceptance
+of legitimate cases. Keep the proposal within the requested scope and wait for
+approval in Step 4 before implementing it. Don't automatically file external
+issues or alter tools during the retrospective.
+
+Remove redundant procedural reminders only after the approved mechanism is
+verified. Preserve authorization and security policy even when a tool also
+enforces it; enforcement does not replace the policy.
+
 ## Step 3: Determine Scope
 
 For each finding, classify its scope:
@@ -73,7 +96,7 @@ For each approved suggestion:
    - Claim it
    - Make the changes
    - Verify the change works (run tests, validate config, etc.)
-   - Commit using the `commit` skill if changes touch version-controlled files
+   - Commit only when explicitly authorized, using the `commit` skill
    - Mark the todo as done
 
 3. After completing all todos, print a summary:

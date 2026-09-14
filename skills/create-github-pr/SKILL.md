@@ -1,6 +1,6 @@
 ---
 name: create-github-pr
-description: Publish to GitHub by validating and pushing the current branch, then creating or synchronizing its pull request and description, including verified stacked-PR navigation. Use for publish-to-GitHub and PR creation or update requests, not explicit push-only requests.
+description: Publish to GitHub by validating and pushing the current branch, then creating or synchronizing its pull request title and description, including verified stacked-PR navigation. Use for publish-to-GitHub and PR creation or update requests, not explicit push-only requests.
 ---
 
 # Create or Update a GitHub Pull Request
@@ -12,7 +12,7 @@ Create a new GitHub pull request for the current branch, or update the existing 
 Before each category of work, invoke the matching workflow using its natural task phrasing:
 
 - For GitHub operations, interact with GitHub using the `gh` CLI. Use `gh pr`, `gh run`, and `gh api` for PRs, CI runs, and advanced queries.
-- Before writing a PR body, read and apply `../github-pr-summary/SKILL.md`. Generate reviewer-focused GitHub markdown, not a session completion report.
+- Before choosing a PR title or writing a PR body, read and apply `../github-pr-summary/SKILL.md`. Generate reviewer-focused GitHub markdown, not a session completion report.
 - For approved local commits, create a git commit using a polished Conventional Commit message.
 
 Use `gh` for GitHub operations. Do not use raw web UI steps.
@@ -105,13 +105,13 @@ git push -u origin HEAD
 
 If the branch already has an upstream, `git push` is sufficient. If push fails, stop and report the failure instead of creating the PR.
 
-### 4.3 Generate the PR Description
+### 4.3 Generate the PR Title and Description
 
 Generate a comprehensive GitHub Pull Request summary for the current branch and use it as the PR body. Save the exact GitHub markdown to a temporary file, with no prose before or after the markdown.
 
 If verified PR metadata shows that the branch is part of a stack, request the summary's `## Stack navigation` section. Before the current PR has a number and URL, generate the rest of the body without inventing navigation links; add navigation after creation.
 
-Derive a concise PR title from the branch intent and commits. If the title is ambiguous, ask the user for the title.
+Choose `TITLE` from the summary's reconstructed narrative using its title guidance. Keep it separate from `BODY_FILE`; do not prepend the title to the body.
 
 ### 4.4 Create the PR
 
@@ -170,17 +170,19 @@ git push
 
 Track whether this workflow pushed new commits for the completion report, not as the condition for reviewing the description. If push fails, stop and report the failure.
 
-### 5.3 Check the Description Against the Current Branch
+### 5.3 Check the Title and Description Against the Current Branch
 
-On every publish or PR update request, assess whether the description accurately covers the current branch against the PR's actual base and follows the summary skill's writing rules. Do this even when commits were pushed earlier or by another workflow.
+On every publish or PR update request, assess whether the title and description accurately cover the current branch against the PR's actual base. Apply the summary skill's title guidance and body writing rules. Do this even when commits were pushed earlier or by another workflow.
 
-Fetch the current PR body:
+Fetch the current PR title and body:
 
 ```bash
-gh pr view --json body --jq '.body'
+gh pr view --json title,body
 ```
 
-Choose one update mode:
+Keep an accurate existing title; do not retitle solely for stylistic preference. Change it when the branch's main purpose or scope has materially changed, the title is misleading, or the user requests a rewrite. Preserve explicit user wording; if it conflicts with the current scope, ask before replacing it. Record the intended final title in `TITLE`, whether changed or preserved.
+
+Choose one description update mode independently of the title decision:
 
 - **Full regeneration:** Use when the user requests a rewrite, or the body is empty, incomplete, stale, or violates the writing rules, including session commentary.
 - **Navigation-only update:** Use when the rest of the body is accurate and follows the writing rules, but verified stack relationships show that `## Stack navigation` is missing, stale, or inconsistent.
@@ -188,7 +190,15 @@ Choose one update mode:
 
 Treat a body as detailed when it includes meaningful `## Problem`, `## Solution`, and `## QA` sections or an equivalent reviewer-focused structure.
 
-### 5.4 Update the PR Description
+### 5.4 Update the PR Title and Description
+
+If the title needs changing, apply it before generating the final body:
+
+```bash
+gh pr edit --title "$TITLE"
+```
+
+If this fails, stop and report the failure. If the body includes verified stack navigation, refresh it after a title change so its current-PR label matches GitHub. Use a navigation-only update when the rest of the body needs no changes. Do not edit neighboring PRs.
 
 For full regeneration:
 
@@ -203,7 +213,7 @@ For a navigation-only update:
 3. Preserve the remainder of the existing body byte-for-byte, including screenshots, manual QA notes, comments, and formatting.
 4. Save the composed body to a temporary file and update it with `gh pr edit --body-file "$BODY_FILE"`.
 
-After updating, show the PR URL and summarize whether commits were pushed and whether the description changed. For no update, show the PR URL and state that no description update was necessary.
+After updating, show the PR URL and summarize whether commits were pushed and whether the title or description changed. State when either was left unchanged.
 
 ## Step 6: Final Validation
 
@@ -211,10 +221,10 @@ Before reporting completion, verify the final PR state:
 
 ```bash
 git rev-parse HEAD
-gh pr view --json number,url,author,headRefName,headRefOid,baseRefName,state,body
+gh pr view --json number,url,author,title,headRefName,headRefOid,baseRefName,state,body
 ```
 
-Verify that the PR's remote `headRefOid` matches the intended local `HEAD`. Read back the published body and verify that it matches the prepared markdown (allowing line-ending normalization) and meets the summary skill's writing rules. If no body edit was needed, verify that the existing body still accurately describes the current branch. Report any mismatch as incomplete publication, not success.
+Verify that the PR's remote `headRefOid` matches the intended local `HEAD`. Read back the published title and verify that it exactly matches `TITLE` and represents the intended branch-only scope. If explicit user wording leaves a known scope mismatch, resolve it with the user before claiming completion. Read back the published body and verify that it matches the prepared markdown (allowing line-ending normalization) and meets the summary skill's writing rules. If no body edit was needed, verify that the existing body still accurately describes the current branch. Report any mismatch as incomplete publication, not success.
 
 For new PRs, also verify the PR exists on the expected branch. For updates, verify the PR author is the authenticated user. When stack navigation is present, verify that it is the first section and that every PR number, title, URL, layer, endpoint label, and current marker matches GitHub metadata.
 
@@ -225,6 +235,7 @@ PR: <url>
 Branch: <branch>
 Validation: <command> — passed|failed with explicit approval|not run because existing PR update
 Pushed: yes|no
+Title: <published title> — created|updated|left unchanged
 Description: created|updated|left unchanged
 ```
 

@@ -7,11 +7,9 @@ Run the full planning workflow for: `$ARGUMENTS`.
 
 ## Ownership and state
 
-The coordinator owns plan and cleanup-checklist approval, implementation and
-cleanup orchestration, task acceptance, workflow state, and the review record.
-The planner produces planning artifacts only. `code-quality` returns findings
-and a proposed cleanup checklist only. Reviewers return findings without
-implementing repairs.
+The coordinator owns approvals, implementation and cleanup orchestration, task
+acceptance, state, and the review record. The planner only plans; `code-quality`
+only proposes cleanup findings/checklists; reviewers only report findings.
 
 Keep state in the plan: approved revision, repository, branch, starting HEAD,
 review base SHA, ordered todo IDs, accepted commit SHAs, current stage, repair
@@ -44,18 +42,16 @@ only for material scope or design changes.
    explicit approval before creating actionable todos or implementing.
 5. Create todos exactly from the approved breakdown, preserving dependencies
    and order. Execute sequentially through `worker` agents in the same repository.
-   Supply one todo, plan path, relevant context, and the verbatim instruction
-   below. Verify each contract and commit before accepting completion or
-   starting the next worker.
+   Supply one todo, plan path, relevant context, and the worker completion
+   contract below. Apply its acceptance checks before proceeding.
 6. Run `reviewer` in fresh context with the approved plan, acceptance criteria,
    exact base/head SHAs, verification evidence, and accepted risks. This is the
    sole independent review stage, including focused repair and cleanup follow-ups.
 
-   Require direct inspection of the diff, changed tests, affected callers, and
-   supporting verification evidence. Treat summaries as claims to verify. Rerun
-   checks only for missing/inconsistent evidence, changed code, or a specific
-   unresolved regression risk. Apply `code-reviewer` thresholds and output contract.
-   No findings is valid; missing evidence is uncertainty, not a confirmed defect.
+   Inspect the diff, changed tests, callers, and verification evidence directly;
+   verify summaries. Rerun checks only for missing/inconsistent evidence, changed
+   code, or specific unresolved regression risks. Apply `code-reviewer` thresholds
+   and output contract; no findings is valid, and missing evidence is uncertainty.
 
    The coordinator alone maintains `${PI_SESSION_FILE%.jsonl}.review.md` when
    `PI_SESSION_FILE` exists. Record attempts, reviewed SHAs, dispositions, and
@@ -102,11 +98,10 @@ only for material scope or design changes.
    user approval before creating actionable todos or implementing. No improvements
    means no approval request. Record declined cleanup; continue without edits.
 
-   The coordinator creates approved cleanup todos and runs sequential workers,
-   one todo each, with the same mandatory validation, commits, and contract as
-   implementation. Verify each contract and commit before accepting completion
-   or launching the next worker. Review cleanup diffs and affected behavior
-   through step 6; record the resulting HEAD.
+   Create approved cleanup todos and run sequential workers, one todo each,
+   under the same worker completion contract and acceptance checks as
+   implementation. Review cleanup diffs and affected behavior through step 6;
+   record the resulting HEAD.
 
 ## Worker completion contract
 

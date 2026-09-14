@@ -153,6 +153,20 @@ Answer these questions before writing:
 
 Keep the narrative grounded in evidence from commits and code. Do not guess at intent when the code does not support it.
 
+### Title guidance for the publishing workflow
+
+Use this narrative to choose the PR title, not a separate summary of commit subjects:
+
+- Describe the main capability, corrected behavior, or engineering outcome of the whole PR within its branch-only scope.
+- Start with a concrete verb and use recognizable product terminology. For internal changes, name the actual engineering outcome rather than inventing user impact.
+- Treat commits as evidence, not title templates. Avoid implementation jargon, vague verbs such as "improve," and lists of incidental changes.
+- Prefer a short, plain-language sentence that makes sense in a PR list without the body. Use Conventional Commit prefixes only when project instructions require them; commit-message conventions alone do not require them for PR titles.
+- Preserve an explicit user-supplied title. Ask only when evidence leaves materially different interpretations of the PR's purpose, not merely several possible phrasings.
+
+For example, when a branch lets speakers add defaults, remove terms, and reorder them, prefer "Let speakers add, remove, and reorder contract terms" over "feat(contracts): add reusable defaults and available terms catalog". Do not claim capabilities that the branch does not implement.
+
+The calling publishing workflow keeps the chosen title in `TITLE`, separate from the body markdown. Summary-only and navigation-only output remain body markdown only; do not prepend a title or metadata.
+
 ## Step 6: Categorize files for the summary tables
 
 Group files by the system they affect.

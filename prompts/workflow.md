@@ -1,75 +1,105 @@
 ---
-description: Plan and execute substantial work through scoped context gathering, explicit plan approval, sequential implementation, and independent review
+description: Approved planning, sequential implementation, and independent review
 argument-hint: "<what-to-build>"
 ---
 
 Run the full planning workflow for: `$ARGUMENTS`.
 
-## Outcome
+## Ownership and state
 
-Deliver the requested change with an approved plan, completed todos, relevant
-validation, and an independent final review.
+The coordinator owns plan approval, task acceptance, workflow state, and the
+review record. The planner produces planning artifacts only. `code-quality`
+owns cleanup-checklist approval and orchestration. Reviewers return findings
+without implementing repairs.
+
+Keep state in the plan: approved revision, repository, branch, starting HEAD,
+review base SHA, ordered todo IDs, accepted commit SHAs, current stage, repair
+rounds used, and pending decisions. Identify approval by a commit SHA or content
+hash of the plan and breakdown, excluding mutable state. Update after accepted
+handoffs. On resume, reconcile Git, todos, and state before continuing.
+
+After approval, continue autonomously until complete, an explicit approval gate,
+a material scope or risk decision, or a concrete blocker. Renew plan approval
+only for material scope or design changes.
 
 ## Orchestration
 
-1. Inspect project instructions and reuse current repository evidence to scope
-   the work.
-2. Apply the global delegation rule where substantial independent investigation
-   is useful. Gather small or tightly coupled facts directly. Wait for required
-   subagent results and read their artifacts; don't require a scout round.
-3. Spawn the interactive `planner` with the user request, known constraints,
-   available evidence, a target plan path, and access to `subagent_done`. Let it
-   resolve material ambiguity, choose routine design details autonomously,
-   validate the design, and write a worker-ready plan and proposed todo breakdown.
-   Tell it that this workflow owns the single concrete-plan approval, with no
-   separate approach checkpoint, and that it must not create actionable
-   todo records, final-review, generic QA, audit, cleanup, or final-validation
-   todos. Instruct it to call `subagent_done` immediately after reporting its
-   completed planning artifact and proposed breakdown.
-4. Read the concrete plan and proposed todos. Before presenting them, remove or
-   merge any item that only reruns another todo's verification or duplicates
-   `code-quality`, independent review, or review repair. Require every proposed
-   todo to own a product, test, documentation, migration, configuration, or
-   operational artifact. Update the plan artifact to match the deduplicated
-   breakdown, present both, then wait for explicit user approval.
-5. After approval, create actionable todo records exactly from the approved
-   breakdown, preserving order and dependencies. Execute them sequentially with
-   `worker` agents in the same repository. Give each worker one todo, the plan
-   path, relevant context, and the verbatim commit instruction below. Verify each
-   completion contract and commit before accepting completion or starting the next.
-6. Run `reviewer` after implementation. This is the sole independent review
-   stage. When `PI_SESSION_FILE` is available, use
-   `${PI_SESSION_FILE%.jsonl}.review.md` as the durable review record and keep
-   one coordinator as its sole writer. Record each attempt, finding state, and
-   repair result before continuing.
+1. Inspect project instructions and reuse current evidence. Record repository,
+   branch, starting HEAD, and pre-existing worktree changes. Default review base
+   to starting HEAD; record a different base before approval when the request
+   includes pre-existing branch changes. Inspect relevant surrounding code regardless.
+2. Apply the global delegation rule for substantial independent investigations.
+   Gather coupled facts directly. Read all required results and artifacts.
+3. Spawn interactive `planner` with the request, constraints, evidence, target
+   plan path, and `subagent_done`. Require a validated, worker-ready plan and
+   proposed todo breakdown. Resolve routine choices autonomously and clarify
+   only material ambiguity. This workflow owns the single concrete-plan approval;
+   no separate approach checkpoint or actionable todo creation. Require
+   `subagent_done` immediately after reporting the planning artifact.
+4. Read the plan and proposed todos. Merge or remove duplicate verification,
+   generic QA, audit, review, cleanup, and final-validation items. Every todo
+   must own a product, test, documentation, migration, configuration, or
+   operational artifact. Update the plan to match, present both, and obtain
+   explicit approval before creating actionable todos or implementing.
+5. Create todos exactly from the approved breakdown, preserving dependencies
+   and order. Execute sequentially through `worker` agents in the same repository.
+   Supply one todo, plan path, relevant context, and the verbatim instruction
+   below. Verify each contract and commit before accepting completion or
+   starting the next worker.
+6. Run `reviewer` in fresh context with the approved plan, acceptance criteria,
+   exact base/head SHAs, verification evidence, and accepted risks. This is the
+   sole independent review stage, including focused repair and cleanup follow-ups.
 
-   Before creating a review-repair todo, triage each finding by:
+   Require direct inspection of the diff, changed tests, affected callers, and
+   supporting verification evidence. Treat summaries as claims to verify. Rerun
+   checks only for missing/inconsistent evidence, changed code, or a specific
+   unresolved regression risk. Apply `code-reviewer` thresholds and output contract.
+   No findings is valid; missing evidence is uncertainty, not a confirmed defect.
 
-   - likelihood in normal supported use
-   - consequence, affected users, and expected frequency
-   - existing backend or system containment
-   - whether it violates an approved acceptance criterion
-   - remediation complexity and blast radius
+   The coordinator alone maintains `${PI_SESSION_FILE%.jsonl}.review.md` when
+   `PI_SESSION_FILE` exists. Record attempts, reviewed SHAs, dispositions, and
+   repair results before continuing. Mark findings fixed, explicitly accepted,
+   deferred if non-blocking, or dismissed with evidence. Unresolved P0 and
+   unaccepted P1 block completion. P2 does not block or silently expand scope.
 
-   Automatically repair P0 findings and P1 findings involving security,
-   authorization, data integrity, financial correctness, irreversible effects,
-   or a direct violation of approved requirements. For other P1 findings, do not
-   let review silently expand the approved scope. If the scenario is rare,
-   timing-dependent, and contained by an authoritative backend, present it as an
-   accepted-risk candidate and ask the user before creating a repair todo.
+   Before creating repair todos, assess normal-use likelihood, impact, affected
+   users, frequency, system containment, acceptance-criterion violations, repair
+   complexity, and blast radius.
 
-   Stop and request a user risk decision when a proposed repair requires a new
-   state machine or cross-cutting abstraction, is materially broader than the
-   original implementation, creates another finding of comparable severity, or
-   follows an already completed autonomous repair round. Offer three choices:
-   accept the risk, implement the hardening, or revert to the simpler design.
-   Re-review substantial repairs after the decision.
-7. After independent review and any approved repairs are complete, run
-   `code-quality` only when the resulting branch has material behavior-preserving
-   simplification opportunities. Its checklist requires approval before cleanup.
+   Allow one autonomous repair round across the workflow, including cleanup
+   follow-ups: one repair batch followed by focused review. Within approved scope
+   and existing approval boundaries, automatically repair P0 and P1 involving
+   security, authorization, data integrity, financial correctness, irreversible
+   effects, or direct requirement violations. Other P1 requires a user decision;
+   present rare, timing-dependent, backend-contained scenarios as risk-acceptance
+   candidates before creating repair todos.
 
-Include this instruction verbatim in every implementation and review-repair
-worker's task message:
+   Request a decision before further repairs after that round, or when repairs
+   require a new state machine/cross-cutting abstraction, materially exceed the
+   implementation, or create comparably severe findings. Offer applicable choices:
+   accept P1 risk, authorize repairs, or approve reverting to the simpler design.
+   P0 acceptance cannot permit completion. Review repair diffs and affected
+   behavior; reopen settled findings only with new evidence.
+7. Always spawn `code-quality` after review and repairs, supplying the plan,
+   review base, current HEAD, verification evidence, accepted risks, and contract
+   below. Apply its agent criteria; require evidence of behavioral equivalence
+   and official documentation for version-sensitive recommendations. Route
+   defects through step 6.
+
+   It owns one concrete checklist approval before cleanup todos or workers;
+   don't duplicate approval. No improvements means no checklist/todos.
+   Record declined cleanup; continue without edits.
+
+   Override direct editing: approved cleanup uses sequential workers, one todo
+   each, with the same mandatory validation, commits, and contract as implementation.
+   Require `code-quality` to verify each contract/commit before launching the next
+   worker and return contracts for coordinator acceptance. Review cleanup diffs
+   and affected behavior through step 6; record the resulting HEAD.
+
+## Worker completion contract
+
+Include this instruction verbatim in every implementation, review-repair, and
+cleanup worker's task message:
 
 > You are explicitly authorized and required to commit this task's changes.
 > Load the `commit` skill, validate, commit only this task's changes, and append
@@ -78,8 +108,7 @@ worker's task message:
 > and a commit. If committing is blocked, report BLOCKED, append the record,
 > release the todo, and leave it open.
 
-Every implementation or review-repair worker must return this exact completion
-contract:
+Require this exact return contract:
 
 ```markdown
 Status: DONE | BLOCKED
@@ -92,33 +121,22 @@ Commit SHA: `<full SHA>` | none — blocked before commit
 Residual risks: none | specific remaining risk or blocker
 ```
 
-Before accepting completion or starting the next worker, verify that the reported
-full SHA identifies a commit in the working branch and that its diff contains
-only the task's changes. Require `Status: DONE`, successful required validation,
-and that verified SHA. Reject `not authorized` or a missing commit; keep the todo
-open (or reopen it if closed prematurely) and resolve the blocker before proceeding.
+Before acceptance or the next worker, verify the full SHA belongs to the working
+branch and contains only task changes. Require DONE and successful validation.
+Reject missing commits or `not authorized`; keep/reopen the todo until resolved.
+Copy verified repair contracts into the review record and repair todo before
+closure. Never infer completion from subagent exit or idle state.
 
-For repair work, copy the verified contract into the review record and the
-repair todo before closing it. Do not infer completion from subagent exit or
-idle state.
+## Boundaries and completion
 
-## Boundaries
+Parallelize independent read-heavy investigation only, never shared-state writes.
+Reuse evidence; don't create coordinator verification todos.
+Keep planning, implementation, cleanup, and review in their assigned roles.
 
-- Parallelize only independent read-heavy investigations, never shared-state
-  implementation.
-- Don't repeat repository exploration already supported by current evidence.
-- Don't create actionable todo records or start implementation before approval
-  of the actual plan and proposed todo breakdown.
-- Don't synthesize required subagent results until all have returned and their
-  artifacts have been read.
-- Keep planning, implementation, quality cleanup, and review in their named
-  layers; don't silently cross between them.
-- Focused tests, builds, type checks, and smoke checks belong to the worker todo
-  that owns the changed behavior. Coordinator checkpoints consume that evidence;
-  they are not separate review todos.
+Require all workflow-owned changes committed and final review coverage of delivered
+HEAD, including follow-ups. Preserve unrelated user changes; a globally clean
+worktree is unnecessary. Reconcile approved todos as completed, blocked, or
+explicitly cancelled with reasons. Never claim completion with required work blocked.
 
-## Completion
-
-Report the plan path, todos completed, commits created, validation commands and
-results, review-record path or why none was written, review verdict, addressed
-findings, repair rounds, and remaining risks or blockers.
+Report plan path, completed todos, commits, validation commands/results, review-record
+path or why absent, verdict, addressed findings, repair rounds, and remaining risks.

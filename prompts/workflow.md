@@ -63,15 +63,19 @@ only for material scope or design changes.
    users, frequency, system containment, acceptance-criterion violations, repair
    complexity, and blast radius.
 
-   Allow one autonomous repair round across the workflow, including cleanup
-   follow-ups: one repair batch followed by focused review. Within approved scope
-   and existing approval boundaries, automatically repair P0 and P1 involving
-   security, authorization, data integrity, financial correctness, irreversible
-   effects, or direct requirement violations. Other P1 requires a user decision;
-   present rare, timing-dependent, backend-contained scenarios as risk-acceptance
+   Allow up to three autonomous repair rounds workflow-wide, including cleanup:
+   one batch then focused review. Initialize counter to zero; increment before
+   each batch, including failures/interruptions. Never reset across resumes/stages.
+   Repeat only for eligible unresolved findings within budget and approval boundaries.
+
+   Within approved scope and existing approval boundaries, automatically repair
+   P0 and P1 involving security, authorization, data integrity, financial
+   correctness, irreversible effects, or direct requirement violations.
+   Other P1 requires a user decision; present rare, timing-dependent,
+   backend-contained scenarios as risk-acceptance
    candidates before creating repair todos.
 
-   Request a decision before further repairs after that round, or when repairs
+   Request a decision before fourth or subsequent repair rounds, or when repairs
    require a new state machine/cross-cutting abstraction, materially exceed the
    implementation, or create comparably severe findings. Offer applicable choices:
    accept P1 risk, authorize repairs, or approve reverting to the simpler design.

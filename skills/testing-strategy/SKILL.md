@@ -9,15 +9,17 @@ Place each behavior at the lowest test layer that can prove it. Require every hi
 
 ## Workflow
 
-1. Identify the observable contracts and regression risks.
+1. Identify the observable contracts, regression risks, and production code responsible for the behavior.
 2. Search existing tests for the same messages, inputs, outcomes, and invariants.
 3. Map each contract to its current and preferred owning layer.
 4. Separate unique boundary confidence from duplicated rule coverage.
 5. Add or refactor tests at the lowest sufficient layer.
 6. Preserve one representative higher-level assertion when wiring, accessibility, integration, or a user sequence is the actual contract.
-7. Run targeted validation and the most representative affordable regression command.
+7. Run targeted validation and required repository checks, including representative regression validation appropriate to the change.
 
-Use this coverage map when test ownership or removal is non-trivial:
+Choose evidence proportional to the change. Do not add a test merely to mirror a reversible, low-impact implementation change. For clipping or responsive layout, verify in a real browser; DOM assertions alone do not prove the visual result.
+
+Use this coverage map when test ownership or removal is non-trivial. For a small change, identify ownership without producing a separate document:
 
 | Contract | Current layer | Owning layer | Unique higher-level confidence |
 |---|---|---|---|
@@ -26,6 +28,8 @@ Use this coverage map when test ownership or removal is non-trivial:
 Do not remove an assertion until its contract has an owning test or is shown not to be a meaningful contract.
 
 ## Choose the Lowest Sufficient Layer
+
+Trace the callback, state, or effect responsible for the outcome before moving coverage. Include that production behavior in the chosen layer; do not recreate it in a test harness to make a lower-level test pass.
 
 | Behavior | Preferred layer | Higher-level coverage |
 |---|---|---|
@@ -55,6 +59,14 @@ Keep each rule matrix at one owning layer. For example, keep validation values a
 
 Do not split one slow page test into several page tests merely to avoid a per-test timeout. Reduce total expensive setup, renders, interactions, and queries.
 
+## Minimize Scenario Setup
+
+Start at the nearest valid precondition for the transition under test. Load a saved fixture when creation is only setup; keep real creation and navigation when first-save behavior is the contract.
+
+Identify the starting state, transition, and observable outcome before removing a repeated journey. Identical assertions after different transitions may protect distinct failures. Preserve those contracts even when splitting a long scenario.
+
+Simplify unrelated setup and duplicated journeys before adding mocks or optimizing interactions. Replace an expensive unrelated widget only when its real behavior has dedicated coverage and the double preserves the interface used by the scenario. Keep the behavior under test real. Prefer a local double or an existing focused helper over global mocks or a configurable all-purpose harness.
+
 ## Match Interaction Fidelity to the Contract
 
 Use realistic user interaction helpers when the contract includes:
@@ -71,7 +83,7 @@ Never replace a realistic sequence when doing so skips behavior users rely on. I
 
 ## Diagnose Slow and Timed-Out Tests
 
-Measure progressively more representative conditions:
+Measure the conditions relevant to the failure, progressing toward the representative configuration rather than treating every entry as a mandatory run:
 
 1. The test alone without instrumentation.
 2. The test alone with CI instrumentation such as coverage, sanitizers, or tracing.
@@ -82,14 +94,14 @@ Inspect full application/page renders, state-changing loops, repeated accessibil
 
 Prefer this repair order:
 
-1. Remove duplicate high-level coverage while preserving owning tests.
+1. Simplify unrelated setup and remove duplicate high-level coverage while preserving owning tests and distinct transition coverage.
 2. Move rule matrices and state filtering to pure, unit, or hook tests.
 3. Retain one representative boundary assertion.
 4. Narrow interaction fidelity only when sequencing is not the contract.
 5. Optimize production code only when profiling identifies it as the bottleneck.
 6. Increase a timeout only when the remaining scenario is irreducibly valuable and representative measurements justify the budget.
 
-Verify before and after with comparable commands. An isolated speedup does not prove a CI timeout is resolved.
+Verify before and after with comparable commands and configurations. Report focused and representative-suite timings separately, including remaining timeout margin. An isolated speedup or local shard pass does not establish that CI is fixed; distinguish measured local results from CI confirmation.
 
 ## Fixture Validity and Environmental Dependencies
 
@@ -120,8 +132,12 @@ Read `references/testing-patterns.md` when concrete examples for unit, component
 
 ## Verification
 
-- [ ] Every meaningful contract has an owning test.
-- [ ] Higher-level tests identify unique boundary confidence.
+Apply the checks relevant to the change. Follow the active project instructions for required checks and when to stop verification.
+
+- [ ] Meaningful automated coverage is preserved; new tests protect behavior rather than mirror implementation.
+- [ ] Higher-level tests identify unique boundary or transition confidence.
+- [ ] The chosen layer includes the production behavior responsible for the outcome.
+- [ ] Setup omits unrelated journeys without bypassing the transition under test.
 - [ ] Removed assertions remain covered or are explicitly shown redundant.
 - [ ] Interaction fidelity matches the behavior under test.
 - [ ] Targeted tests pass.

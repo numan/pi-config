@@ -10,6 +10,7 @@ Load this reference from the `testing-strategy` skill when concrete examples are
 - [Mocking Patterns](#mocking-patterns)
 - [React/Component Testing](#reactcomponent-testing)
 - [Layered Test Refactoring](#layered-test-refactoring)
+- [Narrow Integration Scenarios](#narrow-integration-scenarios)
 - [API / Integration Testing](#api--integration-testing)
 - [E2E Testing (Playwright)](#e2e-testing-playwright)
 - [Test Anti-Patterns](#test-anti-patterns)
@@ -112,7 +113,9 @@ jest.mock('./utils', () => ({
 }));
 ```
 
-### Mock at Boundaries Only
+### Mock Outside the Behavior Under Test
+
+Choose doubles relative to the contract being tested. These are typical external boundaries, not permission to replace the behavior the test claims to prove:
 
 ```
 Mock these:                    Don't mock these:
@@ -122,6 +125,10 @@ Mock these:                    Don't mock these:
 ├── External API calls         ├── Validation functions
 └── Time/Date (when needed)    └── Pure functions
 ```
+
+A focused integration test may also replace an expensive child widget unrelated to its contract. For example, a first-save navigation test can replace segmented date entry with a labeled input that receives the current value and calls the real update callback with the expected date representation. Keep segmented entry, clearing, keyboard, and focus behavior covered with the real widget in its own tests. Keep routing and persistence logic real in the navigation test, with HTTP responses supplied at the network boundary.
+
+Do not implement the behavior under test in the double. If a parent owns focus restoration, a component harness that manually focuses the expected element proves the harness, not the application. Keep that assertion at a layer containing the real parent behavior. Scope widget doubles locally or reuse an existing focused helper; do not introduce a global replacement for unrelated tests.
 
 ## React/Component Testing
 
@@ -209,7 +216,7 @@ This layer proves the input is wired to touched state and exposes its error acce
 
 ### Redundancy checklist
 
-Before refactoring, search the suite and record:
+For non-trivial coverage moves, search the suite and record ownership. For smaller changes, use these distinctions without producing a separate map:
 
 | Contract | Owning layer | Higher-level unique confidence |
 |---|---|---|
@@ -219,6 +226,26 @@ Before refactoring, search the suite and record:
 | Multi-page user journey | Browser/E2E | Routing and browser integration |
 
 Remove an expensive assertion only after identifying where its contract remains covered. If no owning test exists, add the lower-level test first. Measure before and after with the same isolated and representative suite/coverage commands; splitting one slow page test into several page tests is not an optimization when total renders increase.
+
+## Narrow Integration Scenarios
+
+Suppose a page test fills recipient details and three dates, saves a new contract, checks guidance, switches Preview → Builder, and checks guidance and disclosures again. Separate the contracts before reducing its work:
+
+| Starting state | Transition | Observable outcome | Required setup |
+|---|---|---|---|
+| Valid new draft with open disclosures | First save changes the URL | Guidance and disclosures survive canonical navigation | Real creation and router behavior; direct input setup where typing is unrelated |
+| Valid saved contract with open disclosures | Preview → Builder | Disclosures remain open | Load a saved fixture; no creation journey |
+| Independently loaded saved contract | Initial load | New-draft guidance is absent | Load through the saved route rather than reuse a newly saved instance |
+
+Remove the Preview round trip from the first-save test only after checking whether new-versus-saved state changes the behavior. If it does, retain coverage of that distinction. Do not replace the first-save scenario with a saved fixture: that would bypass the transition it protects.
+
+Keep exact helper copy and link details in focused rendering coverage. Use representative visibility or state assertions during navigation. Keep server-data → edit → save → reload scenarios where persistence is the contract, and keep parent-owned focus assertions with the real parent implementation.
+
+For a clipping or responsive-layout fix, use a browser check at the affected widths to verify the rendered result. Add an automated regression test only if it meaningfully detects that failure; an assertion that repeats the CSS value does not prove the banner is visible.
+
+### Report comparable performance evidence
+
+Compare the same focused command before and after, then the relevant suite or shard configuration. Include the timeout budget and distinguish local evidence from CI results. For example, a 3.7-second focused result and a 7.3-second local shard result are different measurements; with a 10-second timeout, the latter leaves about 2.7 seconds of observed margin. Neither confirms a CI pass. Do not require repeated successful runs without a specific unresolved concern.
 
 ## API / Integration Testing
 

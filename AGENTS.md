@@ -41,7 +41,9 @@ Require confirmation before:
   sending a message
 - destructive or difficult-to-reverse actions
 - purchases or actions with material financial cost
-- accessing new sensitive data or credentials
+- accessing new sensitive data or credentials, except designated test
+  credentials explicitly authorized by the user or applicable project
+  instructions for the current task and environment
 - materially expanding the requested scope
 
 "Publish to GitHub" authorizes pushing and creating or synchronizing the branch's
@@ -147,10 +149,17 @@ workflow is practical.
 
 ### Validate behavior
 
-When browser testing requires authentication, check for a project-local
-`.testing-credentials` file before asking the user for credentials. Treat the
-file as sensitive: verify it is ignored by version control, never commit it,
-and do not expose its contents in logs or responses.
+When browser testing requires authentication, check for a repository-root
+`.testing-credentials` file, including when working inside a service directory.
+If its use is explicitly authorized for the task and environment, attempt login
+and verify an authenticated page before reporting authentication as a blocker.
+A login screen alone is not a blocker. If authorization is missing, ask for it
+rather than silently skipping browser checks.
+
+Treat the file as sensitive: verify it is ignored by version control, never
+commit it, and do not expose secrets in tool calls, logs, or responses. If login
+fails, report the attempted environment and sanitized failure. Do not bypass
+authentication or broaden access to another account or environment.
 
 Run checks that exercise the changed behavior and complete required repository
 checks.

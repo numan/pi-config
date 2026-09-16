@@ -44,6 +44,9 @@ Check only relevant concerns:
   rendering, sequential independent work, and unsupported performance claims.
 - **Tests:** observable contracts, realistic boundaries, and whether expensive
   higher-level coverage adds confidence unavailable at a lower layer.
+  Trace changed test setup through relevant factories, callbacks, and validations
+  for concrete failure conditions tied to today's date or other uncontrolled
+  environmental inputs.
 
 Load `testing-strategy` when tests are materially added, changed, removed, slow,
 or flaky. Run focused validation when safe and useful. Never claim a command

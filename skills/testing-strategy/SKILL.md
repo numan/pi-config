@@ -91,6 +91,22 @@ Prefer this repair order:
 
 Verify before and after with comparable commands. An isolated speedup does not prove a CI timeout is resolved.
 
+## Fixture Validity and Environmental Dependencies
+
+When creating or changing tests, inspect relevant factory defaults, callbacks,
+and validations, including dependencies outside the diff. Keep setup valid
+independently of the execution date unless time is explicitly under test.
+
+For related dates, use a shared controlled clock or explicit relationships that
+preserve the required ordering. Fixed dates are valid for fixed-calendar
+scenarios with controlled time; do not mix them with live-clock defaults when
+fixture validity depends on their relationship.
+
+When a clock dependency could invalidate a fixture, verify the affected examples
+at a date beyond the identified failure boundary. Restore clock changes after
+the check. Scope this verification to the demonstrated dependency rather than
+running every test across a calendar matrix.
+
 ## Detailed Patterns
 
 Read `references/testing-patterns.md` when concrete examples for unit, component, integration, E2E, mocking, or layered test refactoring are needed.

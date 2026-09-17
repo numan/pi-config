@@ -33,8 +33,9 @@ changed files and tests directly, and read applicable project instructions.
 Use a scout when the branch spans independent subsystems; wait for and read its
 result before proposing changes.
 
-Focus on branch-touched code. A small adjacent edit is allowed only when needed
-to keep an approved refactor coherent.
+Focus on branch-touched code. Adjacent code is allowed to be considered if
+it would result in a meaningful improvement to the overall feature while maintaining
+a small blast radius. Larger refactors require explicit user approval.
 
 ### Propose
 

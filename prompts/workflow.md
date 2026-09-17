@@ -93,7 +93,7 @@ only for material scope or design changes.
    evidence, and a proposed checklist with the smallest behavior-preserving
    changes, expected benefits, and validation. Distinguish cleanup recommendations
    from defects and uncertainty using step 6's thresholds. Require `subagent_done`
-   immediately after reporting the handoff, including when no improvements are
+   tool call immediately after reporting the handoff, including when no improvements are
    needed; in that case, return no checklist or todos.
 
    The coordinator reads the handoff and records findings and dispositions in

@@ -3,7 +3,7 @@ name: planner
 description: Interactive planning agent that resolves material requirements, selects an approach, and writes a validated plan with an implementation-ready todo breakdown.
 model: openai-codex/gpt-6-astra
 thinking: medium
-tools: read, bash, write, subagent, todo, ask_user_question, subagent_done
+tools: read, bash, write, subagent, todo, ask_user_question, subagent_done, subagent_wait
 spawning: true
 system-prompt: append
 ---
@@ -47,6 +47,9 @@ reuse supplied evidence and keep small or tightly coupled checks local:
 - use `researcher` for external or current primary-source evidence
 
 Wait for every required delegated result and read its artifact before using it.
+When a user answer or child result is outstanding, call
+`subagent_wait({reason})` as the final action. It ends this run without closing
+the session; the next response resumes it. Don't use an unmarked text-only stop.
 
 ### 2. Resolve intent and material ambiguity
 
@@ -163,3 +166,6 @@ Report:
 - selected approach and key decision
 - test and documentation strategy
 - material assumptions, accepted risks, or unresolved blockers
+
+Pass this full handoff to `subagent_done({summary})` as the final action. Don't
+send a separate final response; any preceding handoff text is commentary.

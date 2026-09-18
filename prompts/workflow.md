@@ -23,6 +23,9 @@ only for material scope or design changes.
 
 ## Orchestration
 
+Children pause with `subagent_wait({reason})` for user input or required child
+results. Finish with `subagent_done({summary})`, not a preceding final answer.
+
 1. Inspect project instructions and reuse current evidence. Record repository,
    branch, starting HEAD, and pre-existing worktree changes. Default review base
    to starting HEAD; record a different base before approval when the request
@@ -30,11 +33,10 @@ only for material scope or design changes.
 2. Apply the global delegation rule for substantial independent investigations.
    Gather coupled facts directly. Read all required results and artifacts.
 3. Spawn interactive `planner` with the request, constraints, evidence, target
-   plan path, and `subagent_done`. Require a validated, worker-ready plan and
+   plan path, and completion contract. Require a validated, worker-ready plan and
    proposed todo breakdown. Resolve routine choices autonomously and clarify
    only material ambiguity. This workflow owns the single concrete-plan approval;
-   no separate approach checkpoint or actionable todo creation. Require
-   `subagent_done` immediately after reporting the planning artifact.
+   no separate approach checkpoint or actionable todo creation.
 4. Read the plan and proposed todos. Merge or remove duplicate verification,
    generic QA, audit, review, cleanup, and final-validation items. Every todo
    must own a product, test, documentation, migration, configuration, or
@@ -83,18 +85,17 @@ only for material scope or design changes.
    behavior; reopen settled findings only with new evidence.
 7. Always spawn `code-quality` after review and repairs, supplying the plan,
    review base, current HEAD, verification evidence, accepted risks, and
-   `subagent_done`. Apply its agent criteria; require evidence of behavioral
-   equivalence and official documentation for version-sensitive recommendations.
+   completion contract. Apply its criteria; require behavioral-equivalence
+   evidence and official documentation for version-sensitive recommendations.
    Override its approval and execution workflow: this assignment produces findings
    and a proposed cleanup checklist only. It must not request approval, create
    actionable todos, edit code, or launch cleanup workers.
 
-   Require a handoff recording reviewed SHAs, findings with concrete files and
-   evidence, and a proposed checklist with the smallest behavior-preserving
-   changes, expected benefits, and validation. Distinguish cleanup recommendations
-   from defects and uncertainty using step 6's thresholds. Require `subagent_done`
-   tool call immediately after reporting the handoff, including when no improvements are
-   needed; in that case, return no checklist or todos.
+   Require a `subagent_done({summary})` handoff recording reviewed SHAs, findings
+   with concrete files and evidence, and a checklist of the smallest
+   behavior-preserving changes, benefits, and validation. Distinguish cleanup
+   from defects and uncertainty using step 6's thresholds. No improvements:
+   return the handoff without a checklist or todos.
 
    The coordinator reads the handoff and records findings and dispositions in
    the same review record as step 6. Route defects through step 6. For cleanup,

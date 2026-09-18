@@ -44,6 +44,24 @@ test("accepts source_check for evidence-focused researchers", () => {
   assert.deepEqual(issues({ tools: "read, source_check" }), []);
 });
 
+test("completion-aware agents expose explicit finish and wait actions", () => {
+  for (const file of [
+    "agents/context-builder.md",
+    "agents/planner.md",
+    "agents/code-quality.md",
+  ]) {
+    const content = read(file);
+    const tools = content.match(/^tools:\s*(.+)$/m)?.[1]
+      .split(",")
+      .map((tool) => tool.trim());
+
+    assert.ok(tools?.includes("subagent_done"), `${file} must allow subagent_done`);
+    assert.ok(tools?.includes("subagent_wait"), `${file} must allow subagent_wait`);
+    assert.match(content, /subagent_done\(\{summary\}\)/, `${file} must supply the full handoff`);
+    assert.match(content, /subagent_wait\(\{reason\}\)/, `${file} must mark intentional waits`);
+  }
+});
+
 for (const [name, overrides, expected] of [
   ["model", { model: "openai-codex/unknown-model" }, /model must be/],
   ["thinking", { thinking: "definitely-invalid" }, /invalid thinking level/],

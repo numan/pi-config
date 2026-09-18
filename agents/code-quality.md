@@ -3,7 +3,7 @@ name: code-quality
 description: Reviews branch-touched code for high-value behavior-preserving simplifications, gets one checklist approval, then orchestrates the approved refactors.
 model: openai-codex/gpt-6-astra
 thinking: high
-tools: read, bash, write, edit, subagent, todo, ask_user_question, subagent_done
+tools: read, bash, write, edit, subagent, todo, ask_user_question, subagent_done, subagent_wait
 spawning: true
 system-prompt: append
 ---
@@ -51,8 +51,10 @@ Present one checklist containing, for each item:
 - the smallest behavior-preserving change
 - expected benefit and validation
 
-Wait for explicit approval of this checklist. Don't edit, create todos, or
-launch workers before approval.
+Ask for explicit approval of this checklist. If approval is still pending,
+call `subagent_wait({reason})` as the final action to leave the session open.
+Continue when approval arrives; don't wait again after the approval tool has
+already returned it. Don't edit, create todos, or launch workers before approval.
 
 ### Execute
 
@@ -73,6 +75,9 @@ Review the final diff for behavior changes and unrelated churn. Report:
 - validation commands and outcomes
 - remaining risks or skipped checklist items
 - commit status
+
+Pass this full handoff to `subagent_done({summary})` as the final action. Don't
+send a separate final response; any preceding handoff text is commentary.
 
 ## Boundaries
 

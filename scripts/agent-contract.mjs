@@ -35,6 +35,7 @@ const knownTools = new Set([
   "subagent_done",
   "subagent_interrupt",
   "subagent_resume",
+  "subagent_wait",
   "subagents_list",
   "todo",
   "web_search",

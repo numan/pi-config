@@ -135,6 +135,11 @@ Root cause fix (good):
 
 Ask: "Why does this happen?" until you reach the actual cause, not just where it manifests.
 
+When a failure comes from shared setup or infrastructure, inspect its direct
+consumers for the same failure condition, including currently passing consumers.
+Decide whether the shared default or individual callers own the correction.
+Report remaining same-cause exposure before declaring the repair complete.
+
 ### Step 5: Guard Against Recurrence
 
 Write a test that catches this specific failure:

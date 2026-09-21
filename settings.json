@@ -1,12 +1,14 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "0.86.1",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-astra",
   "defaultThinkingLevel": "medium",
   "packages": [
     {
       "source": "git:github.com/HazAT/pi-smart-sessions",
-      "extensions": ["+extensions/smart-sessions.ts"]
+      "extensions": [
+        "+extensions/smart-sessions.ts"
+      ]
     },
     "../local-packages/pi-interactive-subagents",
     "npm:pi-web-access",
@@ -20,6 +22,9 @@
     "showImages": false,
     "images": "kitty"
   },
-  "extensions": ["+extensions/cmux/index.ts", "+extensions/herdr-agent-state.ts"],
+  "extensions": [
+    "+extensions/cmux/index.ts",
+    "+extensions/herdr-agent-state.ts"
+  ],
   "theme": "dark"
 }

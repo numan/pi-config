@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Cut AI tells from any writing. Must always apply.
+description: Remove AI writing patterns when drafting or editing prose such as documentation, articles, or public-facing copy, or when asked for a style cleanup. Not required for routine status updates or technical answers.
 license: MIT; see LICENSE
 metadata:
   source: https://github.com/cursor/plugins/tree/main/pstack/skills/unslop

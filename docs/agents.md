@@ -1,9 +1,9 @@
 # Agents
 
-This repository defines Pi agents for GPT-5.6 Sol. Each file in `agents/`
-combines a bounded role with an explicit model, thinking level, tool set, skill
-set, and completion behavior. `AGENTS.md` supplies the global engineering and
-authorization policy.
+This repository defines Pi agents for GPT-6 Astra and GPT-6 Sol. Each file in
+`agents/` combines a bounded role with an explicit model, thinking level, tool
+set, skill set, and completion behavior. `AGENTS.md` supplies the global
+engineering and authorization policy.
 
 ## Agent inventory
 
@@ -28,8 +28,15 @@ limit that permission to the artifact.
 
 ## Execution contract
 
-Every local agent declares `model: openai-codex/gpt-5.6-sol`. The repository
-validator rejects another model. Thinking levels vary by role:
+The main session defaults to `openai-codex/gpt-6-astra`. Local agents pin one of
+two models; the repository validator rejects other models:
+
+- `openai-codex/gpt-6-astra`: planner, context-builder, code-quality, reviewer,
+  and security-auditor
+- `openai-codex/gpt-6-sol`: worker, scout, researcher, test-engineer,
+  visual-tester, web-performance-auditor, and autoresearch
+
+Thinking levels vary by role:
 
 - `low` for bounded repository reconnaissance
 - `medium` for planning, implementation, browser QA, and routine orchestration
@@ -94,9 +101,11 @@ approval, implementation, and review depend on previous stages. It requires
 one approval of the concrete plan and proposed todos; routine approach choices
 are autonomous, while material ambiguity still warrants a question. Scouting is
 conditional on useful independent investigation, not a mandatory first stage.
-Handle ordinary small fixes directly with focused validation unless the user
-requests the full workflow. Coordinators consume worker validation evidence
-under the shared stopping rule rather than rerunning unchanged checks.
+The post-review `code-quality` pass always runs. Any proposed cleanup still
+requires approval of its checklist. Handle ordinary small fixes directly with
+focused validation unless the user requests the full workflow. Coordinators
+consume worker validation evidence under the shared stopping rule rather than
+rerunning unchanged checks.
 
 ## Shared artifacts
 
@@ -119,7 +128,8 @@ When `PI_SESSION_FILE` is available, coordinator prompts derive the adjacent
 3. Select the minimum tools needed for that role.
 4. Load a skill only when it owns a distinct procedure not repeated in the
    agent body.
-5. Set the GPT-5.6 Sol model and an explicit thinking level.
+5. Pin GPT-6 Astra or GPT-6 Sol according to the role and set an explicit
+   thinking level.
 6. Enable spawning only for an agent that performs substantive orchestration.
 7. Run `npm test`.
 

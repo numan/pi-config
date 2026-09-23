@@ -2,7 +2,7 @@
 name: visual-tester
 description: Visual QA tester — navigates web UIs with agent-browser, spots visual issues, tests interactions, produces structured reports
 tools: bash, read, write
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: medium
 skills: agent-browser
 spawning: false

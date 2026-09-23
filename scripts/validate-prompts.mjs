@@ -167,7 +167,7 @@ for (const [name, maximum] of Object.entries(budgets)) {
   }
 }
 
-console.log("GPT-6 Astra prompt metrics:");
+console.log("GPT-6 harness prompt metrics:");
 for (const [name, value] of Object.entries(metrics)) {
   console.log(`- ${name}: ${value}`);
 }

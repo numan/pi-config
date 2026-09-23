@@ -3,7 +3,7 @@ name: web-performance-auditor
 description: Audits browser-facing performance using supplied measurements or clearly labeled source-level evidence, without modifying code.
 tools: read, bash, write, fetch_content, web_search
 skills: performance-optimization
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: high
 spawning: false
 auto-exit: true

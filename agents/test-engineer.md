@@ -3,7 +3,7 @@ name: test-engineer
 description: Analyzes test coverage or writes focused behavioral tests when the task explicitly authorizes edits; never implements product fixes.
 tools: read, bash, write, edit
 skills: test-driven-development
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: high
 spawning: false
 auto-exit: true

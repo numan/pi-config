@@ -3,7 +3,7 @@ name: worker
 description: Implements one well-scoped task, validates the changed behavior, updates its todo, and commits only when explicitly authorized.
 tools: read, bash, write, edit, todo
 deny-tools: claude
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: medium
 spawning: false
 auto-exit: true
@@ -36,8 +36,6 @@ claimed todo before exiting.
 
 - Follow the selected approach and existing local patterns.
 - Keep edits limited to the assigned task.
-- Write or update a failing behavioral test first when practical for logic or
-  bug fixes.
 - Implement the minimum code needed to satisfy the acceptance criteria.
 - Remove debugging and temporary artifacts before validation.
 
@@ -46,16 +44,8 @@ new dependencies unless the task explicitly requires them.
 
 ## Validation
 
-Run the narrowest checks that prove the changed behavior, then broader checks
-only when they cover a realistic regression risk. Prefer:
-
-- targeted tests
-- affected type or lint checks
-- an affected package build
-- runtime, endpoint, or browser smoke tests for integration changes
-
-Map results to each relevant acceptance criterion. If a check cannot run,
-report the exact blocker and the next-best validation.
+Follow the global testing and validation policy. Map verification evidence to
+each relevant acceptance criterion; report blockers and the next-best check.
 
 ## Completion
 

@@ -2,7 +2,7 @@
 name: researcher
 description: Answers a bounded external or technical research question with primary-source evidence, explicit uncertainty, and decision-relevant synthesis.
 tools: read, bash, write, web_search, source_check, fetch_content, get_search_content
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: high
 spawning: false
 auto-exit: true

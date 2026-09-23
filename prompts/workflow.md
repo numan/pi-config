@@ -85,28 +85,24 @@ results. Finish with `subagent_done({summary})`, not a preceding final answer.
    behavior; reopen settled findings only with new evidence.
 7. Always spawn `code-quality` after review and repairs, supplying the plan,
    review base, current HEAD, verification evidence, accepted risks, and
-   completion contract. Apply its criteria; require behavioral-equivalence
+   completion contract. Require behavioral-equivalence
    evidence and official documentation for version-sensitive recommendations.
-   Override its approval and execution workflow: this assignment produces findings
-   and a proposed cleanup checklist only. It must not request approval, create
-   actionable todos, edit code, or launch cleanup workers.
+   Override its approval/execution workflow: return findings and a proposed
+   cleanup checklist only; no approval requests, actionable todos, edits, or workers.
 
-   Require a `subagent_done({summary})` handoff recording reviewed SHAs, findings
-   with concrete files and evidence, and a checklist of the smallest
-   behavior-preserving changes, benefits, and validation. Distinguish cleanup
-   from defects and uncertainty using step 6's thresholds. No improvements:
-   return the handoff without a checklist or todos.
+   Require `subagent_done({summary})` with reviewed SHAs, concrete files and
+   evidence, and the smallest behavior-preserving changes, benefits, and
+   validation. Apply step 6's thresholds; no improvements means no checklist.
 
-   The coordinator reads the handoff and records findings and dispositions in
-   the same review record as step 6. Route defects through step 6. For cleanup,
-   present one concrete checklist and proposed todo breakdown, and obtain explicit
-   user approval before creating actionable todos or implementing. No improvements
-   means no approval request. Record declined cleanup; continue without edits.
+   Record findings and dispositions in step 6's review record; route defects
+   through step 6. For cleanup, present one checklist and proposed todo breakdown,
+   and obtain explicit user approval before creating actionable todos or
+   implementing. If none is proposed or cleanup is declined, record that and
+   continue without edits or further approval requests.
 
-   Create approved cleanup todos and run sequential workers, one todo each,
-   under the same worker completion contract and acceptance checks as
-   implementation. Review cleanup diffs and affected behavior through step 6;
-   record the resulting HEAD.
+   Run approved cleanup todos sequentially through workers, one todo each,
+   under the same completion contract and acceptance checks. Review cleanup
+   diffs and affected behavior through step 6; record the resulting HEAD.
 
 ## Worker completion contract
 

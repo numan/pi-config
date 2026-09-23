@@ -102,17 +102,13 @@ Prioritize this order:
 
 ## Step 3: Ask for approval
 
-Before any implementation work starts, present the concrete checklist to the user and explicitly ask for approval.
-
-General intent to proceed is not enough. Phrases like "just do it", "go ahead", or "proceed" do **NOT** count as approval unless they are clearly responding to the checklist you just presented.
-
 The required sequence is:
 
-1. present the branch summary and concrete todo checklist
-2. wait for the user's explicit approval of that checklist
-3. only after that, claim the first todo or launch the first worker
+1. present the branch summary and concrete todo checklist in the format below
+2. ask for and wait for the user's explicit approval of that checklist
+3. only after approval, claim todos, launch workers, or begin implementation
 
-This approval gate cannot be skipped.
+General intent to proceed is not enough. Phrases like "just do it", "go ahead", or "proceed" do **NOT** count as approval unless they are clearly responding to the checklist you just presented.
 
 Use this format:
 
@@ -134,10 +130,6 @@ Use this format:
 
 Reply with approval and any edits to the checklist. I will only start implementation after approval.
 ```
-
-Do not claim todos or spawn workers before the user explicitly approves the checklist.
-
-Hard stop: if you have not yet shown the checklist in the required format and received explicit approval of that checklist, do not begin implementation.
 
 ## Step 4: Launch worker subagents sequentially
 

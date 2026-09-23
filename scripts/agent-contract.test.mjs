@@ -36,8 +36,8 @@ test("accepts the runtime-controlling agent contract", () => {
   assert.deepEqual(issues({}), []);
 });
 
-test("accepts explicitly pinned Sol agents", () => {
-  assert.deepEqual(issues({ model: "openai-codex/gpt-5.6-sol" }), []);
+test("accepts explicitly pinned GPT-6 Sol agents", () => {
+  assert.deepEqual(issues({ model: "openai-codex/gpt-6-sol" }), []);
 });
 
 test("accepts source_check for evidence-focused researchers", () => {
@@ -64,6 +64,7 @@ test("completion-aware agents expose explicit finish and wait actions", () => {
 
 for (const [name, overrides, expected] of [
   ["model", { model: "openai-codex/unknown-model" }, /model must be/],
+  ["retired model", { model: "openai-codex/gpt-5.6-sol" }, /model must be/],
   ["thinking", { thinking: "definitely-invalid" }, /invalid thinking level/],
   ["boolean", { spawning: "sometimes" }, /invalid boolean spawning/],
   ["session mode", { "session-mode": "shared" }, /invalid session-mode/],

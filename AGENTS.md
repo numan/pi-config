@@ -174,6 +174,9 @@ for new changes, failures, uncovered acceptance criteria, or specific unresolved
 regression risks. Coordinators consume worker evidence rather than rerunning
 unchanged checks.
 
+Use plain, direct language in routine responses. Avoid filler, canned praise,
+and unnecessary jargon.
+
 Lead reports with conclusions and include only substantive sections unless an
 exact schema applies. Omit empty headings and repeated process narration.
 

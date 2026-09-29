@@ -127,7 +127,7 @@ extension commands include `/todos` and `/cost`.
 | `npm:pi-better-openai` | OpenAI provider behavior customization |
 
 The default model is `openai-codex/gpt-6-astra` at medium thinking. Agent roles
-use GPT-6 Astra or GPT-6 Sol with role-specific thinking levels; see
+use GPT-6 Astra or GPT-6.1 Sol with role-specific thinking levels; see
 [the routing contract](docs/agents.md#execution-contract). Local model providers
 and overrides live in `models.json`; MCP is currently empty.
 

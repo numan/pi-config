@@ -1,6 +1,6 @@
 # Agents
 
-This repository defines Pi agents for GPT-6 Astra and GPT-6 Sol. Each file in
+This repository defines Pi agents for GPT-6 Astra and GPT-6.1 Sol. Each file in
 `agents/` combines a bounded role with an explicit model, thinking level, tool
 set, skill set, and completion behavior. `AGENTS.md` supplies the global
 engineering and authorization policy.
@@ -33,7 +33,7 @@ two models; the repository validator rejects other models:
 
 - `openai-codex/gpt-6-astra`: planner, context-builder, code-quality, reviewer,
   and security-auditor
-- `openai-codex/gpt-6-sol`: worker, scout, researcher, test-engineer,
+- `openai-codex/gpt-6.1-sol`: worker, scout, researcher, test-engineer,
   visual-tester, web-performance-auditor, and autoresearch
 
 Thinking levels vary by role:
@@ -128,7 +128,7 @@ When `PI_SESSION_FILE` is available, coordinator prompts derive the adjacent
 3. Select the minimum tools needed for that role.
 4. Load a skill only when it owns a distinct procedure not repeated in the
    agent body.
-5. Pin GPT-6 Astra or GPT-6 Sol according to the role and set an explicit
+5. Pin GPT-6 Astra or GPT-6.1 Sol according to the role and set an explicit
    thinking level.
 6. Enable spawning only for an agent that performs substantive orchestration.
 7. Run `npm test`.

@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.99.1",
+  "lastChangelogVersion": "1.0.4",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-astra",
   "defaultThinkingLevel": "medium",
@@ -26,5 +26,5 @@
     "+extensions/cmux/index.ts",
     "+extensions/herdr-agent-state.ts"
   ],
-  "theme": "dark"
+  "theme": "system"
 }

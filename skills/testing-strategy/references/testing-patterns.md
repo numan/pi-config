@@ -9,6 +9,7 @@ Load this reference from the `testing-strategy` skill when concrete examples are
 - [Common Assertions](#common-assertions)
 - [Mocking Patterns](#mocking-patterns)
 - [React/Component Testing](#reactcomponent-testing)
+- [Async Completion](#async-completion)
 - [Layered Test Refactoring](#layered-test-refactoring)
 - [Narrow Integration Scenarios](#narrow-integration-scenarios)
 - [API / Integration Testing](#api--integration-testing)
@@ -162,6 +163,23 @@ describe('TaskForm', () => {
 });
 ```
 
+## Async Completion
+
+A matched request proves the request was sent, not that the application has processed its response. Keep request assertions, but wait for the action's observable result before teardown or dependent actions. For a form that shows a new success status after saving:
+
+```tsx
+expect(screen.queryByRole('status')).not.toBeInTheDocument();
+await user.click(screen.getByRole('button', { name: 'Save' }));
+await waitFor(() => {
+  expect(screen.getByRole('status')).toHaveTextContent('Changes saved');
+});
+expect(saveRequest.isDone()).toBe(true);
+```
+
+Use the application's actual completion contract. If a status already exists, assert its action-specific change rather than its presence. If the contract is navigation, await the destination UI. An enabled Save button alone can pass before a mutation starts; use it only when the sequence establishes that it represents completion.
+
+Re-query replaced controls after rerender or navigation instead of asserting against a detached element reference. For a test of interruption itself, deliberately keep the operation pending, perform the interruption, then resolve or reject the controlled work and verify the outcome before ending the test. Avoid arbitrary sleeps and cleanup-only fixes for unfinished work.
+
 ## Layered Test Refactoring
 
 When a slow page test repeats rule coverage, separate the contracts by ownership rather than splitting the scenario into more full-page tests.
@@ -229,6 +247,18 @@ Remove an expensive assertion only after identifying where its contract remains 
 
 ## Narrow Integration Scenarios
 
+Before writing a nontrivial test, state its starting state, transition, outcome, and unique failure mode. Search existing tests for the remaining contracts. For example:
+
+| Design question | Saved-item insertion test |
+|---|---|
+| Starting state | A saved contract with two selected upsells and saved inclusion defaults |
+| Transition | Insert one saved inclusion into one upsell, then save |
+| Observable outcome | The outgoing PATCH contains the new inclusion only on the target upsell |
+| Unique failure caught | The menu, parent callback, draft update, or save wiring targets the wrong upsell |
+| Covered elsewhere | Catalog copy, price arithmetic, keyboard editing, and generic hydration |
+
+Keep the two-upsell setup: a one-upsell hook test cannot prove isolation between two selected upsells. Omit the unrelated editing and reload journeys unless they protect an additional contract that needs this layer.
+
 Suppose a page test fills recipient details and three dates, saves a new contract, checks guidance, switches Preview → Builder, and checks guidance and disclosures again. Separate the contracts before reducing its work:
 
 | Starting state | Transition | Observable outcome | Required setup |
@@ -239,7 +269,13 @@ Suppose a page test fills recipient details and three dates, saves a new contrac
 
 Remove the Preview round trip from the first-save test only after checking whether new-versus-saved state changes the behavior. If it does, retain coverage of that distinction. Do not replace the first-save scenario with a saved fixture: that would bypass the transition it protects.
 
-Keep exact helper copy and link details in focused rendering coverage. Use representative visibility or state assertions during navigation. Keep server-data → edit → save → reload scenarios where persistence is the contract, and keep parent-owned focus assertions with the real parent implementation.
+Keep exact helper copy and link details in focused rendering coverage. Use representative visibility or state assertions during navigation. Keep parent-owned focus assertions with the real parent implementation.
+
+### Distinguish reload coverage from persistence
+
+A save followed by an independently hard-coded mocked GET proves two separate things: the client sends a write and the client hydrates the supplied response. It does not prove the backend stored that write. Removing the second render is appropriate when hydration already has owning coverage and there is no distinct reload-specific UI behavior.
+
+Keep one UI-to-request integration test, with serialization and hydration rules covered below it. Retain a mocked reload when it catches a unique client behavior, such as stale state surviving remount, and name that contract accurately. Use a real backend round trip when stored data is the contract. Do not introduce a stateful mock that recreates persistence just to retain the longer scenario.
 
 For a clipping or responsive-layout fix, use a browser check at the affected widths to verify the rendered result. Add an automated regression test only if it meaningfully detects that failure; an assertion that repeats the CSS value does not prove the banner is visible.
 

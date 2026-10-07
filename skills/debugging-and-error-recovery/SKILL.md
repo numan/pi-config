@@ -198,6 +198,14 @@ Before changing test structure, interactions, coverage, or timeout budgets, load
 
 Do not increase the timeout unless that workflow shows the remaining scenario is uniquely valuable and irreducible.
 
+#### Investigate failures after a timeout
+
+When a timeout is followed by duplicate elements, unexpected requests, or state-update warnings, inspect unfinished work from the first test before changing the later assertions. Depending on the runner, a timeout can reject its wait without cancelling the async test body. That body's later continuations may mount another page or mutate shared state after cleanup.
+
+Inspect the first test's remaining awaits, renders, timers, and request callbacks. Compare the later test alone with the failing sequence when needed to distinguish its own defect from contamination. A controlled timeout probe can help, but a different timeout may interrupt a different phase; failure to reproduce the cascade does not rule it out.
+
+Do not broaden queries to tolerate duplicate DOM or assume another cleanup call cancels pending continuations. Apply `testing-strategy`'s async-completion guidance to the initiating test. Label timeout fallout as a hypothesis until logs or a reproduction establish the sequence, and verify any remaining later failures independently.
+
 ### Build Failure Triage
 
 ```

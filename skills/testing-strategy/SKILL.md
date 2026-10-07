@@ -11,7 +11,7 @@ Place each behavior at the lowest test layer that can prove it. Require every hi
 
 1. Identify the observable contracts, regression risks, and production code responsible for the behavior.
 2. Search existing tests for the same messages, inputs, outcomes, and invariants.
-3. Map each contract to its current and preferred owning layer.
+3. Before writing or restructuring a nontrivial test, state its starting state, transition, observable outcome, and the unique failure its layer catches. Use those answers to choose the owning layer. Keep this to a short note; do not require a separate plan for each test.
 4. Separate unique boundary confidence from duplicated rule coverage.
 5. Add or refactor tests at the lowest sufficient layer.
 6. Preserve one representative higher-level assertion when wiring, accessibility, integration, or a user sequence is the actual contract.
@@ -63,7 +63,9 @@ Do not split one slow page test into several page tests merely to avoid a per-te
 
 Start at the nearest valid precondition for the transition under test. Load a saved fixture when creation is only setup; keep real creation and navigation when first-save behavior is the contract.
 
-Identify the starting state, transition, and observable outcome before removing a repeated journey. Identical assertions after different transitions may protect distinct failures. Preserve those contracts even when splitting a long scenario.
+Identical assertions after different transitions may protect distinct failures. Preserve those contracts when removing or splitting a repeated journey.
+
+Treat a save followed by a hard-coded mocked GET as write-request coverage plus hydration coverage, not proof that the write persisted. Keep the reload only when it adds a distinct reload-specific UI contract. Otherwise test the outgoing request and hydration at their owning layers. Use a real backend round trip when server persistence is the contract; do not build a stateful mock merely to justify retaining a long scenario.
 
 Simplify unrelated setup and duplicated journeys before adding mocks or optimizing interactions. Replace an expensive unrelated widget only when its real behavior has dedicated coverage and the double preserves the interface used by the scenario. Keep the behavior under test real. Prefer a local double or an existing focused helper over global mocks or a configurable all-purpose harness.
 
@@ -80,6 +82,14 @@ Use realistic user interaction helpers when the contract includes:
 Use a direct event when the contract is a single handler or state transition. Do not simulate click, focus, tab traversal, and blur merely to exercise an `onBlur` contract.
 
 Never replace a realistic sequence when doing so skips behavior users rely on. In that case, retain the sequence and move duplicated rule assertions lower.
+
+## Finish Async Operations
+
+Await the application's observable completion state before ending a test, unmounting, navigating, or starting an operation that depends on it. A matched HTTP request or called mock does not establish that response handling and rendering have completed.
+
+Choose a completion signal tied to the action, such as newly displayed saved state or the completed destination route. Do not rely solely on `nock.isDone()` or an assertion that can pass in the pre-action state, such as an already-enabled Save button. Re-query elements after transitions that can replace their DOM nodes.
+
+When interruption, cancellation, or navigation during an in-flight operation is the contract, preserve that sequence. Control and settle the pending work within the test rather than leaving it to run after teardown. Do not substitute arbitrary sleeps for observable completion.
 
 ## Diagnose Slow and Timed-Out Tests
 
@@ -140,6 +150,8 @@ Apply the checks relevant to the change. Follow the active project instructions 
 - [ ] Setup omits unrelated journeys without bypassing the transition under test.
 - [ ] Removed assertions remain covered or are explicitly shown redundant.
 - [ ] Interaction fidelity matches the behavior under test.
+- [ ] Async actions reach an observable completion state, or intentional in-flight work is controlled and settled before teardown.
+- [ ] Mocked reloads are not presented as proof of server persistence.
 - [ ] Targeted tests pass.
 - [ ] Representative regression validation passes or its limitation is reported.
 - [ ] Performance claims include comparable before/after measurements.

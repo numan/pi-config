@@ -20,8 +20,11 @@ mcp-npx-cache.json
 run-history.jsonl
 session-manager-config.toml
 
-# Extension dependencies (install locally)
-extensions/*/node_modules/
+# Managed Pi installation
+/install/
+
+# Installed dependencies anywhere
+node_modules/
 
 # OS files
 .DS_Store

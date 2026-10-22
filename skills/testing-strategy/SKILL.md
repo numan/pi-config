@@ -27,6 +27,27 @@ Use this coverage map when test ownership or removal is non-trivial. For a small
 
 Do not remove an assertion until its contract has an owning test or is shown not to be a meaningful contract.
 
+## Check Scenario Validity
+
+For nontrivial cache, retry, concurrency, authorization, and persistence tests,
+check the setup against the production path before treating a pass as evidence:
+
+1. Identify the actual object, connection, or persisted state being controlled.
+2. Trace execution to confirm it encounters the intended precondition. Account
+   for fresh lookups, reloads, inherited setup, callbacks, and mocks that replace
+   the behavior under test.
+3. Name a plausible broken implementation that would make the assertion fail.
+
+For example, warming an association on one record instance does not prove stale
+cache handling when the service fetches another instance. A test name and a
+passing assertion cannot establish that scenario.
+
+When source tracing leaves material doubt, use a narrowly scoped mutation or
+removal check in an isolated copy or safely reversible edit. Confirm the test
+fails for the intended reason, restore the code, and rerun the focused check.
+Do not require mutation testing across the suite. If the test survives the
+broken behavior, correct its setup or narrow its claimed coverage.
+
 ## Choose the Lowest Sufficient Layer
 
 Trace the callback, state, or effect responsible for the outcome before moving coverage. Include that production behavior in the chosen layer; do not recreate it in a test harness to make a lower-level test pass.
@@ -147,6 +168,8 @@ Apply the checks relevant to the change. Follow the active project instructions 
 - [ ] Meaningful automated coverage is preserved; new tests protect behavior rather than mirror implementation.
 - [ ] Higher-level tests identify unique boundary or transition confidence.
 - [ ] The chosen layer includes the production behavior responsible for the outcome.
+- [ ] Nontrivial stateful tests reach their claimed precondition and would fail
+  for an identified plausible regression.
 - [ ] Setup omits unrelated journeys without bypassing the transition under test.
 - [ ] Removed assertions remain covered or are explicitly shown redundant.
 - [ ] Interaction fidelity matches the behavior under test.

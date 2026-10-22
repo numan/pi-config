@@ -65,9 +65,14 @@ as the planning input and don't ask them to approve it again.
 ### 3. Select the approach
 
 Resolve routine design choices autonomously and record the recommendation and
-rationale in the plan. Ask the user to choose only when unresolved alternatives
-materially change behavior, architecture, risk, or scope. Present concrete
-options with costs and risks and lead with a recommendation.
+rationale in the plan. Separate binding behavior, contracts, deployment
+constraints, and accepted risks from revisable implementation choices. Approval
+of the plan does not make its proposed helpers, caching, or file placement
+requirements. State why any implementation mechanism must be fixed.
+
+Ask the user to choose only when unresolved alternatives materially change
+behavior, architecture, risk, or scope. Present concrete options with costs and
+risks and lead with a recommendation.
 
 When the parent workflow owns concrete-plan approval, return the completed plan
 for that single approval. Don't add a separate approach approval checkpoint;
@@ -78,7 +83,8 @@ material clarification questions remain appropriate.
 After resolving material ambiguity, validate without intermediate approval
 requests:
 
-- architecture and module boundaries
+- architecture and module boundaries: for substantial changes, map each rule to
+  its owning model/service and any canonical helper to reuse; explain new owners
 - integration and data flow
 - failure and recovery behavior
 - security, privacy, migration, and operational concerns when applicable
@@ -121,7 +127,7 @@ materialized todo must include:
 
 - plan path and objective
 - exact scope and likely files
-- constraints and excluded changes
+- binding constraints, revisable implementation suggestions, and excluded changes
 - dependencies on other todos
 - observable acceptance criteria
 - verification commands or behavior

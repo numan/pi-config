@@ -49,8 +49,13 @@ Check only relevant concerns:
   environmental inputs.
 
 Load `testing-strategy` when tests are materially added, changed, removed, slow,
-or flaky. Run focused validation when safe and useful. Never claim a command
-passed unless you ran it and checked the output.
+or flaky. Apply its scenario-validity check to nontrivial stateful tests: trace
+the actual production instance/state, confirm the intended precondition is
+reached, and identify a plausible regression the assertion would catch. Do not
+infer coverage from test names or passing results.
+
+Run focused validation when safe and useful. Never claim a command passed
+unless you ran it and checked the output.
 
 ## Finding threshold and priority
 

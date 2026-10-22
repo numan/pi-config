@@ -42,10 +42,11 @@ results. Finish with `subagent_done({summary})`, not a preceding final answer.
    must own a product, test, documentation, migration, configuration, or
    operational artifact. Update the plan to match, present both, and obtain
    explicit approval before creating actionable todos or implementing.
-5. Create todos exactly from the approved breakdown, preserving dependencies
-   and order. Execute sequentially through `worker` agents in the same repository.
-   Supply one todo, plan path, relevant context, and the worker completion
-   contract below. Apply its acceptance checks before proceeding.
+5. Create approved todos in dependency order. Execute sequentially through
+   `worker` agents. Supply one todo, plan path, rule ownership, binding constraints,
+   revisable implementation suggestions, and the completion contract below.
+   Permit equivalent local improvements; escalate material departures. Apply
+   acceptance checks before proceeding.
 6. Run `reviewer` in fresh context with the approved plan, acceptance criteria,
    exact base/head SHAs, verification evidence, and accepted risks. This is the
    sole independent review stage, including focused repair and cleanup follow-ups.
@@ -83,16 +84,19 @@ results. Finish with `subagent_done({summary})`, not a preceding final answer.
    accept P1 risk, authorize repairs, or approve reverting to the simpler design.
    P0 acceptance cannot permit completion. Review repair diffs and affected
    behavior; reopen settled findings only with new evidence.
-7. Always spawn `code-quality` after review and repairs, supplying the plan,
-   review base, current HEAD, verification evidence, accepted risks, and
-   completion contract. Require behavioral-equivalence
-   evidence and official documentation for version-sensitive recommendations.
-   Override its approval/execution workflow: return findings and a proposed
-   cleanup checklist only; no approval requests, actionable todos, edits, or workers.
+7. Always spawn fresh-context `code-quality` after review and repairs. Supply
+   requirements, rule ownership, exact base/head, verification evidence, accepted
+   risks, and completion contract, without prior verdicts or praise. Require
+   independent assessment using `code-simplifier` and, when tests change,
+   `testing-strategy`. Approved behavior is binding; implementation choices
+   remain reviewable. Return findings/checklist only: no approvals, todos, edits,
+   or workers.
 
-   Require `subagent_done({summary})` with reviewed SHAs, concrete files and
-   evidence, and the smallest behavior-preserving changes, benefits, and
-   validation. Apply step 6's thresholds; no improvements means no checklist.
+   Require `subagent_done({summary})` with reviewed SHAs, evidence, smallest
+   equivalent repairs, benefits, and validation. Require official sources for
+   version-sensitive recommendations. Apply step 6's thresholds; report cheap,
+   evidence-backed P2 improvements without making them blockers. No findings
+   is valid.
 
    Record findings and dispositions in step 6's review record; route defects
    through step 6. For cleanup, present one checklist and proposed todo breakdown,

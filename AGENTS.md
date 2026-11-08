@@ -164,6 +164,12 @@ authentication or broaden access to another account or environment.
 Run checks that exercise the changed behavior and complete required repository
 checks.
 
+Make tests pass by fixing the behavior they check. Don't special-case test
+inputs, hard-code expected values, weaken assertions, or skip tests to reach
+green. If an existing test appears wrong, report the evidence instead of
+changing it unless the task covers that behavior. A test changed to pass hides
+the defect it was written to catch.
+
 Prefer tests of observable behavior over implementation-detail assertions. If
 validation is blocked or disproportionately expensive, report why and name the
 best next check. Don't claim that work is complete or that tests pass without

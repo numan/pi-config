@@ -142,11 +142,6 @@ jq empty settings.json models.json mcp.json package.json
 pi list
 ```
 
-`npm run test:evals` checks the source-replay tooling with Python 3, without
-model calls. The [PR review quality replay](docs/evaluations/pr-review-quality.md)
-compares frozen guidance using private historical inputs and a held-out control;
-model trials are opt-in and separate from configuration validation.
-
 ## Credits
 
 Selected skills originate from or incorporate work by mitsuhiko/agent-stuff,

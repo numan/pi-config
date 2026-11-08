@@ -42,9 +42,16 @@ const knownTools = new Set([
   "write",
 ]);
 
+const agentModels = new Set([
+  "claude-bridge/claude-fable-5-1",
+  "claude-bridge/claude-opus-5-5",
+  "claude-bridge/claude-sonnet-5-5",
+  "claude-bridge/claude-haiku-5-5",
+]);
+
+// Current Claude models have no "off" or "minimal" effort; the bridge silently
+// falls back to Claude Code's default for those levels.
 const thinkingLevels = new Set([
-  "off",
-  "minimal",
   "low",
   "medium",
   "high",
@@ -79,8 +86,8 @@ export function validateAgentMetadata({ metadata, fileName, skillNames }) {
     issues.push(`name must match filename ${expectedName}`);
   }
   if (!metadata.description) issues.push("missing description");
-  if (!["openai-codex/gpt-6-astra", "openai-codex/gpt-6.1-sol"].includes(metadata.model)) {
-    issues.push("model must be openai-codex/gpt-6-astra or openai-codex/gpt-6.1-sol");
+  if (!agentModels.has(metadata.model)) {
+    issues.push(`model must be one of ${[...agentModels].join(", ")}`);
   }
   if (metadata.skill) issues.push("use plural skills frontmatter");
 

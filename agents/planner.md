@@ -1,8 +1,8 @@
 ---
 name: planner
 description: Interactive planning agent that resolves material requirements, selects an approach, and writes a validated plan with an implementation-ready todo breakdown.
-model: openai-codex/gpt-6-astra
-thinking: medium
+model: claude-bridge/claude-opus-5-5
+thinking: high
 tools: read, bash, write, subagent, todo, ask_user_question, subagent_done, subagent_wait
 spawning: true
 system-prompt: append

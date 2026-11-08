@@ -1,6 +1,7 @@
 # Agents
 
-This repository defines Pi agents for GPT-6 Astra and GPT-6.1 Sol. Each file in
+This repository defines Pi agents for Claude models served through
+`pi-claude-bridge`. Each file in
 `agents/` combines a bounded role with an explicit model, thinking level, tool
 set, skill set, and completion behavior. `AGENTS.md` supplies the global
 engineering and authorization policy.
@@ -28,19 +29,31 @@ limit that permission to the artifact.
 
 ## Execution contract
 
-The main session defaults to `openai-codex/gpt-6-astra`. Local agents pin one of
-two models; the repository validator rejects other models:
+The main session defaults to `claude-bridge/claude-opus-5-5`. Agents route by
+the judgment a role needs, following Anthropic's
+[model selection guidance](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model).
+Use `claude-bridge/...` ids, not `anthropic/...`, so requests go through Claude
+Code and the Claude subscription:
 
-- `openai-codex/gpt-6-astra`: planner, context-builder, code-quality, reviewer,
-  and security-auditor
-- `openai-codex/gpt-6.1-sol`: worker, scout, researcher, test-engineer,
-  visual-tester, web-performance-auditor, and autoresearch
+- `claude-bridge/claude-opus-5-5`: planner, code-quality, reviewer, and
+  security-auditor, where a subtle mistake is expensive
+- `claude-bridge/claude-sonnet-5-5`: worker, test-engineer, researcher,
+  context-builder, visual-tester, web-performance-auditor, and autoresearch,
+  which do well-scoped implementation, analysis, or coordination
+- `claude-bridge/claude-haiku-5-5`: scout, for fast read-only reconnaissance
 
-Thinking levels vary by role:
+The validator also accepts `claude-bridge/claude-fable-5-1`. Promote an agent
+to Fable only when Opus at higher effort still falls short; it is the slowest
+model, uses the most plan quota, and may require Extra Usage on Pro plans.
 
-- `low` for bounded repository reconnaissance
-- `medium` for planning, implementation, browser QA, and routine orchestration
-- `high` for broad review, security, performance, and external research
+Thinking levels map to Claude effort levels. Current Claude models do not
+support `off` or `minimal`, so the validator rejects them:
+
+- `medium` for reconnaissance, routine orchestration, browser QA, and
+  experiment batches
+- `high` for planning, implementation, testing, review, security, performance,
+  and external research
+- `xhigh` or `max` only for long-horizon work that demonstrably needs it
 
 Agent system prompts append to the global policy. Do not switch them to
 `replace` unless the replacement preserves authorization, evidence, testing,
@@ -128,7 +141,7 @@ When `PI_SESSION_FILE` is available, coordinator prompts derive the adjacent
 3. Select the minimum tools needed for that role.
 4. Load a skill only when it owns a distinct procedure not repeated in the
    agent body.
-5. Pin GPT-6 Astra or GPT-6.1 Sol according to the role and set an explicit
+5. Pin a `claude-bridge` model according to the role and set an explicit
    thinking level.
 6. Enable spawning only for an agent that performs substantive orchestration.
 7. Run `npm test`.

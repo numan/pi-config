@@ -14,7 +14,7 @@ const skillNames = new Set(["code-reviewer"]);
 const valid = {
   name: "reviewer",
   description: "Review code.",
-  model: "openai-codex/gpt-6-astra",
+  model: "claude-bridge/claude-opus-5-5",
   thinking: "high",
   tools: "read, bash, write",
   skills: "code-reviewer",
@@ -36,8 +36,14 @@ test("accepts the runtime-controlling agent contract", () => {
   assert.deepEqual(issues({}), []);
 });
 
-test("accepts explicitly pinned GPT-6.1 Sol agents", () => {
-  assert.deepEqual(issues({ model: "openai-codex/gpt-6.1-sol" }), []);
+test("accepts each current claude-bridge agent model", () => {
+  for (const model of [
+    "claude-bridge/claude-fable-5-1",
+    "claude-bridge/claude-sonnet-5-5",
+    "claude-bridge/claude-haiku-5-5",
+  ]) {
+    assert.deepEqual(issues({ model }), []);
+  }
 });
 
 test("accepts source_check for evidence-focused researchers", () => {
@@ -63,10 +69,12 @@ test("completion-aware agents expose explicit finish and wait actions", () => {
 });
 
 for (const [name, overrides, expected] of [
-  ["model", { model: "openai-codex/unknown-model" }, /model must be/],
-  ["retired model", { model: "openai-codex/gpt-5.6-sol" }, /model must be/],
-  ["retired GPT-6 Sol model", { model: "openai-codex/gpt-6-sol" }, /model must be/],
+  ["model", { model: "claude-bridge/unknown-model" }, /model must be/],
+  ["non-bridge Anthropic model", { model: "anthropic/claude-opus-5-5" }, /model must be/],
+  ["older Claude model", { model: "claude-bridge/claude-opus-5" }, /model must be/],
+  ["former GPT model", { model: "openai-codex/gpt-6-astra" }, /model must be/],
   ["thinking", { thinking: "definitely-invalid" }, /invalid thinking level/],
+  ["unsupported minimal thinking", { thinking: "minimal" }, /invalid thinking level/],
   ["boolean", { spawning: "sometimes" }, /invalid boolean spawning/],
   ["session mode", { "session-mode": "shared" }, /invalid session-mode/],
   ["system prompt", { "system-prompt": "merge" }, /invalid system-prompt/],

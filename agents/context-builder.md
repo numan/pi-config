@@ -1,10 +1,9 @@
 ---
 name: context-builder
 description: Orchestrates bounded scouts and researchers, then synthesizes their evidence into one context artifact without planning or implementation.
-model: openai-codex/gpt-6-astra
+model: claude-bridge/claude-sonnet-5-5
 thinking: medium
 tools: read, bash, write, subagent, subagent_done, subagent_wait
-deny-tools: claude
 spawning: true
 interactive: false
 session-mode: lineage-only

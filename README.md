@@ -125,9 +125,11 @@ extension commands include `/todos` and `/cost`.
 | `npm:@juicesharp/rpiv-ask-user-question` | Structured question UI |
 | `npm:@juicesharp/rpiv-btw` | Side-channel interaction support |
 | `npm:pi-better-openai` | OpenAI provider behavior customization |
+| `npm:pi-claude-bridge` | Claude models through Claude Code and the Claude subscription |
 
-The default model is `openai-codex/gpt-6-astra` at medium thinking. Agent roles
-use GPT-6 Astra or GPT-6.1 Sol with role-specific thinking levels; see
+The default model is `claude-bridge/claude-opus-5-5` at high thinking. Agent
+roles use Claude Opus 5.5, Sonnet 5.5, or Haiku 5.5 through `claude-bridge` with
+role-specific thinking levels; see
 [the routing contract](docs/agents.md#execution-contract). Local model providers
 and overrides live in `models.json`; MCP is currently empty.
 

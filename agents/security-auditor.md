@@ -3,7 +3,7 @@ name: security-auditor
 description: Performs an evidence-based security review of applicable trust boundaries and reports exploitable risks without modifying code.
 tools: read, bash, write
 skills: security-and-hardening
-model: openai-codex/gpt-6-astra
+model: claude-bridge/claude-opus-5-5
 thinking: high
 spawning: false
 auto-exit: true

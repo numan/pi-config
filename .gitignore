@@ -6,6 +6,7 @@ trust.json
 .pi/
 sessions/
 web-search-cache/
+pi-web-access/
 bin/
 
 

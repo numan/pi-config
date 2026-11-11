@@ -1,12 +1,14 @@
 {
-  "lastChangelogVersion": "1.5.0",
+  "lastChangelogVersion": "1.5.2",
   "defaultProvider": "claude-bridge",
   "defaultModel": "claude-opus-5-5",
   "defaultThinkingLevel": "high",
   "packages": [
     {
       "source": "git:github.com/HazAT/pi-smart-sessions",
-      "extensions": ["+extensions/smart-sessions.ts"]
+      "extensions": [
+        "+extensions/smart-sessions.ts"
+      ]
     },
     "../local-packages/pi-interactive-subagents",
     "npm:pi-web-access",
@@ -20,7 +22,10 @@
     "showImages": false,
     "images": "kitty"
   },
-  "extensions": ["+extensions/cmux/index.ts", "+extensions/herdr-agent-state.ts"],
+  "extensions": [
+    "+extensions/cmux/index.ts",
+    "+extensions/herdr-agent-state.ts"
+  ],
   "theme": "system",
   "extensionChangelogVersions": {
     "{\"source\":\"git:github.com/HazAT/pi-smart-sessions\",\"scope\":\"user\"}": "1.0.2",

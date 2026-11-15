@@ -3,6 +3,7 @@
   "defaultProvider": "claude-bridge",
   "defaultModel": "claude-opus-5-5",
   "defaultThinkingLevel": "high",
+  "defaultTools": ["+codemode"],
   "packages": [
     {
       "source": "git:github.com/HazAT/pi-smart-sessions",

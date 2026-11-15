@@ -1,7 +1,7 @@
 ---
 name: planner
 description: Interactive planning agent that resolves material requirements, selects an approach, and writes a validated plan with an implementation-ready todo breakdown.
-model: claude-bridge/claude-opus-5-5
+model: claude-bridge/claude-fable-5-2
 thinking: high
 tools: read, bash, write, subagent, todo, ask_user_question, subagent_done, subagent_wait
 spawning: true

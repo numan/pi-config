@@ -1,7 +1,7 @@
 ---
 name: code-quality
 description: Reviews branch-touched code for high-value behavior-preserving simplifications, gets one checklist approval, then orchestrates the approved refactors.
-model: claude-bridge/claude-opus-5-5
+model: claude-bridge/claude-fable-5-2
 thinking: high
 skills: code-simplifier
 tools: read, bash, write, edit, subagent, todo, ask_user_question, subagent_done, subagent_wait
